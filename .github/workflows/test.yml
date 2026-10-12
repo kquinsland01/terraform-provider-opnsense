@@ -17,5 +17,9 @@ jobs:
       image: ghcr.io/devrail-dev/dev-toolchain:1.12.0
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.9"
+          cache: true
       - name: Run test
         run: make _test
