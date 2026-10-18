@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-18
-last_updated: 2026-09-28
+last_updated: 2026-10-17
 project: terraform-provider-opnsense
 project_key: NOKEY
 tracking_system: file-system
@@ -81,7 +81,7 @@ development_status:
 
   # Epic 5: Core Infrastructure
   epic-5: in-progress
-  5-1-interface-resource: done          # RELEASE-GATED — master has expanded assignment/IP API, but checked stable/tag targets through 26.7.4/27.1.a lack it; Epic 30 tracks adoption
+  5-1-interface-resource: done          # RELEASE GATE CLEARED — expanded assignment/IP API shipped in 26.7.6; Epic 30 tracks provider adoption
   5-2-vlan-resource: done
   5-3-virtual-ip-resource: done
   5-4-static-route-resource: done
@@ -285,10 +285,10 @@ development_status:
   # === PROVIDER MANAGEMENT ROADMAP (provider-management-roadmap-2026-09-28.md) ===
 
   # Epic 30: OPNsense Assignment API Adoption
-  epic-30: backlog
-  30-1-track-opnsense-assignment-api-release: backlog
+  epic-30: in-progress
+  30-1-track-opnsense-assignment-api-release: review
   30-2-prototype-interface-assignment-ip-resource: backlog
-  30-3-update-interface-support-matrix: backlog
+  30-3-update-interface-support-matrix: review
   epic-30-retrospective: optional
 
   # Epic 31: Provider Completeness, Positioning, and Migration

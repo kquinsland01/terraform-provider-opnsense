@@ -84,9 +84,9 @@ Goal: safely adopt the expanded upstream `api/interfaces/assignment/*` API after
 
 | Story | Status | File |
 |---|---|---|
-| 30.1 Track OPNsense Assignment API Release | backlog | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
-| 30.2 Prototype Interface Assignment/IP Resource Against OPNsense Master | backlog | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
-| 30.3 Update Interface Support Matrix and Public Blocker Docs | backlog | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
+| 30.1 Track OPNsense Assignment API Release | review | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
+| 30.2 Implement Interface Assignment/IP Resource for OPNsense 26.7.6+ | backlog | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
+| 30.3 Update Interface Support Matrix and Public Blocker Docs | review | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
 
 ## Epic 31: Provider Completeness, Positioning, and Migration
 
@@ -112,9 +112,9 @@ Goal: make releases feel intentionally tested, versioned, and ready for producti
 ## Recommended Sequence
 
 1. Treat Epics 25B through 29 as completed or historical unless a regression appears.
-2. Start with Story 30.1 so release timing and support-matrix language are evidence-backed.
-3. Use Story 30.2 to prototype against OPNsense `master` or snapshot only; do not declare stable support until Story 30.1 finds a released OPNsense version.
-4. Run Story 30.3 before or alongside implementation so public docs stop describing the interface API as a generic old blocker.
+2. Merge Stories 30.1 and 30.3 after review; the tracker and public docs now identify `26.7.6` as the first complete released API.
+3. Use Story 30.2 to implement against OPNsense `26.7.6+`; do not declare provider support until disposable-appliance lifecycle proof passes.
+4. Keep the weekly Story 30.1 probe baseline current when upstream branch, tag, or API evidence changes.
 5. Run Story 31.0 before migration-positioning work so coverage gaps are audited as product completeness work, not buried in docs.
 6. Follow with Stories 31.1 and 31.2 to make the Registry/README story match the provider's actual coverage advantage.
 7. Add Story 32.1 acceptance proof before treating v1 positioning as credible.
