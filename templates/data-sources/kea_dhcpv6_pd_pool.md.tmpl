@@ -1,0 +1,16 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Reads a Kea DHCPv6 delegated-prefix pool.
+---
+
+# {{.Name}} ({{.Type}})
+
+Reads a typed DHCPv6 delegated-prefix pool by UUID on OPNsense 26.7.7 or newer. The appliance returns the prefix as an address-only value; CIDR spelling preservation applies only to the managed resource configuration.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_kea_dhcpv6_pd_pool/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

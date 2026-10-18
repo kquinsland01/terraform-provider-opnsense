@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func (r *dhcpv6SubnetResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -41,6 +43,16 @@ func (r *dhcpv6SubnetResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional: true, Computed: true,
 				Default:             stringdefault.StaticString(""),
 				MarkdownDescription: "Address pools for the subnet (newline-separated ranges).",
+			},
+			"dns_servers": schema.SetAttribute{
+				ElementType: types.StringType, Optional: true, Computed: true,
+				MarkdownDescription: "IPv6 DNS servers offered to clients.",
+				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+			},
+			"domain_search": schema.SetAttribute{
+				ElementType: types.StringType, Optional: true, Computed: true,
+				MarkdownDescription: "Domain-search suffixes offered to clients.",
+				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 			},
 			"description": schema.StringAttribute{
 				Optional: true, Computed: true,

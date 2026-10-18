@@ -17,7 +17,7 @@ The first provider version is published. Completed post-release work closed the 
 
 ## Epic 25B: Data Source Parity
 
-Goal: close straightforward data-source parity gaps and leave only singleton or sensitive special-case follow-up work. Epic 25B completed the historical move from 34 to 76 supported data sources; subsequent work brings the current inventory to 90 data sources and 17 resource-matching gaps.
+Goal: close straightforward data-source parity gaps and leave only singleton or sensitive special-case follow-up work. Epic 25B completed the historical move from 34 to 76 supported data sources; subsequent work brings the current inventory to 92 data sources and 17 resource-matching gaps.
 
 | Story | Status | File |
 |---|---|---|
@@ -95,8 +95,8 @@ Goal: make this provider complete enough to be the default provider choice for a
 | Story | Status | File |
 |---|---|---|
 | 31.0 Complete Provider Coverage Audit | done | `_bmad-output/implementation-artifacts/31-0-complete-provider-coverage-audit.md` |
-| 31.0a Firewall and NAT Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md` |
-| 31.0b Kea Field and Surface Parity | backlog | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
+| 31.0a Firewall and NAT Field Parity | done | `_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md` |
+| 31.0b Kea Field and Surface Parity | done | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
 | 31.0c OpenVPN Field and Key Parity | backlog | `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md` |
 | 31.0d Unbound Settings and Forward Parity | backlog | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
 | 31.0e WireGuard Field and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |

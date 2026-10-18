@@ -22,37 +22,17 @@ This plan defines the remaining data-source work after v0.1.0. It is an implemen
 
 | Check | Command | Result |
 |---|---|---:|
-| Registered resources | Provider registration metadata | 106 |
-| Registered data sources | Provider registration metadata | 90 |
-| Resource docs | `find docs/resources -name '*.md'` | 106 |
-| Data-source docs | `find docs/data-sources -name '*.md'` | 90 |
+| Registered resources | Provider registration metadata | 108 |
+| Registered data sources | Provider registration metadata | 92 |
+| Resource docs | `find docs/resources -name '*.md'` | 108 |
+| Data-source docs | `find docs/data-sources -name '*.md'` | 92 |
 | Resource-matching data-source gaps | Resource doc basenames minus data-source doc basenames | 17 |
 
 No mismatch was found between registered implementation counts and generated documentation counts. The gap is 17, not 106 minus 90, because `system_info` is a standalone data source without a matching resource. The canonical names and drift checks now live in `provider-ecosystem-coverage-audit.json` and `internal/coverageaudit`.
 
 ## Existing Data Sources
 
-| Domain | Existing data sources |
-|---|---|
-| Auth | auth_group, auth_user |
-| Cron | cron_job |
-| ACME | acme_account, acme_certificate, acme_challenge |
-| DHCPv4 | dhcpv4_reservation, dhcpv4_subnet |
-| Dynamic DNS | ddclient_account |
-| Firewall | firewall_alias, firewall_category, firewall_filter_rule, firewall_nat_one_to_one, firewall_nat_outbound, firewall_nat_port_forward |
-| HAProxy | haproxy_acl, haproxy_backend, haproxy_frontend, haproxy_healthcheck, haproxy_server |
-| Interfaces | interface_bridge, interface_gif, interface_gre, interface_loopback, interface_neighbor, interface_vxlan |
-| IPsec | ipsec_child, ipsec_connection, ipsec_local, ipsec_manual_spd, ipsec_pool, ipsec_remote, ipsec_vti |
-| Kea | kea_dhcpv6_reservation, kea_dhcpv6_subnet, kea_ha_peer |
-| Monit | monit_alert, monit_service, monit_test |
-| Quagga / FRR | quagga_bgp_aspath, quagga_bgp_communitylist, quagga_bgp_neighbor, quagga_bgp_peergroup, quagga_bgp_redistribution, quagga_ospf_interface, quagga_ospf_neighbor, quagga_ospf_network, quagga_ospf_prefixlist, quagga_ospf_redistribution, quagga_ospf_routemap, quagga_ospf6_interface, quagga_ospf6_network, quagga_ospf6_prefixlist, quagga_ospf6_redistribution, quagga_ospf6_routemap, quagga_prefix_list, quagga_route_map, quagga_static_route |
-| Syslog | syslog_destination |
-| OpenVPN | openvpn_client_overwrite, openvpn_instance |
-| System | system_gateway, system_info, system_route, system_vip, system_vlan |
-| Traffic shaper | trafficshaper_pipe, trafficshaper_queue, trafficshaper_rule |
-| Trust | trust_ca |
-| Unbound | unbound_acl, unbound_domain_override, unbound_host_alias, unbound_host_override |
-| WireGuard | wireguard_peer, wireguard_server |
+The complete deterministic inventory is the set registered by `OpnsenseProvider.DataSources` in `internal/provider/provider.go` and its domain `DataSources()` constructors. Generated files under `docs/data-sources/` are the independently counted public projection of that registration set. This plan intentionally does not duplicate those names in a hand-maintained table, which can silently omit newly shipped surfaces while leaving the totals unchanged. `provider-ecosystem-coverage-audit.json` and `internal/coverageaudit` enforce registration/documentation parity.
 
 ## Missing Data-Source Inventory
 

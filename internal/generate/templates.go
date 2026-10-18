@@ -33,17 +33,20 @@ import (
 )
 
 func TestAcc{{.R.GoType}}_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	{{if .R.UniqueTest}}suffix := keaParityRunMarker(t)
+	iface := os.Getenv("OPNSENSE_KEA_TEST_INTERFACE")
+	{{end}}resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		PreCheck:                 func() { {{.R.TestPreCheck}} },
-{{if isItem .R}}		CheckDestroy:             acctest.CheckResourceDestroyed(t, "opnsense_{{.R.TypeName}}", opnsense.ReqOpts{GetEndpoint: "{{index .R.Endpoints "get"}}", Monad: "{{.R.Monad}}"}),
+		PreCheck:                 func() { {{if .R.UniqueTest}}keaParityGeneratedPreCheck(t, suffix){{else}}{{.R.TestPreCheck}}{{end}} },
+{{if .R.CompositeDestroy}}		CheckDestroy:             {{.R.CompositeDestroy}},
+{{else if isItem .R}}		CheckDestroy:             acctest.CheckResourceDestroyed(t, "opnsense_{{.R.TypeName}}", opnsense.ReqOpts{GetEndpoint: "{{index .R.Endpoints "get"}}", Monad: "{{.R.Monad}}"}),
 {{end}}		Steps: []resource.TestStep{
 			{
-				Config: testAcc{{.R.GoType}}Config,
+				Config: {{if .R.UniqueTest}}fmt.Sprintf(testAcc{{.R.GoType}}Config, suffix, iface, keaTestSegment(suffix)){{else}}testAcc{{.R.GoType}}Config{{end}},
 				Check:  resource.TestCheckResourceAttrSet("opnsense_{{.R.TypeName}}.test", "id"),
 			},
 {{if hasUpdateTest .R}}			{
-				Config: testAcc{{.R.GoType}}UpdatedConfig,
+				Config: {{if .R.UniqueTest}}fmt.Sprintf(testAcc{{.R.GoType}}UpdatedConfig, suffix, iface, keaTestSegment(suffix)){{else}}testAcc{{.R.GoType}}UpdatedConfig{{end}},
 				Check:  resource.TestCheckResourceAttrSet("opnsense_{{.R.TypeName}}.test", "id"),
 			},
 {{end}}			{ResourceName: "opnsense_{{.R.TypeName}}.test", ImportState: true, {{if isSingleton .R}}ImportStateId: "{{.R.ID}}", {{end}}{{importIgnore .R}}ImportStateVerify: true},
@@ -81,7 +84,7 @@ type {{camel .R.Name}}APIResponse struct {
 {{end}}}
 
 type {{camel .R.Name}}APIRequest struct {
-{{range .R.Fields}}	{{.Name}} string {{reqTag .}}
+{{range .R.Fields}}	{{.Name}} {{reqType .}} {{reqTag .}}
 {{end}}}
 
 func (m *{{.R.GoType}}ResourceModel) toAPI({{if hasSet .R}}ctx{{else}}_{{end}} context.Context) *{{camel .R.Name}}APIRequest {
@@ -90,9 +93,11 @@ func (m *{{.R.GoType}}ResourceModel) toAPI({{if hasSet .R}}ctx{{else}}_{{end}} c
 {{end}}	}
 }
 
-func (m *{{.R.GoType}}ResourceModel) fromAPI(_ context.Context, a *{{camel .R.Name}}APIResponse, id string) {
+func (m *{{.R.GoType}}ResourceModel) fromAPI(_ context.Context, a *{{camel .R.Name}}APIResponse, id string){{if hasStrictResponse .R}} error{{end}} {
 	m.ID = types.StringValue(id)
 {{range .R.Fields}}	{{fromAPI .}}
+{{end}}{{if .R.ResponseValidator}}	if err := {{.R.ResponseValidator}}; err != nil { return err }
+{{end}}{{if hasStrictResponse .R}}	return nil
 {{end}}}
 `
 
@@ -166,13 +171,22 @@ func (d *{{$n}}DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 	id := config.ID.ValueString()
+{{if .R.MinimumVersion}}	if err := requireKeaVersion(ctx, d.client, {{printf "%q" .R.MinimumVersion}}); err != nil {
+		resp.Diagnostics.AddError("Unsupported OPNsense version", err.Error())
+		return
+	}
+{{end -}}
 	result, err := opnsense.Get[{{$n}}APIResponse](ctx, d.client, {{$n}}ReqOpts, id)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading {{.R.Title}}", fmt.Sprintf("Could not read {{.R.Title}} %s: %s", id, err))
 		return
 	}
-	config.fromAPI(ctx, result, id)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
+	{{if hasStrictResponse .R}}if err := config.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding {{.R.Title}}", err.Error())
+		return
+	}
+	{{else}}config.fromAPI(ctx, result, id)
+	{{end}}	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }
 `
 
@@ -195,6 +209,10 @@ var {{$n}}ReqOpts = opnsense.ReqOpts{
 	UpdateEndpoint:      {{printf "%q" (index .R.Endpoints "set")}},
 {{if isItem .R}}	DeleteEndpoint:      {{printf "%q" (index .R.Endpoints "del")}},
 	SearchEndpoint:      {{printf "%q" (index .R.Endpoints "search")}},
+{{if .R.StrictDelete}}	StrictDeleteResponse: true,
+{{end -}}
+{{if .R.StrictMissing}}	StrictMissingObjectResponse: true,
+{{end -}}
 {{end}}	ReconfigureEndpoint: {{printf "%q" .R.Reconfigure}},
 	Monad:               {{printf "%q" .R.Monad}},
 }
@@ -225,18 +243,50 @@ func (r *{{$n}}Resource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{if .R.MinimumVersion}}	if err := requireKeaVersion(ctx, r.client, {{printf "%q" .R.MinimumVersion}}); err != nil {
+		resp.Diagnostics.AddError("Unsupported OPNsense version", err.Error())
+		return
+	}
+{{end -}}
 	uuid, err := opnsense.Add(ctx, r.client, {{$n}}ReqOpts, plan.toAPI(ctx))
 	if err != nil {
-		resp.Diagnostics.AddError("Error creating {{.R.Title}}", fmt.Sprintf("%s", err))
+{{if .R.PendingActivation}}		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingMutation)...)
+		}
+{{end -}}
+{{if .R.RecoverCreate}}		if uuid != "" {
+			var recovered {{.R.GoType}}ResourceModel
+			recovered.ID = types.StringValue(uuid)
+			if result, readErr := opnsense.Get[{{$n}}APIResponse](ctx, r.client, {{$n}}ReqOpts, uuid); readErr == nil {
+{{if hasStrictResponse .R}}				if recovered.{{resourceFromAPI .R}}(ctx, result, uuid) != nil {
+					recovered = {{.R.GoType}}ResourceModel{ID: types.StringValue(uuid)}
+				}
+{{else}}				recovered.{{resourceFromAPI .R}}(ctx, result, uuid)
+{{end -}}
+			}
+			resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		}
+{{end}}		resp.Diagnostics.AddError("Error creating {{.R.Title}}", fmt.Sprintf("%s", err))
 		return
 	}
 	result, err := opnsense.Get[{{$n}}APIResponse](ctx, r.client, {{$n}}ReqOpts, uuid)
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading {{.R.Title}} after create", fmt.Sprintf("%s", err))
+{{if .R.RecoverCreate}}		var recovered {{.R.GoType}}ResourceModel
+		recovered.ID = types.StringValue(uuid)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+{{end}}		resp.Diagnostics.AddError("Error reading {{.R.Title}} after create", fmt.Sprintf("%s", err))
 		return
 	}
-	plan.fromAPI(ctx, result, uuid)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	{{if hasStrictResponse .R}}if err := plan.{{resourceFromAPI .R}}(ctx, result, uuid); err != nil {
+		var recovered {{.R.GoType}}ResourceModel
+		recovered.ID = types.StringValue(uuid)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		resp.Diagnostics.AddError("Error decoding {{.R.Title}} after create", err.Error())
+		return
+	}
+	{{else}}plan.{{resourceFromAPI .R}}(ctx, result, uuid)
+	{{end}}	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *{{$n}}Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -245,6 +295,23 @@ func (r *{{$n}}Resource) Read(ctx context.Context, req resource.ReadRequest, res
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{if .R.MinimumVersion}}	if err := requireKeaVersion(ctx, r.client, {{printf "%q" .R.MinimumVersion}}); err != nil {
+		resp.Diagnostics.AddError("Unsupported OPNsense version", err.Error())
+		return
+	}
+{{end -}}
+{{if .R.PendingActivation}}	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() { return }
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, {{$n}}ReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() { return }
+	}
+{{end -}}
 	result, err := opnsense.Get[{{$n}}APIResponse](ctx, r.client, {{$n}}ReqOpts, state.ID.ValueString())
 	if err != nil {
 		var nf *opnsense.NotFoundError
@@ -255,8 +322,12 @@ func (r *{{$n}}Resource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Error reading {{.R.Title}}", fmt.Sprintf("%s", err))
 		return
 	}
-	state.fromAPI(ctx, result, state.ID.ValueString())
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	{{if hasStrictResponse .R}}if err := state.{{resourceFromAPI .R}}(ctx, result, state.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Error decoding {{.R.Title}}", err.Error())
+		return
+	}
+	{{else}}state.{{resourceFromAPI .R}}(ctx, result, state.ID.ValueString())
+	{{end}}	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *{{$n}}Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -266,8 +337,38 @@ func (r *{{$n}}Resource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{if .R.MinimumVersion}}	if err := requireKeaVersion(ctx, r.client, {{printf "%q" .R.MinimumVersion}}); err != nil {
+		resp.Diagnostics.AddError("Unsupported OPNsense version", err.Error())
+		return
+	}
+{{end -}}
+{{if .R.PendingActivation}}	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() { return }
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, {{$n}}ReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() { return }
+	}
+{{end -}}
 	id := state.ID.ValueString()
 	if err := opnsense.Update(ctx, r.client, {{$n}}ReqOpts, plan.toAPI(ctx), id); err != nil {
+{{if .R.PendingActivation}}
+		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingMutation)...)
+			var recovered {{.R.GoType}}ResourceModel
+			recovered.ID = types.StringValue(id)
+			if result, readErr := opnsense.Get[{{$n}}APIResponse](ctx, r.client, {{$n}}ReqOpts, id); readErr == nil {
+{{if hasStrictResponse .R}}				if recovered.{{resourceFromAPI .R}}(ctx, result, id) != nil { recovered = {{.R.GoType}}ResourceModel{ID: types.StringValue(id)} }
+{{else}}				recovered.{{resourceFromAPI .R}}(ctx, result, id)
+{{end}}			}
+			resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		}
+{{end -}}
 		resp.Diagnostics.AddError("Error updating {{.R.Title}}", fmt.Sprintf("%s", err))
 		return
 	}
@@ -276,8 +377,12 @@ func (r *{{$n}}Resource) Update(ctx context.Context, req resource.UpdateRequest,
 		resp.Diagnostics.AddError("Error reading {{.R.Title}} after update", fmt.Sprintf("%s", err))
 		return
 	}
-	plan.fromAPI(ctx, result, id)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	{{if hasStrictResponse .R}}if err := plan.{{resourceFromAPI .R}}(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding {{.R.Title}} after update", err.Error())
+		return
+	}
+	{{else}}plan.{{resourceFromAPI .R}}(ctx, result, id)
+	{{end}}	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *{{$n}}Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -286,11 +391,29 @@ func (r *{{$n}}Resource) Delete(ctx context.Context, req resource.DeleteRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{if .R.PendingActivation}}	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() { return }
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, {{$n}}ReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() { return }
+		if pending == keaPendingDelete { return }
+	}
+{{end -}}
 	if err := opnsense.Delete(ctx, r.client, {{$n}}ReqOpts, state.ID.ValueString()); err != nil {
 		var nf *opnsense.NotFoundError
 		if errors.As(err, &nf) {
 			return
 		}
+{{if .R.PendingActivation}}		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingDelete)...)
+		}
+{{end -}}
 		resp.Diagnostics.AddError("Error deleting {{.R.Title}}", fmt.Sprintf("%s", err))
 	}
 }

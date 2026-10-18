@@ -1,0 +1,22 @@
+Story 31.0b sanitized live acceptance output
+Run: 20261018T233224Z
+Target: disposable OPNsense 26.7.7, isolated interface opt1
+Safety precheck: Kea DHCPv4, DHCPv4 HA, DHCPv6, and DHCPv6 HA disabled; opt1 selected
+Command: TF_ACC=1 go test -v -run 'TestAcc(KeaFieldAndSurfaceParity|DHCPv6(Peer|PDPool)_basic)' -count=1 -p 1 -timeout 45m ./internal/service/kea
+Code/test digest before run: 2db677cf3ca78f0ff680ca738ed75973c0635fde5c5159abff2802db3cc3d19f
+
+=== RUN   TestAccDHCPv6PDPool_basic
+--- PASS: TestAccDHCPv6PDPool_basic (5.93s)
+=== RUN   TestAccDHCPv6Peer_basic
+--- PASS: TestAccDHCPv6Peer_basic (5.53s)
+=== RUN   TestAccKeaFieldAndSurfaceParity
+    kea_parity_acceptance_test.go:621: Kea parity fixture marker=e1383f9d7ae63f19
+    kea_parity_acceptance_test.go:1069: Kea parity cleanup endpoint=/api/kea/dhcpv6/search_pd_pool query="Story31b-e1383f9d7ae63f19" total=0
+    kea_parity_acceptance_test.go:1069: Kea parity cleanup endpoint=/api/kea/dhcpv6/search_subnet query="fd31:39::/48" total=0
+    kea_parity_acceptance_test.go:1069: Kea parity cleanup endpoint=/api/kea/dhcpv6/search_peer query="story31b-e1383f9d7ae63f19" total=0
+    kea_parity_acceptance_test.go:1069: Kea parity cleanup endpoint=/api/kea/dhcpv4/search_subnet query="198.18.57.0/24" total=0
+--- PASS: TestAccKeaFieldAndSurfaceParity (24.26s)
+PASS
+ok  github.com/matthew-on-git/terraform-provider-opnsense/internal/service/kea  36.127s
+Code/test digest after run: 2db677cf3ca78f0ff680ca738ed75973c0635fde5c5159abff2802db3cc3d19f
+Credentials, URLs, state files, and unsanitized logs are intentionally omitted.

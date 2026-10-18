@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
@@ -22,13 +23,15 @@ var (
 
 // dhcpv6SubnetReqOpts configures the OPNsense API endpoints for IPsec local auth entries.
 var dhcpv6SubnetReqOpts = opnsense.ReqOpts{
-	AddEndpoint:         "/api/kea/dhcpv6/add_subnet",
-	GetEndpoint:         "/api/kea/dhcpv6/get_subnet",
-	UpdateEndpoint:      "/api/kea/dhcpv6/set_subnet",
-	DeleteEndpoint:      "/api/kea/dhcpv6/del_subnet",
-	SearchEndpoint:      "/api/kea/dhcpv6/search_subnet",
-	ReconfigureEndpoint: "/api/kea/service/reconfigure",
-	Monad:               "subnet6",
+	AddEndpoint:                 "/api/kea/dhcpv6/add_subnet",
+	GetEndpoint:                 "/api/kea/dhcpv6/get_subnet",
+	UpdateEndpoint:              "/api/kea/dhcpv6/set_subnet",
+	DeleteEndpoint:              "/api/kea/dhcpv6/del_subnet",
+	StrictDeleteResponse:        true,
+	StrictMissingObjectResponse: true,
+	SearchEndpoint:              "/api/kea/dhcpv6/search_subnet",
+	ReconfigureEndpoint:         "/api/kea/service/reconfigure",
+	Monad:                       "subnet6",
 }
 
 // dhcpv6SubnetResource implements the opnsense_kea_dhcpv6_subnet resource.
@@ -73,6 +76,19 @@ func (r *dhcpv6SubnetResource) Create(ctx context.Context, req resource.CreateRe
 
 	uuid, err := opnsense.Add(ctx, r.client, dhcpv6SubnetReqOpts, apiReq)
 	if err != nil {
+		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingMutation)...)
+		}
+		if uuid != "" {
+			recovered := dhcpv6SubnetIdentity(uuid)
+			if result, readErr := opnsense.Get[dhcpv6SubnetAPIResponse](ctx, r.client, dhcpv6SubnetReqOpts, uuid); readErr == nil {
+				if plan.fromAPI(ctx, result, uuid) == nil {
+					recovered = plan
+				}
+			}
+			resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		}
 		resp.Diagnostics.AddError(
 			"Error creating Kea DHCPv6 subnet",
 			fmt.Sprintf("Could not create Kea DHCPv6 subnet: %s", err),
@@ -82,6 +98,8 @@ func (r *dhcpv6SubnetResource) Create(ctx context.Context, req resource.CreateRe
 
 	result, err := opnsense.Get[dhcpv6SubnetAPIResponse](ctx, r.client, dhcpv6SubnetReqOpts, uuid)
 	if err != nil {
+		recovered := dhcpv6SubnetIdentity(uuid)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
 		resp.Diagnostics.AddError(
 			"Error reading Kea DHCPv6 subnet after create",
 			fmt.Sprintf("Created subnet %s but could not read it back: %s", uuid, err),
@@ -89,8 +107,19 @@ func (r *dhcpv6SubnetResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	plan.fromAPI(ctx, result, uuid)
+	if err := plan.fromAPI(ctx, result, uuid); err != nil {
+		recovered := dhcpv6SubnetIdentity(uuid)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		resp.Diagnostics.AddError("Error decoding Kea DHCPv6 subnet after create", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func dhcpv6SubnetIdentity(uuid string) DHCPv6SubnetResourceModel {
+	return DHCPv6SubnetResourceModel{
+		ID: types.StringValue(uuid), DNSServers: types.SetNull(types.StringType), DomainSearch: types.SetNull(types.StringType),
+	}
 }
 
 // Read refreshes the Terraform state from the OPNsense API.
@@ -99,6 +128,21 @@ func (r *dhcpv6SubnetResource) Read(ctx context.Context, req resource.ReadReques
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, dhcpv6SubnetReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	result, err := opnsense.Get[dhcpv6SubnetAPIResponse](ctx, r.client, dhcpv6SubnetReqOpts, state.ID.ValueString())
@@ -115,7 +159,10 @@ func (r *dhcpv6SubnetResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	state.fromAPI(ctx, result, state.ID.ValueString())
+	if err := state.fromAPI(ctx, result, state.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Error decoding Kea DHCPv6 subnet", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -132,12 +179,36 @@ func (r *dhcpv6SubnetResource) Update(ctx context.Context, req resource.UpdateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, dhcpv6SubnetReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	apiReq := plan.toAPI(ctx)
 	id := state.ID.ValueString()
 
 	err := opnsense.Update(ctx, r.client, dhcpv6SubnetReqOpts, apiReq, id)
 	if err != nil {
+		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingMutation)...)
+			recovered := dhcpv6SubnetIdentity(id)
+			if result, readErr := opnsense.Get[dhcpv6SubnetAPIResponse](ctx, r.client, dhcpv6SubnetReqOpts, id); readErr == nil && plan.fromAPI(ctx, result, id) == nil {
+				recovered = plan
+			}
+			resp.Diagnostics.Append(resp.State.Set(ctx, &recovered)...)
+		}
 		resp.Diagnostics.AddError(
 			"Error updating Kea DHCPv6 subnet",
 			fmt.Sprintf("Could not update Kea DHCPv6 subnet %s: %s", id, err),
@@ -154,7 +225,10 @@ func (r *dhcpv6SubnetResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	plan.fromAPI(ctx, result, id)
+	if err := plan.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding Kea DHCPv6 subnet after update", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -165,12 +239,34 @@ func (r *dhcpv6SubnetResource) Delete(ctx context.Context, req resource.DeleteRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	pending, privateDiags := getKeaPendingActivation(ctx, req.Private)
+	resp.Diagnostics.Append(privateDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := retryKeaPendingActivation(ctx, r.client, dhcpv6SubnetReqOpts, pending); err != nil {
+			resp.Diagnostics.AddError("Error activating pending Kea mutation", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(clearKeaPendingActivation(ctx, resp.Private)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if pending == keaPendingDelete {
+			return
+		}
+	}
 
 	err := opnsense.Delete(ctx, r.client, dhcpv6SubnetReqOpts, state.ID.ValueString())
 	if err != nil {
 		var notFoundErr *opnsense.NotFoundError
 		if errors.As(err, &notFoundErr) {
 			return
+		}
+		var reconfigureErr *opnsense.MutationReconfigureError
+		if errors.As(err, &reconfigureErr) {
+			resp.Diagnostics.Append(setKeaPendingActivation(ctx, resp.Private, keaPendingDelete)...)
 		}
 		resp.Diagnostics.AddError(
 			"Error deleting Kea DHCPv6 subnet",

@@ -7,7 +7,7 @@ description: |-
 
 # opnsense_kea_dhcpv6_subnet (Data Source)
 
-Look up an existing Kea DHCPv6 subnet on OPNsense by UUID without importing it into Terraform management.
+Look up an existing Kea DHCPv6 subnet on OPNsense by UUID without importing it into Terraform management. DNS and domain-search parity was verified with OPNsense 26.7.7 or newer.
 
 ## Example Usage
 
@@ -33,6 +33,8 @@ output "kea_dhcpv6_subnet_id" {
 
 - `allocator` (String) Address allocator.
 - `description` (String) Description of the subnet.
+- `dns_servers` (Set of String) IPv6 DNS servers offered to clients.
+- `domain_search` (Set of String) Domain-search suffixes offered to clients.
 - `interface` (String) Interface for the subnet.
 - `pd_allocator` (String) Prefix delegation allocator.
 - `pools` (String) DHCPv6 pool definitions.

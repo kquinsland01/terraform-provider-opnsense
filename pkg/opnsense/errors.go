@@ -119,6 +119,18 @@ func ParseMutationResponse(body []byte) (string, error) {
 	return resp.UUID, nil
 }
 
+// ParseAddResponse requires both an affirmative save and a recoverable UUID.
+func ParseAddResponse(body []byte) (string, error) {
+	uuid, err := ParseMutationResponse(body)
+	if err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(uuid) == "" {
+		return "", fmt.Errorf("mutation response reported saved but did not include a non-empty UUID")
+	}
+	return uuid, nil
+}
+
 // ParseDeleteResponse parses a delete API response body. OPNsense delete
 // endpoints commonly return result="deleted" instead of result="saved", but
 // failed delete attempts still use result="failed" with validations.
@@ -136,18 +148,35 @@ func ParseDeleteResponse(body []byte) error {
 	return &ValidationError{Fields: resp.Validations}
 }
 
-// CheckHTTPError returns an appropriate error type for non-success HTTP status codes.
-// Returns nil for HTTP 200. Called before body parsing.
-func CheckHTTPError(statusCode int, endpoint string) error {
-	switch statusCode {
-	case http.StatusOK:
+// ParseStrictDeleteResponse requires source-backed affirmative deletion.
+func ParseStrictDeleteResponse(body []byte) error {
+	var resp mutationResponse
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return fmt.Errorf("failed to parse delete response: %w", err)
+	}
+	switch resp.Result {
+	case "deleted", "saved":
 		return nil
+	case "failed":
+		return &ValidationError{Fields: resp.Validations}
+	default:
+		return fmt.Errorf("delete response did not affirm success: unexpected result %q", resp.Result)
+	}
+}
+
+// CheckHTTPError returns an appropriate error type for non-success HTTP status codes.
+// Returns nil for every 2xx response. Called before body parsing.
+func CheckHTTPError(statusCode int, endpoint string) error {
+	if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
+		return nil
+	}
+	switch statusCode {
 	case http.StatusUnauthorized, http.StatusForbidden:
 		return &AuthError{StatusCode: statusCode}
 	case http.StatusNotFound:
 		return &PluginNotFoundError{PluginName: extractPluginName(endpoint)}
 	default:
-		return nil
+		return NewServerError(endpoint, fmt.Errorf("HTTP %d", statusCode))
 	}
 }
 

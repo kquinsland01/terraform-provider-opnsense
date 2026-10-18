@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+done
 
 ## Priority
 
@@ -21,3 +21,11 @@ Add DHCPv6 peers and delegated-prefix pools, and fill audited subnet field gaps.
 ## Verification
 
 Kea unit/generated tests, disposable-appliance v4/v6 lifecycle tests, docs generation, and `make check`.
+
+### Current evidence
+
+- Review pass 6 patching is implemented: required selected-map decoding is deterministic, generated peer/PD-pool/parent cleanup propagates transport and response errors and accepts only source-backed empty-array absence, and final support/status prose is synchronized.
+- Final disposable run `20261018T233224Z` passed the 20-step field/surface parity lifecycle plus generated peer and PD-pool lifecycles with `-count=1` and verbose non-skip output.
+- The reproducible code/test digest matched before and after the live run: `2db677cf3ca78f0ff680ca738ed75973c0635fde5c5159abff2802db3cc3d19f`.
+- Kea v4/v6 and HA remained disabled, isolated interface `opt1` remained selected, and all four strict post-run searches returned zero matches.
+- The eight scoped resource/data-source rows are `covered` with row-specific evidence from the pass-6 patched run; review pass 7 returned publication GO with no findings.

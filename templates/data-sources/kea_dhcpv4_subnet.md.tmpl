@@ -1,0 +1,16 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Reads a Kea DHCPv4 subnet and its advanced option fields.
+---
+
+# {{.Name}} ({{.Type}})
+
+Reads an existing Kea DHCPv4 subnet by UUID. Advanced field parity was verified with OPNsense 26.7.7 or newer.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_kea_dhcpv4_subnet/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

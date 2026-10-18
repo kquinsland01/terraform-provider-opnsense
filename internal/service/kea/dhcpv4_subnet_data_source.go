@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	dsschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
@@ -33,9 +34,27 @@ func (d *dhcpv4SubnetDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 			"pools":           dsschema.StringAttribute{Computed: true, MarkdownDescription: "DHCPv4 pool definitions."},
 			"match_client_id": dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Match clients by client-id."},
 			"ping_check":      dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Ping the address before handing out a lease."},
-			"description":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the subnet."},
+			"auto_collect":    dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Automatically collect option data from OPNsense."},
+			"dns_servers":     computedStringSet("IPv4 DNS servers offered to clients."),
+			"domain_name":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Domain name offered to clients."},
+			"domain_search":   computedStringSet("Domain-search suffixes offered to clients."),
+			"routers":         computedStringSet("IPv4 default routers offered to clients."),
+			"static_routes": dsschema.SetNestedAttribute{Computed: true, MarkdownDescription: "IPv4 static route pairs.", NestedObject: dsschema.NestedAttributeObject{Attributes: map[string]dsschema.Attribute{
+				"destination": dsschema.StringAttribute{Computed: true, MarkdownDescription: "IPv4 route destination."},
+				"router":      dsschema.StringAttribute{Computed: true, MarkdownDescription: "IPv4 next-hop router."},
+			}}},
+			"ntp_servers":   computedStringSet("IPv4 NTP servers offered to clients."),
+			"time_servers":  computedStringSet("IPv4 RFC 868 time servers offered to clients."),
+			"next_server":   dsschema.StringAttribute{Computed: true, MarkdownDescription: "Network-boot next-server address."},
+			"tftp_server":   dsschema.StringAttribute{Computed: true, MarkdownDescription: "TFTP server name or address."},
+			"tftp_bootfile": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Network boot filename."},
+			"description":   dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the subnet."},
 		},
 	}
+}
+
+func computedStringSet(description string) dsschema.SetAttribute {
+	return dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: description}
 }
 
 func (d *dhcpv4SubnetDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -62,6 +81,9 @@ func (d *dhcpv4SubnetDataSource) Read(ctx context.Context, req datasource.ReadRe
 		resp.Diagnostics.AddError("Error reading Kea DHCPv4 subnet", fmt.Sprintf("Could not read Kea DHCPv4 subnet %s: %s", id, err))
 		return
 	}
-	config.fromAPI(ctx, result, id)
+	if err := config.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding Kea DHCPv4 subnet", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	dsschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
@@ -27,13 +28,15 @@ func (d *dhcpv6SubnetDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 	resp.Schema = dsschema.Schema{
 		MarkdownDescription: "Reads an existing Kea DHCPv6 subnet on OPNsense by UUID.",
 		Attributes: map[string]dsschema.Attribute{
-			"id":           dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
-			"subnet":       dsschema.StringAttribute{Computed: true, MarkdownDescription: "IPv6 subnet in CIDR notation."},
-			"interface":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Interface for the subnet."},
-			"allocator":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Address allocator."},
-			"pd_allocator": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Prefix delegation allocator."},
-			"pools":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "DHCPv6 pool definitions."},
-			"description":  dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the subnet."},
+			"id":            dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
+			"subnet":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "IPv6 subnet in CIDR notation."},
+			"interface":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Interface for the subnet."},
+			"allocator":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Address allocator."},
+			"pd_allocator":  dsschema.StringAttribute{Computed: true, MarkdownDescription: "Prefix delegation allocator."},
+			"pools":         dsschema.StringAttribute{Computed: true, MarkdownDescription: "DHCPv6 pool definitions."},
+			"dns_servers":   dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "IPv6 DNS servers offered to clients."},
+			"domain_search": dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Domain-search suffixes offered to clients."},
+			"description":   dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the subnet."},
 		},
 	}
 }
@@ -62,6 +65,9 @@ func (d *dhcpv6SubnetDataSource) Read(ctx context.Context, req datasource.ReadRe
 		resp.Diagnostics.AddError("Error reading Kea DHCPv6 subnet", fmt.Sprintf("Could not read Kea DHCPv6 subnet %s: %s", id, err))
 		return
 	}
-	config.fromAPI(ctx, result, id)
+	if err := config.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding Kea DHCPv6 subnet", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

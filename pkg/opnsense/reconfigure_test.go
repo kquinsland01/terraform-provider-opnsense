@@ -6,6 +6,7 @@ package opnsense
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -38,6 +39,25 @@ func TestReconfigure_StandardEndpointSuccess(t *testing.T) {
 	path, _ := calledPath.Load().(string)
 	if path != "/haproxy/service/reconfigure" {
 		t.Errorf("expected path %q, got %q", "/haproxy/service/reconfigure", path)
+	}
+}
+
+func TestReconfigure_KeaRequiresAffirmativeStatusOK(t *testing.T) {
+	for _, body := range []string{"", `{}`, `{"status":"unknown"}`, `{"result":"ok"}`} {
+		t.Run(body, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, body) }))
+			defer server.Close()
+			client := newReconfigureTestClient(t, server.URL)
+			err := Reconfigure(context.Background(), client, ReqOpts{ReconfigureEndpoint: "/api/kea/service/reconfigure"})
+			if err == nil {
+				t.Fatalf("ambiguous Kea response accepted: %q", body)
+			}
+		})
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, `{"status":"ok"}`) }))
+	defer server.Close()
+	if err := Reconfigure(context.Background(), newReconfigureTestClient(t, server.URL), ReqOpts{ReconfigureEndpoint: "/api/kea/service/reconfigure"}); err != nil {
+		t.Fatal(err)
 	}
 }
 
