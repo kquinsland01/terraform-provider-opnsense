@@ -22,13 +22,13 @@ This plan defines the remaining data-source work after v0.1.0. It is an implemen
 
 | Check | Command | Result |
 |---|---|---:|
-| Registered resources | `rg "\t\tnew[A-Za-z0-9]+Resource," "internal/service" \| wc -l` | 90 |
-| Registered data sources | `rg "\t\tnew[A-Za-z0-9]+DataSource," "internal/service" \| wc -l` | 76 |
-| Resource docs | `rg "^# opnsense_" "docs/resources" \| wc -l` | 90 |
-| Data-source docs | `rg "^# opnsense_" "docs/data-sources" \| wc -l` | 76 |
-| Resource-matching data-source gaps | Resource doc basenames minus data-source doc basenames | 15 |
+| Registered resources | Provider registration metadata | 106 |
+| Registered data sources | Provider registration metadata | 90 |
+| Resource docs | `find docs/resources -name '*.md'` | 106 |
+| Data-source docs | `find docs/data-sources -name '*.md'` | 90 |
+| Resource-matching data-source gaps | Resource doc basenames minus data-source doc basenames | 17 |
 
-No mismatch was found between registered implementation counts and generated documentation counts. The gap is 15, not 90 minus 76, because `system_info` is a standalone data source without a matching resource. Batch 1 was completed by Story 25B.2; Batches 2 and 3 were completed by Story 25B.3.
+No mismatch was found between registered implementation counts and generated documentation counts. The gap is 17, not 106 minus 90, because `system_info` is a standalone data source without a matching resource. The canonical names and drift checks now live in `provider-ecosystem-coverage-audit.json` and `internal/coverageaudit`.
 
 ## Existing Data Sources
 
@@ -59,9 +59,11 @@ No mismatch was found between registered implementation counts and generated doc
 | Resource | Domain | Current data source? | Pattern | Priority | Batch | Notes |
 |---|---|---|---|---|---|---|
 | dnsmasq_settings | Dnsmasq | No | Singleton | Low | 4 | Singleton read pattern may differ from UUID resources. |
+| interface_assignment | Interfaces | No | UUID-backed-special | Medium | 4 | Configuration lookup differs from live interface-state data sources. |
 | ipsec_key_pair | IPsec | No | UUID-backed-special | Medium | 4 | Sensitive/write-only fields require careful state expectations. |
 | ipsec_psk | IPsec | No | UUID-backed-special | Medium | 4 | Secret fields require careful state expectations. |
 | kea_ctrl_agent | Kea | No | Singleton | Low | 4 | Singleton read pattern may differ from UUID resources. |
+| kea_dhcpv4_settings | Kea | No | Singleton | Low | 4 | Singleton/settings pattern. |
 | kea_dhcpv6_settings | Kea | No | Singleton | Low | 4 | Singleton/settings pattern. |
 | openvpn_static_key | OpenVPN | No | UUID-backed-special | Medium | 4 | Key material may be write-only/sensitive. |
 | quagga_bgp_global | Quagga / FRR | No | Singleton | Low | 4 | Singleton resource. |

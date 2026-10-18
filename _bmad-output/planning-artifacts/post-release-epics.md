@@ -17,7 +17,7 @@ The first provider version is published. Completed post-release work closed the 
 
 ## Epic 25B: Data Source Parity
 
-Goal: close straightforward data-source parity gaps and leave only singleton or sensitive special-case follow-up work. Epic 25B completed the move from 34 to 76 supported data sources, leaving 15 resource-matching data-source gaps.
+Goal: close straightforward data-source parity gaps and leave only singleton or sensitive special-case follow-up work. Epic 25B completed the historical move from 34 to 76 supported data sources; subsequent work brings the current inventory to 90 data sources and 17 resource-matching gaps.
 
 | Story | Status | File |
 |---|---|---|
@@ -84,9 +84,9 @@ Goal: safely adopt the expanded upstream `api/interfaces/assignment/*` API after
 
 | Story | Status | File |
 |---|---|---|
-| 30.1 Track OPNsense Assignment API Release | review | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
-| 30.2 Implement Interface Assignment/IP Resource for OPNsense 26.7.6+ | backlog | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
-| 30.3 Update Interface Support Matrix and Public Blocker Docs | review | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
+| 30.1 Track OPNsense Assignment API Release | done | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
+| 30.2 Implement Interface Assignment/IP Resource for OPNsense 26.7.6+ | done | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
+| 30.3 Update Interface Support Matrix and Public Blocker Docs | done | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
 
 ## Epic 31: Provider Completeness, Positioning, and Migration
 
@@ -94,7 +94,17 @@ Goal: make this provider complete enough to be the default provider choice for a
 
 | Story | Status | File |
 |---|---|---|
-| 31.0 Complete Provider Coverage Audit | backlog | `_bmad-output/implementation-artifacts/31-0-complete-provider-coverage-audit.md` |
+| 31.0 Complete Provider Coverage Audit | done | `_bmad-output/implementation-artifacts/31-0-complete-provider-coverage-audit.md` |
+| 31.0a Firewall and NAT Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md` |
+| 31.0b Kea Field and Surface Parity | backlog | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
+| 31.0c OpenVPN Field and Key Parity | backlog | `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md` |
+| 31.0d Unbound Settings and Forward Parity | backlog | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
+| 31.0e WireGuard Field and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
+| 31.0f Trust Lifecycle and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md` |
+| 31.0g IPsec Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md` |
+| 31.0h Quagga/BGP Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |
+| 31.0i Live Interface Data Sources | backlog | `_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md` |
+| 31.0j Provider Retry Settings | backlog | `_bmad-output/implementation-artifacts/31-0j-provider-retry-settings.md` |
 | 31.1 Complete Provider Positioning README and Registry Pass | backlog | `_bmad-output/implementation-artifacts/31-1-complete-provider-positioning-docs.md` |
 | 31.2 Existing Provider Migration Guide | backlog | `_bmad-output/implementation-artifacts/31-2-existing-provider-migration-guide.md` |
 | 31.3 Example Stacks for Adoption | backlog | `_bmad-output/implementation-artifacts/31-3-example-stacks-for-adoption.md` |
@@ -112,9 +122,7 @@ Goal: make releases feel intentionally tested, versioned, and ready for producti
 ## Recommended Sequence
 
 1. Treat Epics 25B through 29 as completed or historical unless a regression appears.
-2. Merge Stories 30.1 and 30.3 after review; the tracker and public docs now identify `26.7.6` as the first complete released API.
-3. Use Story 30.2 to implement against OPNsense `26.7.6+`; do not declare provider support until disposable-appliance lifecycle proof passes.
-4. Keep the weekly Story 30.1 probe baseline current when upstream branch, tag, or API evidence changes.
-5. Run Story 31.0 before migration-positioning work so coverage gaps are audited as product completeness work, not buried in docs.
-6. Follow with Stories 31.1 and 31.2 to make the Registry/README story match the provider's actual coverage advantage.
-7. Add Story 32.1 acceptance proof before treating v1 positioning as credible.
+2. Keep completed Epic 30's weekly probe baseline current; assignment/IP support requires OPNsense 26.7.6+ and has disposable-appliance lifecycle proof.
+3. Complete audit-derived Stories 31.0a–31.0j before migration-positioning work so product gaps are not buried in docs.
+4. Follow with Stories 31.1 and 31.2 to make the Registry/README story match verified coverage.
+5. Add Story 32.1 acceptance proof before treating v1 positioning as credible.

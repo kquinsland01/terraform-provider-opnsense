@@ -113,3 +113,6 @@ e2f1f7a8f81d21c25aebf12625d0b4a37086a440:_bmad/_config/files-manifest.csv:generi
 e2f1f7a8f81d21c25aebf12625d0b4a37086a440:_bmad/_config/files-manifest.csv:generic-api-key:58
 e2f1f7a8f81d21c25aebf12625d0b4a37086a440:_bmad/_config/files-manifest.csv:generic-api-key:792
 e2f1f7a8f81d21c25aebf12625d0b4a37086a440:_bmad/_config/files-manifest.csv:generic-api-key:817
+
+# OPNsense API model field name in a committed interface-assignment unit-test table.
+c908164e6f08d6fb603100a8cbb450c1acef0f06:internal/service/iface/assignment_resource_unit_test.go:generic-api-key:433

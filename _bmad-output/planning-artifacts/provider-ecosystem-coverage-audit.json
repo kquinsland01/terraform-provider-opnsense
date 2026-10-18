@@ -1,0 +1,3179 @@
+{
+  "schema_version": 1,
+  "baseline": {
+    "source": "browningluke/opnsense",
+    "version": "0.26.0",
+    "commit": "33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba",
+    "resource_count": 47,
+    "data_source_count": 45,
+    "ephemeral_resource_count": 1,
+    "provider_config_count": 1
+  },
+  "local_inventory": {
+    "resource_count": 106,
+    "data_source_count": 90,
+    "resource_doc_count": 106,
+    "data_source_doc_count": 90,
+    "resource_only_data_source_gaps": [
+      "dnsmasq_settings",
+      "interface_assignment",
+      "ipsec_key_pair",
+      "ipsec_psk",
+      "kea_ctrl_agent",
+      "kea_dhcpv4_settings",
+      "kea_dhcpv6_settings",
+      "openvpn_static_key",
+      "quagga_bgp_global",
+      "quagga_general",
+      "quagga_ospf6_general",
+      "quagga_ospf_general",
+      "quagga_rip",
+      "quagga_static",
+      "trust_cert",
+      "unbound_dnsbl",
+      "unbound_general"
+    ],
+    "data_source_only": [
+      "system_info"
+    ]
+  },
+  "allowed_classifications": [
+    "covered",
+    "covered-different-name",
+    "covered-broader",
+    "missing-buildable",
+    "missing-upstream-blocked",
+    "intentionally-different",
+    "needs-field-audit"
+  ],
+  "ownership_direction": "Use one provider per appliance and object domain in steady state. Never configure two providers to manage the same OPNsense object; close, document, or explicitly block gaps before migration.",
+  "surfaces": [
+    {
+      "kind": "provider-configuration",
+      "name": "retry-settings",
+      "domain": "Provider",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "provider retry defaults"
+      ],
+      "baseline_fields": [
+        "min_backoff",
+        "max_backoff",
+        "retries"
+      ],
+      "field_evidence": {
+        "shared": "both HTTP clients automatically retry transient failures",
+        "baseline_only": "user-configurable min_backoff, max_backoff, and retries attributes plus environment variables",
+        "local_only": "fixed defaults of 1s, 30s, and 3 plus a local read-concurrency limiter",
+        "lifecycle": "provider configuration is resolved once and passed into the shared API client",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/internal/provider/provider.go",
+        "internal/provider/provider.go",
+        "pkg/opnsense/client.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0j-provider-retry-settings.md"
+    },
+    {
+      "kind": "resource",
+      "name": "cron_job",
+      "domain": "Cron",
+      "classification": "covered",
+      "local_equivalents": [
+        "cron_job"
+      ],
+      "baseline_fields": [
+        "command",
+        "days",
+        "description",
+        "enabled",
+        "hours",
+        "id",
+        "minutes",
+        "months",
+        "parameters",
+        "weekdays",
+        "who"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/cron_job.md",
+        "docs/resources/cron_job.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "dnsmasq_host",
+      "domain": "Dnsmasq",
+      "classification": "covered-broader",
+      "local_equivalents": [
+        "dnsmasq_host"
+      ],
+      "baseline_fields": [
+        "alias_records",
+        "client_id",
+        "cname_records",
+        "comment",
+        "description",
+        "domain",
+        "hardware_addresses",
+        "hostname",
+        "id",
+        "ip_addresses",
+        "is_ignored",
+        "is_local_domain",
+        "tag"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "lease_time plus normalized singular field names",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/dnsmasq_host.md",
+        "docs/resources/dnsmasq_host.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_alias",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_alias"
+      ],
+      "baseline_fields": [
+        "categories",
+        "content",
+        "description",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "name",
+        "path_expression",
+        "stats",
+        "type",
+        "update_freq"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "interface, path_expression, and stats alias controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_alias.md",
+        "docs/resources/firewall_alias.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_category",
+      "domain": "Firewall/NAT",
+      "classification": "covered",
+      "local_equivalents": [
+        "firewall_category"
+      ],
+      "baseline_fields": [
+        "auto",
+        "color",
+        "id",
+        "name"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_category.md",
+        "docs/resources/firewall_category.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_filter",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_filter_rule"
+      ],
+      "baseline_fields": [
+        "categories",
+        "description",
+        "enabled",
+        "filter",
+        "id",
+        "interface",
+        "internal_tagging",
+        "no_xmlrpc_sync",
+        "priority",
+        "sequence",
+        "source_routing",
+        "stateful_firewall",
+        "traffic_shaping"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "advanced tagging, priority, reply-to, state limits/timeouts, schedules, TCP flags, ICMP types, shaping, and HA-sync controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_filter.md",
+        "docs/resources/firewall_filter_rule.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_nat",
+      "domain": "Firewall/NAT",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "firewall_nat_outbound"
+      ],
+      "baseline_fields": [
+        "description",
+        "destination",
+        "disable_nat",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "log",
+        "protocol",
+        "sequence",
+        "source",
+        "target"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "categories, static_nat_port, and target_port",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_nat.md",
+        "docs/resources/firewall_nat_outbound.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_nat_one_to_one",
+      "domain": "Firewall/NAT",
+      "classification": "covered",
+      "local_equivalents": [
+        "firewall_nat_one_to_one"
+      ],
+      "baseline_fields": [
+        "categories",
+        "description",
+        "destination",
+        "enabled",
+        "external_net",
+        "id",
+        "interface",
+        "log",
+        "nat_reflection",
+        "sequence",
+        "source",
+        "type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_nat_one_to_one.md",
+        "docs/resources/firewall_nat_one_to_one.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "firewall_nat_port_forward",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_nat_port_forward"
+      ],
+      "baseline_fields": [
+        "description",
+        "destination",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "log",
+        "nat_reflection",
+        "protocol",
+        "sequence",
+        "source",
+        "target"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the baseline accepts multiple interfaces; the local schema accepts one interface",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_nat_port_forward.md",
+        "docs/resources/firewall_nat_port_forward.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "interfaces_vip",
+      "domain": "Interfaces",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_vip"
+      ],
+      "baseline_fields": [
+        "description",
+        "gateway",
+        "id",
+        "interface",
+        "mode",
+        "network"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/interfaces_vip.md",
+        "docs/resources/system_vip.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "interfaces_vlan",
+      "domain": "Interfaces",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_vlan"
+      ],
+      "baseline_fields": [
+        "description",
+        "device",
+        "id",
+        "parent",
+        "priority",
+        "tag"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/interfaces_vlan.md",
+        "docs/resources/system_vlan.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_auth_local",
+      "domain": "IPsec",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "ipsec_local"
+      ],
+      "baseline_fields": [
+        "auth_id",
+        "authentication",
+        "certificates",
+        "description",
+        "eap_id",
+        "enabled",
+        "id",
+        "ipsec_connection",
+        "public_keys",
+        "round"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_auth_local.md",
+        "docs/resources/ipsec_local.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_auth_remote",
+      "domain": "IPsec",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "ipsec_remote"
+      ],
+      "baseline_fields": [
+        "auth_id",
+        "authentication",
+        "certificates",
+        "description",
+        "eap_id",
+        "enabled",
+        "id",
+        "ipsec_connection",
+        "public_keys",
+        "round"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_auth_remote.md",
+        "docs/resources/ipsec_remote.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_child",
+      "domain": "IPsec",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "ipsec_child"
+      ],
+      "baseline_fields": [
+        "close_action",
+        "description",
+        "dpd_action",
+        "enabled",
+        "id",
+        "install_policies",
+        "ipsec_connection",
+        "local_networks",
+        "mode",
+        "proposals",
+        "rekey_time",
+        "remote_networks",
+        "request_id",
+        "sha256_96",
+        "start_action"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "close/DPD actions, policy installation, request ID, SHA256-96, and rekey controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none on these rows; PSKs are owned by the separate sensitive ipsec_psk surface"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_child.md",
+        "docs/resources/ipsec_child.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_connection",
+      "domain": "IPsec",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "ipsec_connection"
+      ],
+      "baseline_fields": [
+        "aggressive",
+        "description",
+        "dpd_delay",
+        "dpd_timeout",
+        "enabled",
+        "id",
+        "ike_lifetime",
+        "ip_pools",
+        "keying_tries",
+        "local_addresses",
+        "local_port",
+        "mobike",
+        "proposals",
+        "reauthentication_time",
+        "rekey_time",
+        "remote_addresses",
+        "remote_port",
+        "send_certificate",
+        "send_certificate_request",
+        "udp_encapsulation",
+        "unique",
+        "version"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DPD, ports, MOBIKE, lifetimes, local addresses, pools, certificate-send, encapsulation, and keying controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none on these rows; PSKs are owned by the separate sensitive ipsec_psk surface"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_connection.md",
+        "docs/resources/ipsec_connection.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_psk",
+      "domain": "IPsec",
+      "classification": "covered",
+      "local_equivalents": [
+        "ipsec_psk"
+      ],
+      "baseline_fields": [
+        "description",
+        "id",
+        "identity_local",
+        "identity_remote",
+        "pre_shared_key",
+        "type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "pre_shared_key is sensitive and write-only; preserve configured state because the API does not safely return the secret"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_psk.md",
+        "docs/resources/ipsec_psk.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "ipsec_vti",
+      "domain": "IPsec",
+      "classification": "covered",
+      "local_equivalents": [
+        "ipsec_vti"
+      ],
+      "baseline_fields": [
+        "description",
+        "enabled",
+        "id",
+        "local_ip",
+        "remote_ip",
+        "request_id",
+        "tunnel_local_ip",
+        "tunnel_local_ip2",
+        "tunnel_remote_ip",
+        "tunnel_remote_ip2"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/ipsec_vti.md",
+        "docs/resources/ipsec_vti.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv4_peer",
+      "domain": "Kea",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "kea_ha_peer"
+      ],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv4_peer.md",
+        "docs/resources/kea_ha_peer.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv4_reservation",
+      "domain": "Kea",
+      "classification": "covered",
+      "local_equivalents": [
+        "kea_dhcpv4_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "hostname",
+        "id",
+        "ip_address",
+        "mac_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv4_reservation.md",
+        "docs/resources/kea_dhcpv4_reservation.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv4_subnet",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "kea_dhcpv4_subnet"
+      ],
+      "baseline_fields": [
+        "auto_collect",
+        "description",
+        "dns_servers",
+        "domain_name",
+        "domain_search",
+        "id",
+        "match_client_id",
+        "next_server",
+        "ntp_servers",
+        "pools",
+        "routers",
+        "static_routes",
+        "subnet",
+        "tftp_bootfile",
+        "tftp_server",
+        "time_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "auto-collect, DNS/domain/search, routers, static routes, NTP/time servers, and PXE/TFTP fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv4_subnet.md",
+        "docs/resources/kea_dhcpv4_subnet.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv6_pd_pool",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "delegated_len",
+        "description",
+        "id",
+        "prefix",
+        "prefix_len",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the stable delegated-prefix pool item surface has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_pd_pool.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv6_peer",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the stable DHCPv6 HA peer item surface has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_peer.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv6_reservation",
+      "domain": "Kea",
+      "classification": "covered",
+      "local_equivalents": [
+        "kea_dhcpv6_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain_search",
+        "duid",
+        "hostname",
+        "id",
+        "ip_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_reservation.md",
+        "docs/resources/kea_dhcpv6_reservation.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_dhcpv6_subnet",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "kea_dhcpv6_subnet"
+      ],
+      "baseline_fields": [
+        "allocator",
+        "description",
+        "dns_servers",
+        "domain_search",
+        "id",
+        "interface",
+        "pd_allocator",
+        "pools",
+        "subnet"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS servers and domain-search fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_subnet.md",
+        "docs/resources/kea_dhcpv6_subnet.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "kea_peer",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_ha_peer"
+      ],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_peer.md",
+        "docs/resources/kea_ha_peer.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_reservation",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_dhcpv4_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "hostname",
+        "id",
+        "ip_address",
+        "mac_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_reservation.md",
+        "docs/resources/kea_dhcpv4_reservation.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "kea_subnet",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_dhcpv4_subnet"
+      ],
+      "baseline_fields": [
+        "auto_collect",
+        "description",
+        "dns_servers",
+        "domain_name",
+        "domain_search",
+        "id",
+        "match_client_id",
+        "next_server",
+        "ntp_servers",
+        "pools",
+        "routers",
+        "static_routes",
+        "subnet",
+        "tftp_bootfile",
+        "tftp_server",
+        "time_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_subnet.md",
+        "docs/resources/kea_dhcpv4_subnet.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "openvpn_client_overwrite",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "openvpn_client_overwrite"
+      ],
+      "baseline_fields": [
+        "block",
+        "common_name",
+        "description",
+        "dns_domain",
+        "dns_domain_search",
+        "dns_servers",
+        "enabled",
+        "id",
+        "local_networks",
+        "ntp_servers",
+        "push_reset",
+        "redirect_gateway",
+        "register_dns",
+        "remote_networks",
+        "route_gateway",
+        "servers",
+        "tunnel_network",
+        "tunnel_network_v6",
+        "wins_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_client_overwrite.md",
+        "docs/resources/openvpn_client_overwrite.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "openvpn_instance",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "openvpn_instance"
+      ],
+      "baseline_fields": [
+        "auth_digest",
+        "auth_gen_token",
+        "auth_gen_token_renewal",
+        "auth_gen_token_secret",
+        "auth_mode",
+        "bridge_gateway",
+        "bridge_pool",
+        "carp_depend_on",
+        "cert_depth",
+        "certificate",
+        "certificate_authority",
+        "compress_migrate",
+        "crl",
+        "data_ciphers",
+        "data_ciphers_fallback",
+        "description",
+        "dev_type",
+        "dns_domain",
+        "dns_domain_search",
+        "dns_servers",
+        "enabled",
+        "fragment",
+        "http_proxy",
+        "id",
+        "ifconfig_pool_persist",
+        "keepalive_interval",
+        "keepalive_timeout",
+        "local",
+        "local_group",
+        "max_clients",
+        "mss_fix",
+        "no_pool",
+        "ntp_servers",
+        "password",
+        "port",
+        "port_share",
+        "protocol",
+        "provision_exclusive",
+        "push_excluded_routes",
+        "push_inactive",
+        "push_route",
+        "redirect_gateway",
+        "register_dns",
+        "remote",
+        "remote_cert_tls",
+        "reneg_sec",
+        "role",
+        "route",
+        "route_metric",
+        "server",
+        "server_ipv6",
+        "strict_user_cn",
+        "tls_key",
+        "topology",
+        "tun_mtu",
+        "use_ocsp",
+        "username",
+        "username_as_common_name",
+        "various_flags",
+        "various_push_flags",
+        "verify_client_cert",
+        "verify_x509_name",
+        "vpn_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally",
+        "local_only": "verb and API-read vpnid",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_instance.md",
+        "docs/resources/openvpn_instance.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "openvpn_static_key",
+      "domain": "OpenVPN",
+      "classification": "covered",
+      "local_equivalents": [
+        "openvpn_static_key"
+      ],
+      "baseline_fields": [
+        "description",
+        "id",
+        "key",
+        "mode"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the baseline read-only lookup returns sensitive key material; no local data source exists",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_static_key.md",
+        "docs/resources/openvpn_static_key.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "quagga_bgp_aspath",
+      "domain": "Quagga/BGP",
+      "classification": "covered",
+      "local_equivalents": [
+        "quagga_bgp_aspath"
+      ],
+      "baseline_fields": [
+        "action",
+        "as",
+        "description",
+        "enabled",
+        "id",
+        "number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/quagga_bgp_aspath.md",
+        "docs/resources/quagga_bgp_aspath.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "quagga_bgp_communitylist",
+      "domain": "Quagga/BGP",
+      "classification": "covered",
+      "local_equivalents": [
+        "quagga_bgp_communitylist"
+      ],
+      "baseline_fields": [
+        "action",
+        "community",
+        "description",
+        "enabled",
+        "id",
+        "number",
+        "seq_number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/quagga_bgp_communitylist.md",
+        "docs/resources/quagga_bgp_communitylist.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "quagga_bgp_neighbor",
+      "domain": "Quagga/BGP",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "quagga_bgp_neighbor"
+      ],
+      "baseline_fields": [
+        "as_override",
+        "attribute_unchanged",
+        "bfd",
+        "connect_timer",
+        "default_route",
+        "description",
+        "disable_connected_check",
+        "enabled",
+        "hold_down",
+        "id",
+        "keep_alive",
+        "link_local_interface",
+        "local_ip",
+        "md5_password",
+        "multi_hop",
+        "multi_protocol",
+        "next_hop_self",
+        "next_hop_self_all",
+        "peer_ip",
+        "prefix_list_in",
+        "prefix_list_out",
+        "remote_as",
+        "route_map_in",
+        "route_map_out",
+        "rr_client",
+        "update_source",
+        "weight"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "BFD, authentication, connect timer, default route, multihop, route-reflector, weight, connected-check, and next-hop-self-all controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/quagga_bgp_neighbor.md",
+        "docs/resources/quagga_bgp_neighbor.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "quagga_bgp_prefixlist",
+      "domain": "Quagga/BGP",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "quagga_prefix_list"
+      ],
+      "baseline_fields": [
+        "action",
+        "description",
+        "enabled",
+        "id",
+        "ip_version",
+        "name",
+        "network",
+        "number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/quagga_bgp_prefixlist.md",
+        "docs/resources/quagga_prefix_list.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "quagga_bgp_routemap",
+      "domain": "Quagga/BGP",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "quagga_route_map"
+      ],
+      "baseline_fields": [
+        "action",
+        "aspaths",
+        "community_lists",
+        "description",
+        "enabled",
+        "id",
+        "name",
+        "prefix_lists",
+        "route_map_id",
+        "set"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "AS-path/community/prefix-list set references and route-map ID semantics are not represented at equivalent depth locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/quagga_bgp_routemap.md",
+        "docs/resources/quagga_route_map.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "route",
+      "domain": "Routing",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_route"
+      ],
+      "baseline_fields": [
+        "description",
+        "enabled",
+        "gateway",
+        "id",
+        "network"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/route.md",
+        "docs/resources/system_route.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "trust_ca",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "trust_ca"
+      ],
+      "baseline_fields": [
+        "action",
+        "caref",
+        "city",
+        "common_name",
+        "country",
+        "crt",
+        "crt_payload",
+        "description",
+        "digest",
+        "email",
+        "id",
+        "key_type",
+        "lifetime",
+        "name",
+        "ocsp_uri",
+        "organization",
+        "organizational_unit",
+        "prv",
+        "prv_payload",
+        "ref_id",
+        "serial",
+        "state",
+        "valid_from",
+        "valid_to"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "existing/intermediate/OCSP actions, subject fields, digest/key type, import material, serial, and OCSP URI are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "private key fields are sensitive; local import fields are write-only and deliberately not refreshed"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/trust_ca.md",
+        "docs/resources/trust_ca.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "trust_cert",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "trust_cert"
+      ],
+      "baseline_fields": [
+        "action",
+        "altnames_dns",
+        "altnames_email",
+        "altnames_ip",
+        "altnames_uri",
+        "caref",
+        "cert_type",
+        "city",
+        "common_name",
+        "country",
+        "crt",
+        "crt_payload",
+        "csr",
+        "csr_payload",
+        "description",
+        "digest",
+        "email",
+        "id",
+        "in_use",
+        "is_user",
+        "key_type",
+        "lifetime",
+        "name",
+        "ocsp_uri",
+        "organization",
+        "organizational_unit",
+        "private_key_location",
+        "prv",
+        "prv_payload",
+        "ref_id",
+        "rfc3280_purpose",
+        "state",
+        "valid_from",
+        "valid_to"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "internal/external/CSR/import/reissue actions, SANs, subject fields, EKU, digest/key type, lifetime, and operational metadata are absent locally",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "private key fields are sensitive; local import fields are write-only and deliberately not refreshed"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/trust_cert.md",
+        "docs/resources/trust_cert.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "trust_settings",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "cipher_string",
+        "enable_config_constraints",
+        "enable_legacy_sect",
+        "fetch_crls",
+        "id",
+        "install_crls",
+        "store_intermediate_certs"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "global cipher, OpenSSL legacy/constraint, CRL fetch/install, and intermediate-store settings have no local singleton",
+        "local_only": "none material",
+        "lifecycle": "import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/trust_settings.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_acl",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_acl"
+      ],
+      "baseline_fields": [
+        "action",
+        "description",
+        "enabled",
+        "id",
+        "name",
+        "networks"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_acl.md",
+        "docs/resources/unbound_acl.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_domain_override",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_domain_override"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "id",
+        "server"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_domain_override.md",
+        "docs/resources/unbound_domain_override.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_forward",
+      "domain": "Unbound",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "unbound_domain_override"
+      ],
+      "baseline_fields": [
+        "domain",
+        "enabled",
+        "id",
+        "server_ip",
+        "server_port",
+        "type",
+        "verify_cn"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_forward.md",
+        "docs/resources/unbound_domain_override.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_host_alias",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_host_alias"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "hostname",
+        "id",
+        "override"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_host_alias.md",
+        "docs/resources/unbound_host_alias.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_host_override",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_host_override"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "hostname",
+        "id",
+        "mx_host",
+        "mx_priority",
+        "server",
+        "type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_host_override.md",
+        "docs/resources/unbound_host_override.md"
+      ]
+    },
+    {
+      "kind": "resource",
+      "name": "unbound_settings",
+      "domain": "Unbound",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "unbound_general",
+        "unbound_dnsbl"
+      ],
+      "baseline_fields": [
+        "acls",
+        "advanced",
+        "dnsbl",
+        "forwarding",
+        "general",
+        "id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons",
+        "local_only": "none material",
+        "lifecycle": "import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_settings.md",
+        "docs/resources/unbound_general.md",
+        "docs/resources/unbound_dnsbl.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "wireguard_client",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "wireguard_peer"
+      ],
+      "baseline_fields": [
+        "enabled",
+        "id",
+        "keep_alive",
+        "name",
+        "psk",
+        "public_key",
+        "server_address",
+        "server_port",
+        "tunnel_address"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "pre-shared key support and multi-address typed sets are absent locally",
+        "local_only": "explicit servers association",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "baseline PSK is sensitive; local schema does not expose it"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_client.md",
+        "docs/resources/wireguard_peer.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "wireguard_server",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "wireguard_server"
+      ],
+      "baseline_fields": [
+        "disable_routes",
+        "dns",
+        "enabled",
+        "gateway",
+        "id",
+        "instance",
+        "mtu",
+        "name",
+        "peers",
+        "port",
+        "private_key",
+        "public_key",
+        "tunnel_address"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "route suppression/gateway, DNS, MTU, peer binding, public key, instance, and multi-address typed sets are absent locally",
+        "local_only": "description",
+        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "sensitive_write_only": "private_key is sensitive/write-only locally; baseline also returns public_key"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_server.md",
+        "docs/resources/wireguard_server.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "resource",
+      "name": "wireguard_settings",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "enabled",
+        "id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the daemon enabled singleton has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_settings.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "cron_job",
+      "domain": "Cron",
+      "classification": "covered",
+      "local_equivalents": [
+        "cron_job"
+      ],
+      "baseline_fields": [
+        "command",
+        "days",
+        "description",
+        "enabled",
+        "hours",
+        "id",
+        "minutes",
+        "months",
+        "parameters",
+        "weekdays",
+        "who"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/cron_job.md",
+        "docs/data-sources/cron_job.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "dnsmasq_host",
+      "domain": "Dnsmasq",
+      "classification": "covered-broader",
+      "local_equivalents": [
+        "dnsmasq_host"
+      ],
+      "baseline_fields": [
+        "alias_records",
+        "client_id",
+        "cname_records",
+        "comment",
+        "description",
+        "domain",
+        "hardware_addresses",
+        "hostname",
+        "id",
+        "ip_addresses",
+        "is_ignored",
+        "is_local_domain",
+        "tag"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "lease_time plus normalized singular field names",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/dnsmasq_host.md",
+        "docs/data-sources/dnsmasq_host.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_alias",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_alias"
+      ],
+      "baseline_fields": [
+        "categories",
+        "content",
+        "description",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "name",
+        "path_expression",
+        "stats",
+        "type",
+        "update_freq"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "interface, path_expression, and stats alias controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_alias.md",
+        "docs/data-sources/firewall_alias.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_category",
+      "domain": "Firewall/NAT",
+      "classification": "covered",
+      "local_equivalents": [
+        "firewall_category"
+      ],
+      "baseline_fields": [
+        "auto",
+        "color",
+        "id",
+        "name"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_category.md",
+        "docs/data-sources/firewall_category.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_filter",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_filter_rule"
+      ],
+      "baseline_fields": [
+        "categories",
+        "description",
+        "enabled",
+        "filter",
+        "id",
+        "interface",
+        "internal_tagging",
+        "no_xmlrpc_sync",
+        "priority",
+        "sequence",
+        "source_routing",
+        "stateful_firewall",
+        "traffic_shaping"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "advanced tagging, priority, reply-to, state limits/timeouts, schedules, TCP flags, ICMP types, shaping, and HA-sync controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_filter.md",
+        "docs/data-sources/firewall_filter_rule.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_nat",
+      "domain": "Firewall/NAT",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "firewall_nat_outbound"
+      ],
+      "baseline_fields": [
+        "description",
+        "destination",
+        "disable_nat",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "log",
+        "protocol",
+        "sequence",
+        "source",
+        "target"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "categories, static_nat_port, and target_port",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_nat.md",
+        "docs/data-sources/firewall_nat_outbound.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_nat_one_to_one",
+      "domain": "Firewall/NAT",
+      "classification": "covered",
+      "local_equivalents": [
+        "firewall_nat_one_to_one"
+      ],
+      "baseline_fields": [
+        "categories",
+        "description",
+        "destination",
+        "enabled",
+        "external_net",
+        "id",
+        "interface",
+        "log",
+        "nat_reflection",
+        "sequence",
+        "source",
+        "type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_nat_one_to_one.md",
+        "docs/data-sources/firewall_nat_one_to_one.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "firewall_nat_port_forward",
+      "domain": "Firewall/NAT",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "firewall_nat_port_forward"
+      ],
+      "baseline_fields": [
+        "description",
+        "destination",
+        "enabled",
+        "id",
+        "interface",
+        "ip_protocol",
+        "log",
+        "nat_reflection",
+        "protocol",
+        "sequence",
+        "source",
+        "target"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the baseline accepts multiple interfaces; the local schema accepts one interface",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_nat_port_forward.md",
+        "docs/data-sources/firewall_nat_port_forward.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "interface",
+      "domain": "Interfaces",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "capabilities",
+        "device",
+        "flags",
+        "groups",
+        "ipv4",
+        "ipv6",
+        "is_physical",
+        "macaddr",
+        "media",
+        "media_raw",
+        "mtu",
+        "options",
+        "status",
+        "supported_media"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "live device state, capabilities, media, flags, addresses, MTU, and all-interface aggregation have no local data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interface.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "interface_all",
+      "domain": "Interfaces",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "interfaces"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "live device state, capabilities, media, flags, addresses, MTU, and all-interface aggregation have no local data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interface_all.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "interfaces_overview",
+      "domain": "Interfaces",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "addr4",
+        "addr6",
+        "capabilities",
+        "description",
+        "device",
+        "enabled",
+        "flags",
+        "gateways",
+        "groups",
+        "identifier",
+        "ifctl_nameserver",
+        "ifctl_prefix",
+        "ifctl_router",
+        "ifctl_searchdomain",
+        "ipv4",
+        "ipv6",
+        "is_physical",
+        "lagg_hash",
+        "lagg_options",
+        "lagg_proto",
+        "lagg_statistics",
+        "link_type",
+        "macaddr",
+        "macaddr_hw",
+        "media",
+        "media_raw",
+        "mtu",
+        "nd6_flags",
+        "options",
+        "routes",
+        "status",
+        "supported_media",
+        "vlan",
+        "vlan_tag"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the combined assignment/runtime overview, gateways, routes, VLAN/LAGG details, DHCP-learned values, and aggregate form have no local data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interfaces_overview.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "interfaces_overview_all",
+      "domain": "Interfaces",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "interfaces"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the combined assignment/runtime overview, gateways, routes, VLAN/LAGG details, DHCP-learned values, and aggregate form have no local data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interfaces_overview_all.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "interfaces_vip",
+      "domain": "Interfaces",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_vip"
+      ],
+      "baseline_fields": [
+        "description",
+        "gateway",
+        "id",
+        "interface",
+        "mode",
+        "network"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interfaces_vip.md",
+        "docs/data-sources/system_vip.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "interfaces_vlan",
+      "domain": "Interfaces",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_vlan"
+      ],
+      "baseline_fields": [
+        "description",
+        "device",
+        "id",
+        "parent",
+        "priority",
+        "tag"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/interfaces_vlan.md",
+        "docs/data-sources/system_vlan.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv4_peer",
+      "domain": "Kea",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "kea_ha_peer"
+      ],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv4_peer.md",
+        "docs/data-sources/kea_ha_peer.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv4_reservation",
+      "domain": "Kea",
+      "classification": "covered",
+      "local_equivalents": [
+        "kea_dhcpv4_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "hostname",
+        "id",
+        "ip_address",
+        "mac_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv4_reservation.md",
+        "docs/data-sources/kea_dhcpv4_reservation.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv4_subnet",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "kea_dhcpv4_subnet"
+      ],
+      "baseline_fields": [
+        "auto_collect",
+        "description",
+        "dns_servers",
+        "domain_name",
+        "domain_search",
+        "id",
+        "match_client_id",
+        "next_server",
+        "ntp_servers",
+        "pools",
+        "routers",
+        "static_routes",
+        "subnet",
+        "tftp_bootfile",
+        "tftp_server",
+        "time_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "auto-collect, DNS/domain/search, routers, static routes, NTP/time servers, and PXE/TFTP fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv4_subnet.md",
+        "docs/data-sources/kea_dhcpv4_subnet.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv6_pd_pool",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "delegated_len",
+        "description",
+        "id",
+        "prefix",
+        "prefix_len",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the stable delegated-prefix pool item surface has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_pd_pool.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv6_peer",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the stable DHCPv6 HA peer item surface has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_peer.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv6_reservation",
+      "domain": "Kea",
+      "classification": "covered",
+      "local_equivalents": [
+        "kea_dhcpv6_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain_search",
+        "duid",
+        "hostname",
+        "id",
+        "ip_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_reservation.md",
+        "docs/data-sources/kea_dhcpv6_reservation.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_dhcpv6_subnet",
+      "domain": "Kea",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "kea_dhcpv6_subnet"
+      ],
+      "baseline_fields": [
+        "allocator",
+        "description",
+        "dns_servers",
+        "domain_search",
+        "id",
+        "interface",
+        "pd_allocator",
+        "pools",
+        "subnet"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS servers and domain-search fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_subnet.md",
+        "docs/data-sources/kea_dhcpv6_subnet.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_peer",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_ha_peer"
+      ],
+      "baseline_fields": [
+        "id",
+        "name",
+        "role",
+        "url"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_peer.md",
+        "docs/data-sources/kea_ha_peer.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_reservation",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_dhcpv4_reservation"
+      ],
+      "baseline_fields": [
+        "description",
+        "hostname",
+        "id",
+        "ip_address",
+        "mac_address",
+        "subnet_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_reservation.md",
+        "docs/data-sources/kea_dhcpv4_reservation.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "kea_subnet",
+      "domain": "Kea",
+      "classification": "intentionally-different",
+      "local_equivalents": [
+        "kea_dhcpv4_subnet"
+      ],
+      "baseline_fields": [
+        "auto_collect",
+        "description",
+        "dns_servers",
+        "domain_name",
+        "domain_search",
+        "id",
+        "match_client_id",
+        "next_server",
+        "ntp_servers",
+        "pools",
+        "routers",
+        "static_routes",
+        "subnet",
+        "tftp_bootfile",
+        "tftp_server",
+        "time_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_subnet.md",
+        "docs/data-sources/kea_dhcpv4_subnet.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "openvpn_client_overwrite",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "openvpn_client_overwrite"
+      ],
+      "baseline_fields": [
+        "block",
+        "common_name",
+        "description",
+        "dns_domain",
+        "dns_domain_search",
+        "dns_servers",
+        "enabled",
+        "id",
+        "local_networks",
+        "ntp_servers",
+        "push_reset",
+        "redirect_gateway",
+        "register_dns",
+        "remote_networks",
+        "route_gateway",
+        "servers",
+        "tunnel_network",
+        "tunnel_network_v6",
+        "wins_servers"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_client_overwrite.md",
+        "docs/data-sources/openvpn_client_overwrite.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "openvpn_instance",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "openvpn_instance"
+      ],
+      "baseline_fields": [
+        "auth_digest",
+        "auth_gen_token",
+        "auth_gen_token_renewal",
+        "auth_gen_token_secret",
+        "auth_mode",
+        "bridge_gateway",
+        "bridge_pool",
+        "carp_depend_on",
+        "cert_depth",
+        "certificate",
+        "certificate_authority",
+        "compress_migrate",
+        "crl",
+        "data_ciphers",
+        "data_ciphers_fallback",
+        "description",
+        "dev_type",
+        "dns_domain",
+        "dns_domain_search",
+        "dns_servers",
+        "enabled",
+        "fragment",
+        "http_proxy",
+        "id",
+        "ifconfig_pool_persist",
+        "keepalive_interval",
+        "keepalive_timeout",
+        "local",
+        "local_group",
+        "max_clients",
+        "mss_fix",
+        "no_pool",
+        "ntp_servers",
+        "password",
+        "port",
+        "port_share",
+        "protocol",
+        "provision_exclusive",
+        "push_excluded_routes",
+        "push_inactive",
+        "push_route",
+        "redirect_gateway",
+        "register_dns",
+        "remote",
+        "remote_cert_tls",
+        "reneg_sec",
+        "role",
+        "route",
+        "route_metric",
+        "server",
+        "server_ipv6",
+        "strict_user_cn",
+        "tls_key",
+        "topology",
+        "tun_mtu",
+        "use_ocsp",
+        "username",
+        "username_as_common_name",
+        "various_flags",
+        "various_push_flags",
+        "verify_client_cert",
+        "verify_x509_name",
+        "vpn_id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally",
+        "local_only": "verb and API-read vpnid",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_instance.md",
+        "docs/data-sources/openvpn_instance.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "openvpn_static_key",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "description",
+        "id",
+        "key",
+        "mode"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the baseline read-only lookup returns sensitive key material; no local data source exists",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_static_key.md",
+        "docs/resources/openvpn_static_key.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "quagga_bgp_aspath",
+      "domain": "Quagga/BGP",
+      "classification": "covered",
+      "local_equivalents": [
+        "quagga_bgp_aspath"
+      ],
+      "baseline_fields": [
+        "action",
+        "as",
+        "description",
+        "enabled",
+        "id",
+        "number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/quagga_bgp_aspath.md",
+        "docs/data-sources/quagga_bgp_aspath.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "quagga_bgp_communitylist",
+      "domain": "Quagga/BGP",
+      "classification": "covered",
+      "local_equivalents": [
+        "quagga_bgp_communitylist"
+      ],
+      "baseline_fields": [
+        "action",
+        "community",
+        "description",
+        "enabled",
+        "id",
+        "number",
+        "seq_number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/quagga_bgp_communitylist.md",
+        "docs/data-sources/quagga_bgp_communitylist.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "quagga_bgp_neighbor",
+      "domain": "Quagga/BGP",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "quagga_bgp_neighbor"
+      ],
+      "baseline_fields": [
+        "as_override",
+        "attribute_unchanged",
+        "bfd",
+        "connect_timer",
+        "default_route",
+        "description",
+        "disable_connected_check",
+        "enabled",
+        "hold_down",
+        "id",
+        "keep_alive",
+        "link_local_interface",
+        "local_ip",
+        "md5_password",
+        "multi_hop",
+        "multi_protocol",
+        "next_hop_self",
+        "next_hop_self_all",
+        "peer_ip",
+        "prefix_list_in",
+        "prefix_list_out",
+        "remote_as",
+        "route_map_in",
+        "route_map_out",
+        "rr_client",
+        "update_source",
+        "weight"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "BFD, authentication, connect timer, default route, multihop, route-reflector, weight, connected-check, and next-hop-self-all controls are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/quagga_bgp_neighbor.md",
+        "docs/data-sources/quagga_bgp_neighbor.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "quagga_bgp_prefixlist",
+      "domain": "Quagga/BGP",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "quagga_prefix_list"
+      ],
+      "baseline_fields": [
+        "action",
+        "description",
+        "enabled",
+        "id",
+        "ip_version",
+        "name",
+        "network",
+        "number"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/quagga_bgp_prefixlist.md",
+        "docs/data-sources/quagga_prefix_list.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "quagga_bgp_routemap",
+      "domain": "Quagga/BGP",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "quagga_route_map"
+      ],
+      "baseline_fields": [
+        "action",
+        "aspaths",
+        "community_lists",
+        "description",
+        "enabled",
+        "id",
+        "name",
+        "prefix_lists",
+        "route_map_id",
+        "set"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "AS-path/community/prefix-list set references and route-map ID semantics are not represented at equivalent depth locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/quagga_bgp_routemap.md",
+        "docs/data-sources/quagga_route_map.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "route",
+      "domain": "Routing",
+      "classification": "covered-different-name",
+      "local_equivalents": [
+        "system_route"
+      ],
+      "baseline_fields": [
+        "description",
+        "enabled",
+        "gateway",
+        "id",
+        "network"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/route.md",
+        "docs/data-sources/system_route.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "trust_ca",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "trust_ca"
+      ],
+      "baseline_fields": [
+        "action",
+        "caref",
+        "city",
+        "common_name",
+        "country",
+        "crt",
+        "crt_payload",
+        "description",
+        "digest",
+        "email",
+        "id",
+        "key_type",
+        "lifetime",
+        "name",
+        "ocsp_uri",
+        "organization",
+        "organizational_unit",
+        "prv",
+        "prv_payload",
+        "ref_id",
+        "serial",
+        "state",
+        "valid_from",
+        "valid_to"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "existing/intermediate/OCSP actions, subject fields, digest/key type, import material, serial, and OCSP URI are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "private key fields are sensitive; local import fields are write-only and deliberately not refreshed"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/trust_ca.md",
+        "docs/data-sources/trust_ca.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "trust_cert",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "action",
+        "altnames_dns",
+        "altnames_email",
+        "altnames_ip",
+        "altnames_uri",
+        "caref",
+        "cert_type",
+        "city",
+        "common_name",
+        "country",
+        "crt",
+        "crt_payload",
+        "csr",
+        "csr_payload",
+        "description",
+        "digest",
+        "email",
+        "id",
+        "in_use",
+        "is_user",
+        "key_type",
+        "lifetime",
+        "name",
+        "ocsp_uri",
+        "organization",
+        "organizational_unit",
+        "private_key_location",
+        "prv",
+        "prv_payload",
+        "ref_id",
+        "rfc3280_purpose",
+        "state",
+        "valid_from",
+        "valid_to"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "internal/external/CSR/import/reissue actions, SANs, subject fields, EKU, digest/key type, lifetime, and operational metadata are absent locally",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "private key fields are sensitive; local import fields are write-only and deliberately not refreshed"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/trust_cert.md",
+        "docs/resources/trust_cert.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "trust_settings",
+      "domain": "Trust",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "cipher_string",
+        "enable_config_constraints",
+        "enable_legacy_sect",
+        "fetch_crls",
+        "id",
+        "install_crls",
+        "store_intermediate_certs"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "global cipher, OpenSSL legacy/constraint, CRL fetch/install, and intermediate-store settings have no local singleton",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/trust_settings.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_acl",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_acl"
+      ],
+      "baseline_fields": [
+        "action",
+        "description",
+        "enabled",
+        "id",
+        "name",
+        "networks"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_acl.md",
+        "docs/data-sources/unbound_acl.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_domain_override",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_domain_override"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "id",
+        "server"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_domain_override.md",
+        "docs/data-sources/unbound_domain_override.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_forward",
+      "domain": "Unbound",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "unbound_domain_override"
+      ],
+      "baseline_fields": [
+        "domain",
+        "enabled",
+        "id",
+        "server_ip",
+        "server_port",
+        "type",
+        "verify_cn"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_forward.md",
+        "docs/data-sources/unbound_domain_override.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_host_alias",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_host_alias"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "hostname",
+        "id",
+        "override"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_host_alias.md",
+        "docs/data-sources/unbound_host_alias.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_host_override",
+      "domain": "Unbound",
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_host_override"
+      ],
+      "baseline_fields": [
+        "description",
+        "domain",
+        "enabled",
+        "hostname",
+        "id",
+        "mx_host",
+        "mx_priority",
+        "server",
+        "type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_host_override.md",
+        "docs/data-sources/unbound_host_override.md"
+      ]
+    },
+    {
+      "kind": "data-source",
+      "name": "unbound_settings",
+      "domain": "Unbound",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "acls",
+        "advanced",
+        "dnsbl",
+        "forwarding",
+        "general",
+        "id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_settings.md",
+        "docs/resources/unbound_general.md",
+        "docs/resources/unbound_dnsbl.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "wireguard_client",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "wireguard_peer"
+      ],
+      "baseline_fields": [
+        "enabled",
+        "id",
+        "keep_alive",
+        "name",
+        "psk",
+        "public_key",
+        "server_address",
+        "server_port",
+        "tunnel_address"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "pre-shared key support and multi-address typed sets are absent locally",
+        "local_only": "explicit servers association",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "baseline PSK is sensitive; local schema does not expose it"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_client.md",
+        "docs/data-sources/wireguard_peer.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "wireguard_server",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [
+        "wireguard_server"
+      ],
+      "baseline_fields": [
+        "disable_routes",
+        "dns",
+        "enabled",
+        "gateway",
+        "id",
+        "instance",
+        "mtu",
+        "name",
+        "peers",
+        "port",
+        "private_key",
+        "public_key",
+        "tunnel_address"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "route suppression/gateway, DNS, MTU, peer binding, public key, instance, and multi-address typed sets are absent locally",
+        "local_only": "description",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "private_key is sensitive/write-only locally; baseline also returns public_key"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_server.md",
+        "docs/data-sources/wireguard_server.md"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "data-source",
+      "name": "wireguard_settings",
+      "domain": "WireGuard",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "enabled",
+        "id"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the daemon enabled singleton has no local resource or data source",
+        "local_only": "none material",
+        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "sensitive_write_only": "none"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_settings.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+    },
+    {
+      "kind": "ephemeral-resource",
+      "name": "openvpn_generate_key",
+      "domain": "OpenVPN",
+      "classification": "missing-buildable",
+      "local_equivalents": [],
+      "baseline_fields": [
+        "key",
+        "key_type"
+      ],
+      "field_evidence": {
+        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
+        "baseline_only": "the gen_key ephemeral result never enters Terraform state; no local ephemeral surface exists",
+        "local_only": "none material",
+        "lifecycle": "calls gen_key on each apply and returns an in-memory value without state persistence",
+        "sensitive_write_only": "OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value"
+      },
+      "source_refs": [
+        "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/ephemeral-resources/openvpn_generate_key.md",
+        "internal/provider/provider.go"
+      ],
+      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+    }
+  ]
+}

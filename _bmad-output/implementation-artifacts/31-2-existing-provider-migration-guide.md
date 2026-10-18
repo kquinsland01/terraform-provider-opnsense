@@ -23,6 +23,7 @@ so that I can move to this provider as the single standard for an appliance inst
 
 - This is a product/adoption story backed by Story 31.0, not a substitute for coverage work.
 - Include evidence from the coverage audit when making coverage claims.
+- Depends on completion or explicit audit reclassification of P0/P1 Stories 31.0a–31.0j.
 
 ## Validation
 

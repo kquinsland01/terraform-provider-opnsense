@@ -19,12 +19,12 @@ This matrix is the current source of truth for release positioning. It reconcile
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 102 | Supported |
-| Data sources | 88 | Supported |
-| Resource docs | 102 | Supported |
-| Data source docs | 88 | Supported |
-| Remaining resource gaps | Research and upstream-blocked domains only | Needs research or upstream-blocked |
-| Remaining data-source gaps | 15 | Coming |
+| Resources | 106 | Supported |
+| Data sources | 90 | Supported |
+| Resource docs | 106 | Supported |
+| Data source docs | 90 | Supported |
+| Remaining field/surface gaps | 10 audit-derived P0/P1 story groups plus separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Remaining resource-matching data-source gaps | 17 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
 
@@ -40,7 +40,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Dynamic DNS | ddclient account, ddclient settings |
 | Firewall | alias, category, filter rule, NAT one-to-one, NAT outbound, NAT port forward |
 | HAProxy | ACL, action, backend, frontend, health check, map file, server |
-| Interfaces | bridge, GIF, GRE, LAGG, loopback, neighbor, VXLAN |
+| Interfaces | assignment/IP settings, bridge, GIF, GRE, LAGG, loopback, neighbor, VXLAN |
 | IPsec | child, connection, key pair, local, manual SPD, pool, PSK, remote, VTI |
 | Kea | control agent, DHCPv6 reservation, DHCPv6 settings, DHCPv6 subnet, HA peer |
 | Monit | alert, service, test |
@@ -82,11 +82,11 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 
 | Domain | Work |
 |---|---|
-| Data-source parity | Add read-only data sources for the 15 supported singleton/sensitive special-case resources that do not yet have data-source counterparts. |
+| Data-source parity | Add read-only data sources for the 17 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Interface assignment/IP settings | Implement against OPNsense `26.7.6` or newer, the first released tag with the complete probed assignment API; move to Supported only after provider implementation and disposable-appliance acceptance proof pass. |
-| Competitive positioning | Refresh README/Registry positioning, `browningluke/opnsense` parity guidance, and adoption examples. |
+| Audited field/surface parity | Complete Stories 31.0a–31.0j for firewall/NAT, Kea, OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research
 
@@ -94,9 +94,9 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 |---|---|
 | Kea | DHCPv4 option and Kea DDNS are present in OPNsense `master` source but absent from `stable/25.7` as of the 2026-06-18 source recheck; move to Coming only after live re-probe confirms target-release availability. |
 | System / HA | HASync configuration needs request/response shape research because current `Hasync.xml` uses dynamic `JsonKeyValueStoreField` `syncitems`; HASync status `services`/`version` are data-source candidates after live validation, while service operations are action candidates only after product/framework decision. |
-| Interfaces | OPNsense `26.7.6` is the first released tag with the complete probed `interfaces/assignment` surface: address modes/values, gateways, DHCP fields, `set_item`, and `reconfigure`. Provider implementation and disposable-appliance lifecycle proof remain pending; PPPoE semantics remain separate research. |
+| Interfaces | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable 26.7.7 lifecycle/drift/restoration proof. PPPoE semantics remain separate research. |
 
-Source NAT is already supported as `opnsense_firewall_nat_outbound`. Unbound forward is already supported as `opnsense_unbound_domain_override`.
+Source NAT is supported as `opnsense_firewall_nat_outbound`. Basic Unbound query forwarding is supported as `opnsense_unbound_domain_override`; DNS-over-TLS `server_port`/`type`/`verify_cn` parity is tracked by Story 31.0d.
 
 ## Upstream-Blocked
 

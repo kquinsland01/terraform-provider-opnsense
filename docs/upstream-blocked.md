@@ -22,7 +22,7 @@ Some gaps have published or suspected API evidence but still need payload, lifec
 
 | Domain | Why it is not in this register |
 |---|---|
-| Interface assignment / IP settings | The expanded `interfaces/assignment` model/controller shipped in OPNsense `26.7.6` with IPv4/IPv6 address, gateway, DHCP, `set_item`, and `reconfigure` support. Provider implementation and disposable-appliance acceptance proof remain pending; PPPoE semantics remain a separate research item. See the committed [release probe](../_bmad-output/planning-artifacts/opnsense-assignment-api-release-probe.json). |
+| PPPoE assignment semantics | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable-appliance lifecycle/drift/restoration proof. PPPoE remains research-only because its model, secret, and lifecycle semantics were outside that implementation. See the committed [release probe](../_bmad-output/planning-artifacts/opnsense-assignment-api-release-probe.json). |
 | System tunables / sysctl | Current OPNsense docs/source expose persistent `core/tunables` item CRUD/search and `reconfigure`; `opnsense_system_tunable` shipped in v0.3.0 and remains listed here only as an example of a former research item that moved out of this register. |
 | HASync configuration | `core/hasync` endpoints exist, but `syncitems` uses a dynamic `JsonKeyValueStoreField`; request/response shape needs verification before a safe resource can be designed. |
 | HASync status/actions | Endpoints appear operational/status-oriented rather than durable configuration. Data source or action semantics need a separate product decision. |
