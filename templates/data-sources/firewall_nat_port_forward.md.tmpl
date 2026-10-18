@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall NAT port forward rule on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+All selected interfaces are returned in `interfaces`; `interface` is the deterministic scalar compatibility view.
+
 ## Example Usage
 
 {{tffile "examples/data-sources/opnsense_firewall_nat_port_forward/data-source.tf"}}

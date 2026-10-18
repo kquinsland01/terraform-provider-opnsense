@@ -5,6 +5,7 @@ package opnsense
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 )
 
@@ -233,6 +234,48 @@ func TestSelectedMapList_PlainString(t *testing.T) {
 	}
 	if len(sml) != 1 || sml[0] != "127.0.0.1:18080" {
 		t.Errorf("expected plain string as single selected value, got: %v", []string(sml))
+	}
+}
+
+func TestSelectedMapList_PlainStringsAreNotAmbiguouslySplit(t *testing.T) {
+	for _, test := range []struct {
+		name, input string
+		want        []string
+	}{
+		{name: "comma is data", input: `"wan,opt1"`, want: []string{"wan,opt1"}},
+		{name: "newline is data", input: `"192.0.2.1\n192.0.2.2"`, want: []string{"192.0.2.1\n192.0.2.2"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var got SelectedMapList
+			if err := json.Unmarshal([]byte(test.input), &got); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual([]string(got), test.want) {
+				t.Fatalf("got %v want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestNewlineSelectedMapListSplitsOnlyAliasContentDelimiter(t *testing.T) {
+	var got NewlineSelectedMapList
+	if err := json.Unmarshal([]byte(`"value,with,commas\n192.0.2.2"`), &got); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"192.0.2.2", "value,with,commas"}
+	if !reflect.DeepEqual([]string(got), want) {
+		t.Fatalf("got %v want %v", got, want)
+	}
+}
+
+func TestCSVSelectedMapListSplitsSelectorScalars(t *testing.T) {
+	var got CSVSelectedMapList
+	if err := json.Unmarshal([]byte(`"wan,opt1"`), &got); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"opt1", "wan"}
+	if !reflect.DeepEqual([]string(got), want) {
+		t.Fatalf("got %v want %v", got, want)
 	}
 }
 

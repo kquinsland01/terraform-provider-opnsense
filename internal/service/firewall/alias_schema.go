@@ -6,6 +6,7 @@ package firewall
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -39,7 +40,7 @@ func (r *aliasResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						"host", "network", "port", "url", "urltable",
-						"geoip", "networkgroup", "mac", "asn",
+						"urljson", "geoip", "networkgroup", "mac", "asn",
 						"dynipv6host", "authgroup", "internal", "external",
 					),
 				},
@@ -66,7 +67,17 @@ func (r *aliasResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
-				MarkdownDescription: "Protocol filter. Empty string for any, `IPv4`, or `IPv6`.",
+				MarkdownDescription: "Deprecated scalar protocol compatibility view. Use `ip_protocol` for lossless multi-selection.",
+				Validators:          []validator.String{stringvalidator.OneOf("", "IPv4", "IPv6")},
+			},
+			"ip_protocol": schema.SetAttribute{
+				ElementType: types.StringType, Optional: true, Computed: true,
+				MarkdownDescription: "IP protocol selections (`IPv4`, `IPv6`) for applicable alias types.",
+				Validators:          []validator.Set{setvalidator.ValueStringsAre(stringvalidator.OneOf("IPv4", "IPv6"))},
+			},
+			"interface": schema.StringAttribute{
+				Optional: true, Computed: true, Default: stringdefault.StaticString(""),
+				MarkdownDescription: "Interface used by dynamic IPv6 host aliases.",
 			},
 			"categories": schema.SetAttribute{
 				ElementType:         types.StringType,
@@ -79,6 +90,14 @@ func (r *aliasResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 				MarkdownDescription: "Update frequency in days for URL table aliases.",
+			},
+			"path_expression": schema.StringAttribute{
+				Optional: true, Computed: true, Default: stringdefault.StaticString(""),
+				MarkdownDescription: "jq path expression used by JSON URL aliases.",
+			},
+			"stats": schema.BoolAttribute{
+				Optional: true, Computed: true, Default: booldefault.StaticBool(false),
+				MarkdownDescription: "Enable alias counters/statistics.",
 			},
 		},
 	}

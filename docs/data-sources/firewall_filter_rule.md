@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall filter rule on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+Advanced schedules, tags, priorities, state limits, TCP/ICMP selectors, routing, reply-to, shaping, and HA controls are returned without flattening.
+
 ## Example Usage
 
 ```terraform
@@ -32,20 +34,50 @@ output "firewall_filter_rule_id" {
 ### Read-Only
 
 - `action` (String) Rule action: 'pass', 'block', or 'reject'.
+- `adaptive_timeout_end` (Number) State count where adaptive timeouts reach zero; -1 means unset.
+- `adaptive_timeout_start` (Number) State count where adaptive timeouts begin; -1 means unset.
+- `allow_options` (Boolean) Whether packets carrying IP options are allowed.
 - `categories` (Set of String) Set of category UUIDs assigned to this rule.
 - `description` (String) Description of the rule.
 - `destination_net` (String) Destination network ('any', interface name, CIDR, or alias).
 - `destination_not` (Boolean) Invert destination match. Defaults to 'false'.
 - `destination_port` (String) Destination port or range (e.g., '443', '8080:8090'). Empty for any.
 - `direction` (String) Traffic direction: 'in', 'out', or 'any'.
+- `disable_reply_to` (Boolean) Whether automatic reply-to is disabled.
 - `enabled` (Boolean) Whether this rule is enabled. Defaults to 'true'.
 - `gateway` (String) Gateway for policy routing. Empty for default.
+- `icmp_type` (Set of String) ICMP message types matched by ICMP protocols.
 - `interface` (Set of String) Network interfaces this rule applies to.
+- `interface_not` (Boolean) Whether the selected interfaces are inverted.
 - `ip_protocol` (String) IP version: 'inet' (IPv4), 'inet6' (IPv6), or 'inet46' (both).
 - `log` (Boolean) Log matching packets. Defaults to 'false'.
+- `match_local_tag` (String) Local packet tag required by this rule.
+- `match_priority` (Number) Queue priority to match; -1 means unset.
+- `match_tos` (String) Type-of-service value to match.
+- `max_new_connections` (Number) Maximum new TCP connections per interval; -1 means unset.
+- `max_new_connections_seconds` (Number) Connection-rate interval in seconds; -1 means unset.
+- `max_source_connections` (Number) Maximum established TCP connections per source; -1 means unset.
+- `max_source_nodes` (Number) Maximum source nodes; -1 means unset.
+- `max_source_states` (Number) Maximum states per source; -1 means unset.
+- `max_states` (Number) Maximum concurrent states; -1 means unset.
+- `no_pfsync` (Boolean) Whether state synchronization through pfsync is disabled.
+- `no_xmlrpc_sync` (Boolean) Whether HA XMLRPC synchronization is disabled for this rule.
+- `overload_table` (String) Opaque overload-table identifier.
 - `protocol` (String) Protocol (e.g., 'any', 'tcp', 'udp', 'icmp', 'TCP/UDP').
 - `quick` (Boolean) First match wins. Defaults to 'true'.
+- `reply_to` (String) Opaque reply-to gateway identifier.
+- `reverse_shaper` (String) Opaque reverse-traffic-shaper identifier.
+- `schedule` (String) Opaque OPNsense schedule identifier.
 - `sequence` (Number) Rule sequence number (1-999999). Controls evaluation order.
+- `set_local_tag` (String) Local packet tag assigned by this rule.
+- `set_priority` (Number) Queue priority to assign; -1 means unset.
+- `set_priority_low_delay` (Number) Low-delay queue priority to assign; -1 means unset.
+- `shaper` (String) Opaque traffic-shaper identifier.
 - `source_net` (String) Source network ('any', interface name, CIDR, or alias).
 - `source_not` (Boolean) Invert source match. Defaults to 'false'.
 - `source_port` (String) Source port or range (e.g., '80', '80:443'). Empty for any.
+- `state_policy` (String) State policy, such as floating or interface-bound.
+- `state_timeout` (Number) TCP state timeout in seconds; -1 means unset.
+- `state_type` (String) State tracking mechanism.
+- `tcp_flags` (Set of String) TCP flags that must be set; applicable to TCP-compatible protocols.
+- `tcp_flags_out_of` (Set of String) TCP flags considered by the match; applicable to TCP-compatible protocols.

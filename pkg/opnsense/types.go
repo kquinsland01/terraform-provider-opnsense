@@ -39,6 +39,22 @@ func CSVToSlice(s string) []string {
 	return parts
 }
 
+// DelimitedToSlice accepts the comma-separated values used by most OPNsense
+// selectors and the newline-separated values used by alias content fields.
+func DelimitedToSlice(s string) []string {
+	if strings.TrimSpace(s) == "" {
+		return []string{}
+	}
+	parts := strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == '\n' || r == '\r' })
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if value := strings.TrimSpace(part); value != "" {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
 // SliceToCSV joins a string slice into a comma-separated string.
 func SliceToCSV(s []string) string {
 	return strings.Join(s, ",")
@@ -143,6 +159,58 @@ func (s *SelectedMapList) UnmarshalJSON(data []byte) error {
 	} else {
 		*s = selected
 	}
+	return nil
+}
+
+// NewlineSelectedMapList decodes alias content, whose scalar wire form uses
+// newlines. It deliberately keeps comma-containing entries intact.
+type NewlineSelectedMapList []string
+
+// UnmarshalJSON preserves comma-containing entries and splits only newlines.
+func (s *NewlineSelectedMapList) UnmarshalJSON(data []byte) error {
+	trimmed := strings.TrimSpace(string(data))
+	if len(trimmed) > 0 && trimmed[0] == '"' {
+		var value string
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		parts := strings.FieldsFunc(value, func(r rune) bool { return r == '\n' || r == '\r' })
+		for i := range parts {
+			parts[i] = strings.TrimSpace(parts[i])
+		}
+		sort.Strings(parts)
+		*s = parts
+		return nil
+	}
+	var selected SelectedMapList
+	if err := json.Unmarshal(data, &selected); err != nil {
+		return err
+	}
+	*s = NewlineSelectedMapList(selected)
+	return nil
+}
+
+// CSVSelectedMapList decodes selector fields whose scalar wire form is CSV.
+type CSVSelectedMapList []string
+
+// UnmarshalJSON splits scalar CSV and otherwise decodes the selected-map form.
+func (s *CSVSelectedMapList) UnmarshalJSON(data []byte) error {
+	trimmed := strings.TrimSpace(string(data))
+	if len(trimmed) > 0 && trimmed[0] == '"' {
+		var value string
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		values := CSVToSlice(value)
+		sort.Strings(values)
+		*s = values
+		return nil
+	}
+	var selected SelectedMapList
+	if err := json.Unmarshal(data, &selected); err != nil {
+		return err
+	}
+	*s = CSVSelectedMapList(selected)
 	return nil
 }
 

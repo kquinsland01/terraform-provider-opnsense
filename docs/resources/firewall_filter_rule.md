@@ -9,6 +9,8 @@ description: |-
 
 Manages a firewall filter rule on OPNsense. Filter rules control traffic flow through the firewall.
 
+Advanced schedules, local tags, priorities/TOS, state limits and adaptive timeouts, TCP/ICMP selectors, reply-to, shaping, and HA synchronization controls are represented as flat attributes. Empty numeric API values use `-1` in Terraform. Opaque schedule, gateway, shaper, and table identifiers are passed through unchanged.
+
 ## Example Usage
 
 ```terraform
@@ -20,6 +22,9 @@ resource "opnsense_firewall_filter_rule" "allow_https" {
   destination_port = "443"
   description      = "Allow HTTPS"
   log              = true
+  tcp_flags        = ["syn"]
+  state_timeout    = 30
+  set_local_tag    = "managed-https"
 }
 
 # Block all traffic from a specific network
@@ -52,23 +57,53 @@ resource "opnsense_firewall_filter_rule" "allow_dns" {
 
 ### Optional
 
+- `adaptive_timeout_end` (Number) State count where adaptive timeouts reach zero.
+- `adaptive_timeout_start` (Number) State count where adaptive timeouts begin.
+- `allow_options` (Boolean) Allow packets with IP options.
 - `categories` (Set of String) Set of category UUIDs assigned to this rule.
 - `description` (String) Description of the rule.
 - `destination_net` (String) Destination network (`any`, interface name, CIDR, or alias).
 - `destination_not` (Boolean) Invert destination match. Defaults to `false`.
 - `destination_port` (String) Destination port or range (e.g., `443`, `8080:8090`). Empty for any.
 - `direction` (String) Traffic direction: `in`, `out`, or `any`.
+- `disable_reply_to` (Boolean) Disable reply-to.
 - `enabled` (Boolean) Whether this rule is enabled. Defaults to `true`.
 - `gateway` (String) Gateway for policy routing. Empty for default.
+- `icmp_type` (Set of String) ICMP message types.
 - `interface` (Set of String) Network interfaces this rule applies to.
+- `interface_not` (Boolean) Invert selected interfaces.
 - `ip_protocol` (String) IP version: `inet` (IPv4), `inet6` (IPv6), or `inet46` (both).
 - `log` (Boolean) Log matching packets. Defaults to `false`.
+- `match_local_tag` (String) Local packet tag required.
+- `match_priority` (Number) Priority to match.
+- `match_tos` (String) Type-of-service value to match.
+- `max_new_connections` (Number) Maximum new connections per interval.
+- `max_new_connections_seconds` (Number) New connection interval seconds.
+- `max_source_connections` (Number) Maximum established connections per source.
+- `max_source_nodes` (Number) Maximum source nodes.
+- `max_source_states` (Number) Maximum states per source.
+- `max_states` (Number) Maximum concurrent states.
+- `no_pfsync` (Boolean) Prevent state synchronization by pfsync.
+- `no_xmlrpc_sync` (Boolean) Exclude this rule from HA XMLRPC synchronization.
+- `overload_table` (String) Opaque overload table identifier.
 - `protocol` (String) Protocol (e.g., `any`, `tcp`, `udp`, `icmp`, `TCP/UDP`).
 - `quick` (Boolean) First match wins. Defaults to `true`.
+- `reply_to` (String) Opaque reply-to gateway identifier.
+- `reverse_shaper` (String) Reverse traffic shaper identifier.
+- `schedule` (String) Opaque OPNsense schedule identifier.
 - `sequence` (Number) Rule sequence number (1-999999). Controls evaluation order.
+- `set_local_tag` (String) Local packet tag to set.
+- `set_priority` (Number) Priority to assign.
+- `set_priority_low_delay` (Number) Low-delay priority to assign.
+- `shaper` (String) Traffic shaper identifier.
 - `source_net` (String) Source network (`any`, interface name, CIDR, or alias).
 - `source_not` (Boolean) Invert source match. Defaults to `false`.
 - `source_port` (String) Source port or range (e.g., `80`, `80:443`). Empty for any.
+- `state_policy` (String) State policy.
+- `state_timeout` (Number) State timeout in seconds.
+- `state_type` (String) State tracking mechanism.
+- `tcp_flags` (Set of String) TCP flags that must be set.
+- `tcp_flags_out_of` (Set of String) TCP flags considered when matching.
 
 ### Read-Only
 

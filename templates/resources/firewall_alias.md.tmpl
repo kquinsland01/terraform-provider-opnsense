@@ -9,7 +9,7 @@ description: |-
 
 Manages a firewall alias on OPNsense. Aliases define groups of hosts, networks, or ports that can be referenced in firewall rules, NAT rules, and other configuration.
 
-Supported alias types include `host`, `network`, `port`, `url`, `urltable`, `geoip`, `networkgroup`, `mac`, `asn`, and others.
+Supported alias types include `host`, `network`, `port`, `url`, `urltable`, `urljson`, `geoip`, `networkgroup`, `mac`, `asn`, and others. Use `ip_protocol` for lossless multi-protocol state; `proto` remains a deprecated scalar compatibility view. ASN content is numeric without an `AS` prefix. JSON URL aliases require `path_expression`, URL tables require a finite positive `update_freq`, and dynamic IPv6 host aliases require `interface`.
 
 ## Example Usage
 

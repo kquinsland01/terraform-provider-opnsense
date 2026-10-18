@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall alias on OPNsense by its UUID. Use this data source to reference alias attributes in other resource configurations without importing the alias into Terraform management.
 
+The data source preserves all selected IP protocols and exposes dynamic interface, JSON path, counter, and fractional update-interval fields.
+
 ## Example Usage
 
 {{tffile "examples/data-sources/opnsense_firewall_alias/data-source.tf"}}

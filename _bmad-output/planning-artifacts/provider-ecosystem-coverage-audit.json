@@ -147,7 +147,7 @@
       "kind": "resource",
       "name": "firewall_alias",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_alias"
       ],
@@ -166,17 +166,16 @@
         "update_freq"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "interface, path_expression, and stats alias controls are absent locally",
-        "local_only": "none material",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "shared": "same stable OPNsense alias endpoints and fields, including interface, path_expression, counters/stats, fractional update_freq, and lossless multi-protocol state",
+        "baseline_only": "none material after Story 31.0a field and compatibility parity",
+        "local_only": "deprecated proto scalar retained beside canonical ip_protocol set for backward compatibility",
+        "lifecycle": "UUID-backed create/read/update/delete with direct alias reconfigure; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 proved advanced create, import, zero-diff plan, out-of-band drift detection/repair, delete, and zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_alias.md",
         "docs/resources/firewall_alias.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "resource",
@@ -208,7 +207,7 @@
       "kind": "resource",
       "name": "firewall_filter",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_filter_rule"
       ],
@@ -228,17 +227,16 @@
         "traffic_shaping"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "advanced tagging, priority, reply-to, state limits/timeouts, schedules, TCP flags, ICMP types, shaping, and HA-sync controls are absent locally",
+        "shared": "same stable OPNsense filter-rule endpoints and advanced tagging, priority/TOS, reply-to, state limits/timeouts/rates, schedules, TCP/ICMP, shaping, and HA-sync fields",
+        "baseline_only": "none material after Story 31.0a advanced filter parity",
         "local_only": "none material",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "lifecycle": "UUID-backed create/read/update/delete with one direct filter apply; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 proved advanced create, import, zero-diff plan, out-of-band drift detection, configured update, delete, and zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_filter.md",
         "docs/resources/firewall_filter_rule.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "resource",
@@ -312,7 +310,7 @@
       "kind": "resource",
       "name": "firewall_nat_port_forward",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_nat_port_forward"
       ],
@@ -331,17 +329,16 @@
         "target"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the baseline accepts multiple interfaces; the local schema accepts one interface",
-        "local_only": "none material",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "shared": "same stable destination-NAT endpoints and fields, including lossless multi-interface port-forward membership",
+        "baseline_only": "none material after Story 31.0a multi-interface parity",
+        "local_only": "deprecated interface scalar retained beside canonical interfaces set for backward compatibility",
+        "lifecycle": "UUID-backed create/read/update/delete with one direct d_nat apply; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 proved multi-interface create, import, zero-diff plan, membership update, delete, and zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/firewall_nat_port_forward.md",
         "docs/resources/firewall_nat_port_forward.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "resource",
@@ -1725,7 +1722,7 @@
       "kind": "data-source",
       "name": "firewall_alias",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_alias"
       ],
@@ -1744,17 +1741,16 @@
         "update_freq"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "interface, path_expression, and stats alias controls are absent locally",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "shared": "same UUID-backed alias lookup and complete advanced read-back, including interface, path_expression, counters/stats, fractional update_freq, and all selected protocols",
+        "baseline_only": "none material after Story 31.0a field parity",
+        "local_only": "deprecated proto scalar view retained beside canonical ip_protocol set",
+        "lifecycle": "read-only API lookup; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 asserted advanced alias data-source parity during create/import/drift/repair lifecycle, followed by zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_alias.md",
         "docs/data-sources/firewall_alias.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "data-source",
@@ -1786,7 +1782,7 @@
       "kind": "data-source",
       "name": "firewall_filter",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_filter_rule"
       ],
@@ -1806,17 +1802,16 @@
         "traffic_shaping"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "advanced tagging, priority, reply-to, state limits/timeouts, schedules, TCP flags, ICMP types, shaping, and HA-sync controls are absent locally",
+        "shared": "same UUID-backed filter-rule lookup and complete advanced read-back for tagging, priority/TOS, reply-to, state controls, schedules, TCP/ICMP, shaping, and HA-sync fields",
+        "baseline_only": "none material after Story 31.0a advanced filter parity",
         "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "lifecycle": "read-only API lookup; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 asserted advanced filter data-source parity during create/import/drift/update lifecycle, followed by zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_filter.md",
         "docs/data-sources/firewall_filter_rule.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "data-source",
@@ -1890,7 +1885,7 @@
       "kind": "data-source",
       "name": "firewall_nat_port_forward",
       "domain": "Firewall/NAT",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "firewall_nat_port_forward"
       ],
@@ -1909,17 +1904,16 @@
         "target"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the baseline accepts multiple interfaces; the local schema accepts one interface",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "shared": "same UUID-backed destination-NAT lookup and lossless multi-interface port-forward membership",
+        "baseline_only": "none material after Story 31.0a multi-interface parity",
+        "local_only": "deprecated interface scalar view retained beside canonical interfaces set",
+        "lifecycle": "read-only API lookup; live OPNsense 26.7.7 run story-31-0a-live-26.7.7-review1-rerun2 asserted data-source membership parity across multi-interface create and membership update, followed by zero-match cleanup",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/firewall_nat_port_forward.md",
         "docs/data-sources/firewall_nat_port_forward.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md"
+      ]
     },
     {
       "kind": "data-source",
