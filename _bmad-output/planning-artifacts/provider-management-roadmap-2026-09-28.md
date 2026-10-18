@@ -1,6 +1,7 @@
 ---
 title: Provider Management Roadmap - Complete Provider Coverage and OPNsense Assignment API
 date: 2026-09-28
+last_updated: 2026-10-17
 author: BMad PM
 status: current
 inputs:
@@ -24,7 +25,7 @@ Why this matters: this provider now has broad OPNsense surface coverage, but bre
 
 | Signal | `matthew-on-git/opnsense` | Established provider baseline |
 |---|---:|---:|
-| Current public release checked | `v0.4.5` | `v0.26.0` |
+| Current public release checked | `v0.6.0` | `v0.26.0` |
 | Registry downloads checked | about 8.1K | about 1.33M |
 | Resources / data sources | 102 / 88 | about 47 / 45 |
 | Primary advantage | breadth, plugin/service coverage, generated docs | adoption, community recognition, polished positioning |
@@ -41,14 +42,14 @@ The September upstream PR detour changed the plan. We closed the duplicate upstr
 - expanded `NetworkInterface.xml` fields including `enable`, `type4`, `ipaddr`, `type6`, `ipaddrv6`, gateways, DHCP fields, and hardware flags
 - `/tmp/.interfaces.todo` staging and assignment `reconfigure` finalization
 
-Release timing conclusion from the 2026-09-28 check:
+Release timing conclusion from the automated 2026-10-17 check:
 
-- Not present in `stable/26.7`.
-- Not present in tags checked through `26.7.4` or `27.1.a`.
-- Present on `master` only, with relevant commits around Aug 20, Aug 27, and Sep 24.
-- Unless OPNsense backports the work, the first stable provider target should be the next major train that carries the expanded assignment API, likely `27.1`.
+- OPNsense backported the expanded assignment model/controller to `stable/26.7`.
+- `26.7.6` is the first released tag with the complete probed address, gateway, DHCP, `set_item`, and `reconfigure` surface.
+- `26.7.5` and `27.1.a` do not have the complete required field set.
+- Story 30.1 now commits a machine-readable baseline and checks it weekly for upstream changes.
 
-Product rule: provider implementation may prototype against OPNsense `master` or snapshot, but stable release support must stay gated until the endpoint appears in a stable branch or released tag with durable semantics verified.
+Product rule: implementation may target OPNsense `26.7.6` or newer, but provider support must remain unclaimed until Story 30.2 passes lifecycle and no-change-plan acceptance testing on a disposable appliance. PPPoE remains outside the first implementation scope pending separate semantic validation.
 
 ## Public Positioning Strategy
 
@@ -77,9 +78,9 @@ Goal: turn the upstream assignment API work into a safe provider feature as soon
 
 | Story | Priority | Status | File |
 |---|---|---|---|
-| 30.1 Track OPNsense Assignment API Release | P0 | backlog | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
-| 30.2 Prototype Interface Assignment/IP Resource Against OPNsense Master | P0 | backlog | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
-| 30.3 Update Interface Support Matrix and Public Blocker Docs | P0 | backlog | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
+| 30.1 Track OPNsense Assignment API Release | P0 | review | `_bmad-output/implementation-artifacts/30-1-track-opnsense-assignment-api-release.md` |
+| 30.2 Implement Interface Assignment/IP Resource for OPNsense 26.7.6+ | P0 | backlog | `_bmad-output/implementation-artifacts/30-2-prototype-interface-assignment-ip-resource.md` |
+| 30.3 Update Interface Support Matrix and Public Blocker Docs | P0 | review | `_bmad-output/implementation-artifacts/30-3-update-interface-support-matrix.md` |
 
 ## Epic 31: Provider Completeness, Positioning, and Migration
 
@@ -117,11 +118,10 @@ This should stay P1/P2 until Epic 30 has a working release gate and Epic 31 has 
 
 ## Recommended Sequence
 
-1. Story 30.1: create the release/API probe and support-matrix evidence.
-2. Story 30.2: prototype the interface assignment/IP resource against OPNsense `master` with version guardrails.
-3. Story 30.3: update public docs so "blocked" becomes "release-gated prototype" where accurate.
-4. Story 31.0: perform a field-level complete-provider coverage audit and split implementation stories for any true product gaps.
-5. Story 31.1: make README/Registry positioning match the actual provider advantage.
-6. Story 31.2: publish the existing-provider migration guide.
-7. Story 32.1: publish repeatable acceptance-test proof.
-8. Story 32.3: define v1 criteria before v1 work is declared.
+1. Merge Stories 30.1 and 30.3 after review; the release/API probe and public evidence now identify OPNsense `26.7.6` as the stable gate.
+2. Implement Story 30.2 against OPNsense `26.7.6+` with version/capability guardrails and disposable-appliance acceptance proof.
+3. Perform Story 31.0's field-level complete-provider coverage audit and split implementation stories for any true product gaps.
+4. Story 31.1: make README/Registry positioning match the actual provider advantage.
+5. Story 31.2: publish the existing-provider migration guide.
+6. Story 32.1: publish repeatable acceptance-test proof.
+7. Story 32.3: define v1 criteria before v1 work is declared.

@@ -1,0 +1,40 @@
+name: Upstream Assignment API
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.9"
+          cache: true
+
+      - name: Probe current upstream refs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          go run ./tools/opnsense-assignment-probe
+          -output assignment-api-release-probe.json
+
+      - name: Compare with committed baseline
+        run: >-
+          diff -u
+          _bmad-output/planning-artifacts/opnsense-assignment-api-release-probe.json
+          assignment-api-release-probe.json
+
+      - name: Upload probe result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opnsense-assignment-api-release-probe
+          path: assignment-api-release-probe.json

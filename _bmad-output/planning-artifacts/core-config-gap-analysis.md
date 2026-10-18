@@ -46,7 +46,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Loopback | Supported | Resource + data source |
 | Neighbor / static ARP/NDP | Supported | Resource + data source |
 | LAGG | Supported | Resource + data source; live-validated against Vagrant with dedicated `em4`/`em5` member interfaces. |
-| Base assignment / IP config / PPPoE | Release-gated / upstream dependency | 2026-09-28 release check: OPNsense `master` contains the expanded `interfaces/assignment` API backed by `NetworkInterface`, including address fields and apply staging, but checked stable/tag targets through `stable/26.7`, `26.7.4`, and `27.1.a` do not include the full API. Track target-release availability, generated docs, ACL coverage, `set_item`/`reconfigure`, and PPPoE scope. |
+| Base assignment / IP config / PPPoE | Buildable provider work / PPPoE research | OPNsense `26.7.6` is the first released tag with the complete probed `interfaces/assignment` API, including address fields, gateways, DHCP fields, `set_item`, and `reconfigure`. Implement and acceptance-test assignment/IP settings against `26.7.6+`; keep PPPoE semantics outside the first scope pending separate proof. |
 
 ### Firewall & NAT
 
@@ -176,7 +176,7 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 
 | Resource/domain | Upstream item | Action |
 |---|---|---|
-| Interface assignment / IP config / PPPoE | Expanded `master` assignment API, absent from checked stable targets | Track, test target-release availability, verify docs/ACL coverage, and prototype only against `master`/snapshot until stable support exists. |
+| Interface assignment / IP config / PPPoE | Complete assignment/IP API released in OPNsense `26.7.6`; provider implementation pending; PPPoE semantics unverified | Implement and acceptance-test assignment/IP settings against a disposable `26.7.6+` appliance; keep PPPoE outside initial scope. |
 | Gateway group | `master` model-only `GatewayGroups` evidence; no target-release API/controller | Track generated API docs, `stable/*` branch availability, API controllers, ACL/menu entries, and model semantics; candidate fresh MVC API contribution if absent. |
 | System general settings | OPNsense System Settings MVC roadmap; current `core/initial_setup` evidence is wizard-only, not a durable singleton API | Watch release notes, API docs, controllers/models, ACL/menu entries, and adopt only after stable target-release get/set semantics are available. |
 
