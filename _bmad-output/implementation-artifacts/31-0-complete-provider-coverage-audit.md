@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+done
 
 ## Story
 
@@ -39,3 +39,21 @@ so that `matthew-on-git/opnsense` can become the standard complete provider with
 - Follow-up stories are added to `_bmad-output/implementation-artifacts/` and `sprint-status.yaml`.
 - `git diff --check` passes.
 - `make check` passes if docs, generated docs, templates, or source files change.
+
+## Completion Evidence
+
+- Pinned `browningluke/opnsense` v0.26.0 at commit `33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba`; schema counts are 47 resources, 45 data sources, one ephemeral resource, plus provider retry configuration.
+- Added the canonical machine-readable manifest and deterministic Markdown report under `_bmad-output/planning-artifacts/`.
+- Added `internal/coverageaudit` validation for baseline completeness, classification/follow-up rules, registered local names, 106/90 generated docs, 17 resource-only gaps, `system_info` data-only status, and render drift.
+- Classified deprecated generic Kea v4 aliases as intentionally different rather than duplicate work.
+- Created P0/P1 Stories 31.0a–31.0j for every confirmed buildable field or surface family and ordered them before Stories 31.1–31.3.
+- Confirmed no baseline row is upstream-blocked; gateway groups and system general settings remain in the separate public blocker register because they are not published baseline surfaces.
+- Reconciled support/planning/downstream story facts and retained the one-provider-per-appliance/object-domain direction.
+
+## Verification Results
+
+- `go test ./internal/coverageaudit`
+- `go generate ./... && git diff --exit-code` (run after generation artifacts are committed/staged in CI; local generated output was checked deterministically)
+- `bash test/scripts/validate-structure.sh`
+- `DEVRAIL_IMAGE=ghcr.io/devrail-dev/dev-toolchain:1.12.24 make check`
+- `git diff --check`

@@ -24,11 +24,11 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 102 | Supported |
-| Data sources | 88 | Supported |
-| Resource docs | 102 | Supported |
-| Data source docs | 88 | Supported |
-| Resource-matching data-source backlog | 15 | Coming |
+| Resources | 106 | Supported |
+| Data sources | 90 | Supported |
+| Resource docs | 106 | Supported |
+| Data source docs | 90 | Supported |
+| Resource-matching data-source backlog | 17 | Coming |
 | Verified provider-owned resource candidates | 0 plus research follow-ups | Needs research |
 
 ## Domain-by-Domain Status
@@ -46,7 +46,8 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Loopback | Supported | Resource + data source |
 | Neighbor / static ARP/NDP | Supported | Resource + data source |
 | LAGG | Supported | Resource + data source; live-validated against Vagrant with dedicated `em4`/`em5` member interfaces. |
-| Base assignment / IP config / PPPoE | Buildable provider work / PPPoE research | OPNsense `26.7.6` is the first released tag with the complete probed `interfaces/assignment` API, including address fields, gateways, DHCP fields, `set_item`, and `reconfigure`. Implement and acceptance-test assignment/IP settings against `26.7.6+`; keep PPPoE semantics outside the first scope pending separate proof. |
+| Base assignment / IP config | Supported | `opnsense_interface_assignment` shipped after disposable OPNsense 26.7.7 lifecycle, drift, repair, and restoration proof; requires OPNsense 26.7.6+. |
+| PPPoE | Needs research | The assignment implementation deliberately excluded PPPoE until model, secret, and lifecycle semantics are proven. |
 
 ### Firewall & NAT
 
@@ -132,7 +133,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Unbound ACL | Supported | Resource only |
 | Unbound general | Supported | Singleton resource |
 | Unbound DNSBL/blocklist | Supported | Resource |
-| Unbound forward | Supported | Already shipped as `opnsense_unbound_domain_override` using `/api/unbound/settings/*_forward`. |
+| Unbound forward | Partial / buildable | `opnsense_unbound_domain_override` owns `/api/unbound/settings/*_forward` and covers query forwarding; Story 31.0d adds stable DNS-over-TLS `server_port`, `type`, and `verify_cn` parity. |
 | Dnsmasq settings | Supported | Resource only |
 | Dnsmasq host/domain/range/option/tag/boot | Supported | UUID item resources and data sources using `dnsmasq/settings` item endpoints plus `dnsmasq/service/reconfigure`. |
 
@@ -165,7 +166,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 
 | Item | Status | Notes |
 |---|---|---|
-| Data-source parity | Coming | 15 singleton or sensitive special-case resources still lack matching data sources. |
+| Data-source parity | Coming | 17 singleton, assignment, or sensitive special-case resources still lack matching data sources. |
 | Provider index | Supported with follow-up | Auth, version, permissions, and quickstart exist; support matrix should remain visible. |
 | Migration/import guidance | Supported | Full-appliance dependency-order migration guide exists in `docs/migration-import.md`. |
 | Registry release workflow | Supported with preflight | GoReleaser, signed checksums, Registry manifest, changelog, and tag workflow exist; confirm secrets and dry-run before first tag. |
@@ -176,13 +177,12 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 
 | Resource/domain | Upstream item | Action |
 |---|---|---|
-| Interface assignment / IP config / PPPoE | Complete assignment/IP API released in OPNsense `26.7.6`; provider implementation pending; PPPoE semantics unverified | Implement and acceptance-test assignment/IP settings against a disposable `26.7.6+` appliance; keep PPPoE outside initial scope. |
 | Gateway group | `master` model-only `GatewayGroups` evidence; no target-release API/controller | Track generated API docs, `stable/*` branch availability, API controllers, ACL/menu entries, and model semantics; candidate fresh MVC API contribution if absent. |
 | System general settings | OPNsense System Settings MVC roadmap; current `core/initial_setup` evidence is wizard-only, not a durable singleton API | Watch release notes, API docs, controllers/models, ACL/menu entries, and adopt only after stable target-release get/set semantics are available. |
 
 ## Release Matrix
 
-- **Supported:** 102 resources and 88 data sources listed in `support-matrix.md` and generated docs.
+- **Supported:** 106 resources and 90 data sources listed in `support-matrix.md` and generated docs.
 - **Coming:** data-source parity for singleton and sensitive special cases.
-- **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and stable-release OPNsense interface assignment/IP semantics before any future unblocked story.
-- **Upstream-blocked:** interface assignment/IP config/PPPoE, gateway group, and system general settings.
+- **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
+- **Upstream-blocked:** gateway group and system general settings.
