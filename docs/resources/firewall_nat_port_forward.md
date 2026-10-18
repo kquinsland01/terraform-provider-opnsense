@@ -9,12 +9,14 @@ description: |-
 
 Manages a NAT port-forward rule on OPNsense. Port-forward rules redirect inbound traffic from an external port to an internal server and port.
 
+Use `interfaces` for lossless multi-interface rules. The deprecated scalar `interface` remains available for existing configurations; configuring both requires the scalar to be a member of the set.
+
 ## Example Usage
 
 ```terraform
 # Forward HTTPS traffic from WAN to an internal web server
 resource "opnsense_firewall_nat_port_forward" "web_https" {
-  interface        = "wan"
+  interfaces       = ["wan", "opt1"]
   protocol         = "tcp"
   destination_net  = "wanip"
   destination_port = "443"
@@ -43,7 +45,6 @@ resource "opnsense_firewall_nat_port_forward" "ssh" {
 
 - `destination_net` (String) Destination network to match (typically the WAN address, e.g., `wanip`).
 - `destination_port` (String) Destination port to match (the external port).
-- `interface` (String) Network interface for incoming traffic (e.g., `wan`).
 - `local_port` (String) Internal target port to redirect to.
 - `target` (String) Internal target IP address or alias to redirect to.
 
@@ -53,6 +54,8 @@ resource "opnsense_firewall_nat_port_forward" "ssh" {
 - `description` (String) Description of the rule.
 - `destination_not` (Boolean) Invert destination match. Defaults to `false`.
 - `enabled` (Boolean) Whether this rule is enabled. Defaults to `true`.
+- `interface` (String) Deprecated scalar interface compatibility view. Use interfaces for multi-interface rules.
+- `interfaces` (Set of String) Network interfaces for incoming traffic.
 - `ip_protocol` (String) IP version: `inet` (IPv4), `inet6` (IPv6), or `inet46` (both).
 - `log` (Boolean) Log matching packets. Defaults to `false`.
 - `protocol` (String) Protocol (e.g., `tcp`, `udp`, `TCP/UDP`).

@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -45,8 +46,14 @@ func (r *natPortForwardResource) Schema(_ context.Context, _ resource.SchemaRequ
 				},
 			},
 			"interface": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Network interface for incoming traffic (e.g., `wan`).",
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Deprecated scalar interface compatibility view. Use interfaces for multi-interface rules.",
+			},
+			"interfaces": schema.SetAttribute{
+				ElementType: types.StringType, Optional: true, Computed: true,
+				MarkdownDescription: "Network interfaces for incoming traffic.",
+				Validators:          []validator.Set{setvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1))},
 			},
 			"ip_protocol": schema.StringAttribute{
 				Optional:            true,

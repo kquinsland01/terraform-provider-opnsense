@@ -1,6 +1,6 @@
 # Forward HTTPS traffic from WAN to an internal web server
 resource "opnsense_firewall_nat_port_forward" "web_https" {
-  interface        = "wan"
+  interfaces       = ["wan", "opt1"]
   protocol         = "tcp"
   destination_net  = "wanip"
   destination_port = "443"

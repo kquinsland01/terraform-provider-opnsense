@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
@@ -70,9 +71,29 @@ func (r *aliasResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	apiReq := plan.toAPI(ctx)
+	plannedProto := plan.Proto
 
 	uuid, err := opnsense.Add(ctx, r.client, aliasReqOpts, apiReq)
 	if err != nil {
+		if uuid != "" {
+			recovered := false
+			if result, readErr := opnsense.Get[aliasAPIResponse](ctx, r.client, aliasReqOpts, uuid); readErr == nil {
+				apiDiags := validateAliasAPIResponse(result)
+				resp.Diagnostics.Append(apiDiags...)
+				if !apiDiags.HasError() {
+					plan.fromAPI(ctx, result, uuid)
+					if setContains(ctx, plan.IPProtocol, plannedProto.ValueString()) {
+						plan.Proto = plannedProto
+					}
+					resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+					recovered = true
+				}
+			}
+			if !recovered {
+				identity := AliasResourceModel{ID: types.StringValue(uuid), Content: types.SetNull(types.StringType), IPProtocol: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
+			}
+		}
 		resp.Diagnostics.AddError(
 			"Error creating firewall alias",
 			fmt.Sprintf("Could not create firewall alias: %s", err),
@@ -83,14 +104,26 @@ func (r *aliasResource) Create(ctx context.Context, req resource.CreateRequest, 
 	// Read back from API to populate state (never echo from config).
 	result, err := opnsense.Get[aliasAPIResponse](ctx, r.client, aliasReqOpts, uuid)
 	if err != nil {
+		identity := AliasResourceModel{ID: types.StringValue(uuid), Content: types.SetNull(types.StringType), IPProtocol: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+		resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
 		resp.Diagnostics.AddError(
 			"Error reading firewall alias after create",
 			fmt.Sprintf("Created alias %s but could not read it back: %s", uuid, err),
 		)
 		return
 	}
+	apiDiags := validateAliasAPIResponse(result)
+	if apiDiags.HasError() {
+		identity := AliasResourceModel{ID: types.StringValue(uuid), Content: types.SetNull(types.StringType), IPProtocol: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+		resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
+		resp.Diagnostics.Append(apiDiags...)
+		return
+	}
 
 	plan.fromAPI(ctx, result, uuid)
+	if setContains(ctx, plan.IPProtocol, plannedProto.ValueString()) {
+		plan.Proto = plannedProto
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -115,8 +148,16 @@ func (r *aliasResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		)
 		return
 	}
+	resp.Diagnostics.Append(validateAliasAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	priorProto := state.Proto
 	state.fromAPI(ctx, result, state.ID.ValueString())
+	if setContains(ctx, state.IPProtocol, priorProto.ValueString()) {
+		state.Proto = priorProto
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -135,6 +176,7 @@ func (r *aliasResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	apiReq := plan.toAPI(ctx)
+	plannedProto := plan.Proto
 	id := state.ID.ValueString()
 
 	err := opnsense.Update(ctx, r.client, aliasReqOpts, apiReq, id)
@@ -145,7 +187,6 @@ func (r *aliasResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		)
 		return
 	}
-
 	// Read back from API to populate state (never echo from config).
 	result, err := opnsense.Get[aliasAPIResponse](ctx, r.client, aliasReqOpts, id)
 	if err != nil {
@@ -155,8 +196,15 @@ func (r *aliasResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		)
 		return
 	}
+	resp.Diagnostics.Append(validateAliasAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	plan.fromAPI(ctx, result, id)
+	if setContains(ctx, plan.IPProtocol, plannedProto.ValueString()) {
+		plan.Proto = plannedProto
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 

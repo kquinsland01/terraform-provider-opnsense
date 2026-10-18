@@ -21,3 +21,20 @@ resource "opnsense_firewall_alias" "common_ports" {
   description = "Common service ports"
   content     = ["80", "443", "8080"]
 }
+
+# Losslessly manage both protocol selections for an ASN alias. ASN content is
+# numeric and must not include an AS prefix.
+resource "opnsense_firewall_alias" "cloudflare_asn" {
+  name        = "cloudflare_asn"
+  type        = "asn"
+  content     = ["13335"]
+  ip_protocol = ["IPv4", "IPv6"]
+}
+
+resource "opnsense_firewall_alias" "json_feed" {
+  name            = "json_feed"
+  type            = "urljson"
+  content         = ["https://example.invalid/addresses.json"]
+  path_expression = ".addresses[]"
+  stats           = true
+}

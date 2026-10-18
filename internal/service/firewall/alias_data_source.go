@@ -66,6 +66,8 @@ func (d *aliasDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				Computed:            true,
 				MarkdownDescription: "Protocol filter (empty for any, IPv4, or IPv6).",
 			},
+			"ip_protocol": schema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "All selected IP protocols."},
+			"interface":   schema.StringAttribute{Computed: true, MarkdownDescription: "Dynamic alias interface."},
 			"categories": schema.SetAttribute{
 				ElementType:         types.StringType,
 				Computed:            true,
@@ -75,6 +77,8 @@ func (d *aliasDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				Computed:            true,
 				MarkdownDescription: "Update frequency in days for URL table aliases.",
 			},
+			"path_expression": schema.StringAttribute{Computed: true, MarkdownDescription: "JSON path expression."},
+			"stats":           schema.BoolAttribute{Computed: true, MarkdownDescription: "Whether counters are enabled."},
 		},
 	}
 }
@@ -111,6 +115,10 @@ func (d *aliasDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			"Error reading firewall alias",
 			fmt.Sprintf("Could not read firewall alias %s: %s", id, err),
 		)
+		return
+	}
+	resp.Diagnostics.Append(validateAliasAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

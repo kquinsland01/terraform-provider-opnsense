@@ -39,24 +39,24 @@ type NatOutboundResourceModel struct {
 // natOutboundAPIResponse is the struct for unmarshaling OPNsense GET responses.
 // Source NAT uses flat field names (not dot-separated like DNat).
 type natOutboundAPIResponse struct {
-	Enabled         string                   `json:"enabled"`
-	Sequence        string                   `json:"sequence"`
-	Interface       opnsense.SelectedMap     `json:"interface"`
-	IPProtocol      opnsense.SelectedMap     `json:"ipprotocol"`
-	Protocol        opnsense.SelectedMap     `json:"protocol"`
-	SourceNet       string                   `json:"source_net"`
-	SourceNot       string                   `json:"source_not"`
-	SourcePort      string                   `json:"source_port"`
-	DestinationNet  string                   `json:"destination_net"`
-	DestinationNot  string                   `json:"destination_not"`
-	DestinationPort string                   `json:"destination_port"`
-	Target          string                   `json:"target"`
-	TargetPort      string                   `json:"target_port"`
-	NoNat           string                   `json:"nonat"`
-	StaticNatPort   string                   `json:"staticnatport"`
-	Log             string                   `json:"log"`
-	Description     string                   `json:"description"`
-	Categories      opnsense.SelectedMapList `json:"categories"`
+	Enabled         string                      `json:"enabled"`
+	Sequence        string                      `json:"sequence"`
+	Interface       opnsense.SelectedMap        `json:"interface"`
+	IPProtocol      opnsense.SelectedMap        `json:"ipprotocol"`
+	Protocol        opnsense.SelectedMap        `json:"protocol"`
+	SourceNet       string                      `json:"source_net"`
+	SourceNot       string                      `json:"source_not"`
+	SourcePort      string                      `json:"source_port"`
+	DestinationNet  string                      `json:"destination_net"`
+	DestinationNot  string                      `json:"destination_not"`
+	DestinationPort string                      `json:"destination_port"`
+	Target          string                      `json:"target"`
+	TargetPort      string                      `json:"target_port"`
+	NoNat           string                      `json:"nonat"`
+	StaticNatPort   string                      `json:"staticnatport"`
+	Log             string                      `json:"log"`
+	Description     string                      `json:"description"`
+	Categories      opnsense.CSVSelectedMapList `json:"categories"`
 }
 
 // natOutboundAPIRequest is the struct for marshaling OPNsense POST requests.

@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall filter rule on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+Advanced schedules, tags, priorities, state limits, TCP/ICMP selectors, routing, reply-to, shaping, and HA controls are returned without flattening.
+
 ## Example Usage
 
 {{tffile "examples/data-sources/opnsense_firewall_filter_rule/data-source.tf"}}

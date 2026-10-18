@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
@@ -71,9 +72,29 @@ func (r *natPortForwardResource) Create(ctx context.Context, req resource.Create
 	}
 
 	apiReq := plan.toAPI(ctx)
+	plannedInterface := plan.Interface
 
 	uuid, err := opnsense.Add(ctx, r.client, natPortForwardReqOpts, apiReq)
 	if err != nil {
+		if uuid != "" {
+			recovered := false
+			if result, readErr := opnsense.Get[natPortForwardAPIResponse](ctx, r.client, natPortForwardReqOpts, uuid); readErr == nil {
+				apiDiags := validateNATAPIResponse(result)
+				resp.Diagnostics.Append(apiDiags...)
+				if !apiDiags.HasError() {
+					plan.fromAPI(ctx, result, uuid)
+					if setContains(ctx, plan.Interfaces, plannedInterface.ValueString()) {
+						plan.Interface = plannedInterface
+					}
+					resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+					recovered = true
+				}
+			}
+			if !recovered {
+				identity := NatPortForwardResourceModel{ID: types.StringValue(uuid), Interfaces: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
+			}
+		}
 		resp.Diagnostics.AddError(
 			"Error creating NAT port-forward rule",
 			fmt.Sprintf("Could not create NAT port-forward rule: %s", err),
@@ -83,14 +104,26 @@ func (r *natPortForwardResource) Create(ctx context.Context, req resource.Create
 
 	result, err := opnsense.Get[natPortForwardAPIResponse](ctx, r.client, natPortForwardReqOpts, uuid)
 	if err != nil {
+		identity := NatPortForwardResourceModel{ID: types.StringValue(uuid), Interfaces: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+		resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
 		resp.Diagnostics.AddError(
 			"Error reading NAT port-forward rule after create",
 			fmt.Sprintf("Created rule %s but could not read it back: %s", uuid, err),
 		)
 		return
 	}
+	apiDiags := validateNATAPIResponse(result)
+	if apiDiags.HasError() {
+		identity := NatPortForwardResourceModel{ID: types.StringValue(uuid), Interfaces: types.SetNull(types.StringType), Categories: types.SetNull(types.StringType)}
+		resp.Diagnostics.Append(resp.State.Set(ctx, &identity)...)
+		resp.Diagnostics.Append(apiDiags...)
+		return
+	}
 
 	plan.fromAPI(ctx, result, uuid)
+	if setContains(ctx, plan.Interfaces, plannedInterface.ValueString()) {
+		plan.Interface = plannedInterface
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -115,8 +148,16 @@ func (r *natPortForwardResource) Read(ctx context.Context, req resource.ReadRequ
 		)
 		return
 	}
+	resp.Diagnostics.Append(validateNATAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	priorInterface := state.Interface
 	state.fromAPI(ctx, result, state.ID.ValueString())
+	if setContains(ctx, state.Interfaces, priorInterface.ValueString()) {
+		state.Interface = priorInterface
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -135,6 +176,7 @@ func (r *natPortForwardResource) Update(ctx context.Context, req resource.Update
 	}
 
 	apiReq := plan.toAPI(ctx)
+	plannedInterface := plan.Interface
 	id := state.ID.ValueString()
 
 	err := opnsense.Update(ctx, r.client, natPortForwardReqOpts, apiReq, id)
@@ -145,7 +187,6 @@ func (r *natPortForwardResource) Update(ctx context.Context, req resource.Update
 		)
 		return
 	}
-
 	result, err := opnsense.Get[natPortForwardAPIResponse](ctx, r.client, natPortForwardReqOpts, id)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -154,8 +195,15 @@ func (r *natPortForwardResource) Update(ctx context.Context, req resource.Update
 		)
 		return
 	}
+	resp.Diagnostics.Append(validateNATAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	plan.fromAPI(ctx, result, id)
+	if setContains(ctx, plan.Interfaces, plannedInterface.ValueString()) {
+		plan.Interface = plannedInterface
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 

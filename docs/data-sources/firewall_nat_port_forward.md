@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall NAT port forward rule on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+All selected interfaces are returned in `interfaces`; `interface` is the deterministic scalar compatibility view.
+
 ## Example Usage
 
 ```terraform
@@ -38,6 +40,7 @@ output "firewall_nat_port_forward_id" {
 - `destination_port` (String) Destination port to match (the external port).
 - `enabled` (Boolean) Whether this rule is enabled. Defaults to 'true'.
 - `interface` (String) Network interface for incoming traffic (e.g., 'wan').
+- `interfaces` (Set of String) All selected incoming interfaces.
 - `ip_protocol` (String) IP version: 'inet' (IPv4), 'inet6' (IPv6), or 'inet46' (both).
 - `local_port` (String) Internal target port to redirect to.
 - `log` (Boolean) Log matching packets. Defaults to 'false'.

@@ -9,6 +9,8 @@ description: |-
 
 Look up an existing firewall alias on OPNsense by its UUID. Use this data source to reference alias attributes in other resource configurations without importing the alias into Terraform management.
 
+The data source preserves all selected IP protocols and exposes dynamic interface, JSON path, counter, and fractional update-interval fields.
+
 ## Example Usage
 
 ```terraform
@@ -40,7 +42,11 @@ output "alias_content" {
 - `content` (Set of String) Alias entries (IPs, networks, ports, or URLs depending on type).
 - `description` (String) Description of the alias.
 - `enabled` (Boolean) Whether this alias is enabled.
+- `interface` (String) Dynamic alias interface.
+- `ip_protocol` (Set of String) All selected IP protocols.
 - `name` (String) Name of the alias.
+- `path_expression` (String) JSON path expression.
 - `proto` (String) Protocol filter (empty for any, IPv4, or IPv6).
+- `stats` (Boolean) Whether counters are enabled.
 - `type` (String) Alias type (host, network, port, url, etc.).
 - `update_freq` (String) Update frequency in days for URL table aliases.

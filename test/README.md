@@ -88,6 +88,25 @@ tests are optional and self-skip unless extra environment variables are set, for
 example live ACME issuance (`OPNSENSE_ACME_ISSUE=1` plus ACME UUID/domain envs)
 and HAProxy certificate binding (`OPNSENSE_HAPROXY_CERT_REFID`).
 
+## Firewall and NAT parity tests
+
+Story 31.0a tests are separately opt-in and must target only a disposable
+OPNsense 26.7.7 or newer appliance. Filter and DNAT objects are disabled. The
+suite proves advanced read-back, import/no-change, alias and filter drift
+repair, multi-interface DNAT membership update, data-source parity, and exact
+test-object cleanup.
+
+```sh
+export OPNSENSE_FIREWALL_PARITY=1
+export OPNSENSE_FIREWALL_TEST_INTERFACE=lan
+export OPNSENSE_FIREWALL_TEST_INTERFACES=wan,lan
+
+TEST_REGEX='TestAccFirewall(Alias|FilterRule|NatPortForward)_advancedParity' \
+  test/scripts/run-vagrant-acceptance.sh --package ./internal/service/firewall
+```
+
+Do not point these tests at production or management objects.
+
 ## Interface assignment/IP tests
 
 The interface-assignment lifecycle test is opt-in because it changes addressing.

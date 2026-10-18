@@ -5,6 +5,7 @@ package firewall
 
 import (
 	"context"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -19,6 +20,7 @@ type NatPortForwardResourceModel struct {
 	Enabled         types.Bool   `tfsdk:"enabled"`
 	Sequence        types.Int64  `tfsdk:"sequence"`
 	Interface       types.String `tfsdk:"interface"`
+	Interfaces      types.Set    `tfsdk:"interfaces"`
 	IPProtocol      types.String `tfsdk:"ip_protocol"`
 	Protocol        types.String `tfsdk:"protocol"`
 	SourceNet       types.String `tfsdk:"source_net"`
@@ -39,19 +41,19 @@ type NatPortForwardResourceModel struct {
 // source/destination come back as nested objects ({"source": {"network": ...}}),
 // matching the DNat model's field structure.
 type natPortForwardAPIResponse struct {
-	Disabled    string                   `json:"disabled"`
-	Sequence    string                   `json:"sequence"`
-	Interface   opnsense.SelectedMap     `json:"interface"`
-	IPProtocol  opnsense.SelectedMap     `json:"ipprotocol"`
-	Protocol    opnsense.SelectedMap     `json:"protocol"`
-	Source      natDNatEndpoint          `json:"source"`
-	Destination natDNatEndpoint          `json:"destination"`
-	Target      string                   `json:"target"`
-	LocalPort   string                   `json:"local-port"`
-	Log         string                   `json:"log"`
-	Description string                   `json:"descr"`
-	Reflection  opnsense.SelectedMap     `json:"natreflection"`
-	Categories  opnsense.SelectedMapList `json:"categories"`
+	Disabled    string                      `json:"disabled"`
+	Sequence    string                      `json:"sequence"`
+	Interface   opnsense.CSVSelectedMapList `json:"interface"`
+	IPProtocol  opnsense.SelectedMap        `json:"ipprotocol"`
+	Protocol    opnsense.SelectedMap        `json:"protocol"`
+	Source      natDNatEndpoint             `json:"source"`
+	Destination natDNatEndpoint             `json:"destination"`
+	Target      string                      `json:"target"`
+	LocalPort   string                      `json:"local-port"`
+	Log         string                      `json:"log"`
+	Description string                      `json:"descr"`
+	Reflection  opnsense.SelectedMap        `json:"natreflection"`
+	Categories  opnsense.CSVSelectedMapList `json:"categories"`
 }
 
 // natPortForwardAPIRequest is the struct for marshaling OPNsense POST requests.
@@ -89,6 +91,7 @@ func (m *NatPortForwardResourceModel) toAPI(ctx context.Context) *natPortForward
 	if !m.Categories.IsNull() && !m.Categories.IsUnknown() {
 		var elements []string
 		m.Categories.ElementsAs(ctx, &elements, false)
+		sort.Strings(elements)
 		categoriesStr = strings.Join(elements, ",")
 	}
 
@@ -101,10 +104,15 @@ func (m *NatPortForwardResourceModel) toAPI(ctx context.Context) *natPortForward
 		sequence = &s
 	}
 
+	interfaces := setStrings(ctx, m.Interfaces)
+	if m.Interfaces.IsNull() && !m.Interface.IsNull() && !m.Interface.IsUnknown() && m.Interface.ValueString() != "" {
+		interfaces = []string{m.Interface.ValueString()}
+	}
+
 	return &natPortForwardAPIRequest{
 		Disabled:   opnsense.BoolToString(!m.Enabled.ValueBool()), // Invert: enabled=true → disabled="0"
 		Sequence:   sequence,
-		Interface:  m.Interface.ValueString(),
+		Interface:  strings.Join(interfaces, ","),
 		IPProtocol: m.IPProtocol.ValueString(),
 		Protocol:   m.Protocol.ValueString(),
 		Source: natDNatEndpoint{
@@ -131,7 +139,10 @@ func (m *NatPortForwardResourceModel) toAPI(ctx context.Context) *natPortForward
 func (m *NatPortForwardResourceModel) fromAPI(_ context.Context, a *natPortForwardAPIResponse, uuid string) {
 	m.ID = types.StringValue(uuid)
 	m.Enabled = types.BoolValue(!opnsense.StringToBool(a.Disabled)) // Invert: disabled="0" → enabled=true
-	m.Interface = types.StringValue(string(a.Interface))
+	interfaces := []string(a.Interface)
+	sort.Strings(interfaces)
+	m.Interface = types.StringValue(firstString(interfaces))
+	m.Interfaces = stringSetValue(interfaces)
 	m.IPProtocol = types.StringValue(string(a.IPProtocol))
 	m.Protocol = types.StringValue(string(a.Protocol))
 	m.SourceNet = types.StringValue(a.Source.Network)

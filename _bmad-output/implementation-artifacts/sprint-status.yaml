@@ -294,7 +294,7 @@ development_status:
   # Epic 31: Provider Completeness, Positioning, and Migration
   epic-31: in-progress
   31-0-complete-provider-coverage-audit: done
-  31-0a-firewall-nat-field-parity: backlog       # P0 — audit-derived; before 31.1
+  31-0a-firewall-nat-field-parity: done   # final reviewed 26.7.7 lifecycle passed; alias/filter/d_nat cleanup searches returned zero Story31a matches
   31-0b-kea-field-and-surface-parity: backlog    # P0 — audit-derived; before 31.1
   31-0c-openvpn-field-and-key-parity: backlog    # P0 — audit-derived; before 31.1
   31-0d-unbound-settings-and-forward-parity: backlog # P0 — audit-derived; before 31.1

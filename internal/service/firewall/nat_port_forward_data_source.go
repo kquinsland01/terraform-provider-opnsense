@@ -35,6 +35,7 @@ func (d *natPortForwardDataSource) Schema(_ context.Context, _ datasource.Schema
 			"enabled":          dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this rule is enabled. Defaults to 'true'."},
 			"sequence":         dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Rule sequence number (1-999999). Controls evaluation order."},
 			"interface":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "Network interface for incoming traffic (e.g., 'wan')."},
+			"interfaces":       dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "All selected incoming interfaces."},
 			"ip_protocol":      dsschema.StringAttribute{Computed: true, MarkdownDescription: "IP version: 'inet' (IPv4), 'inet6' (IPv6), or 'inet46' (both)."},
 			"protocol":         dsschema.StringAttribute{Computed: true, MarkdownDescription: "Protocol (e.g., 'tcp', 'udp', 'TCP/UDP')."},
 			"source_net":       dsschema.StringAttribute{Computed: true, MarkdownDescription: "Source network ('any', CIDR, or alias)."},
@@ -75,6 +76,10 @@ func (d *natPortForwardDataSource) Read(ctx context.Context, req datasource.Read
 	result, err := opnsense.Get[natPortForwardAPIResponse](ctx, d.client, natPortForwardReqOpts, id)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading firewall NAT port forward rule", fmt.Sprintf("Could not read firewall NAT port forward rule %s: %s", id, err))
+		return
+	}
+	resp.Diagnostics.Append(validateNATAPIResponse(result)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	config.fromAPI(ctx, result, id)

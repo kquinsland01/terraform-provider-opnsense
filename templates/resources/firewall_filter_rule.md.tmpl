@@ -9,6 +9,8 @@ description: |-
 
 Manages a firewall filter rule on OPNsense. Filter rules control traffic flow through the firewall.
 
+Advanced schedules, local tags, priorities/TOS, state limits and adaptive timeouts, TCP/ICMP selectors, reply-to, shaping, and HA synchronization controls are represented as flat attributes. Empty numeric API values use `-1` in Terraform. Opaque schedule, gateway, shaper, and table identifiers are passed through unchanged.
+
 ## Example Usage
 
 {{tffile "examples/resources/opnsense_firewall_filter_rule/resource.tf"}}

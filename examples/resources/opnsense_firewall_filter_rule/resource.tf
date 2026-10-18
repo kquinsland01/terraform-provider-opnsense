@@ -6,6 +6,9 @@ resource "opnsense_firewall_filter_rule" "allow_https" {
   destination_port = "443"
   description      = "Allow HTTPS"
   log              = true
+  tcp_flags        = ["syn"]
+  state_timeout    = 30
+  set_local_tag    = "managed-https"
 }
 
 # Block all traffic from a specific network
