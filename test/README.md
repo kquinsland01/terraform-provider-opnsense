@@ -88,6 +88,27 @@ tests are optional and self-skip unless extra environment variables are set, for
 example live ACME issuance (`OPNSENSE_ACME_ISSUE=1` plus ACME UUID/domain envs)
 and HAProxy certificate binding (`OPNSENSE_HAPROXY_CERT_REFID`).
 
+## Interface assignment/IP tests
+
+The interface-assignment lifecycle test is opt-in because it changes addressing.
+It requires OPNsense 26.7.6 or newer and refuses `wan` or `lan`; provide an
+existing disposable `optN` plus two unused test addresses on its isolated
+network. The test captures the complete assignment before the first apply and
+restores it after Terraform's state-only destroy.
+
+```sh
+export OPNSENSE_INTERFACE_ASSIGNMENT=opt3
+export OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_ADDRESS=192.0.2.10
+export OPNSENSE_INTERFACE_ASSIGNMENT_UPDATED_IPV4_ADDRESS=192.0.2.11
+export OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_PREFIX_LENGTH=24
+
+TEST_REGEX=TestAccInterfaceAssignment \
+  test/scripts/run-vagrant-acceptance.sh --package ./internal/service/iface
+```
+
+Never point these variables at a management interface or a production subnet.
+The bundled Vagrant box is currently OPNsense 25.7 and cannot run this test.
+
 ## Interface LAGG tests
 
 The Vagrant VM includes two dedicated, isolated VirtualBox NICs on

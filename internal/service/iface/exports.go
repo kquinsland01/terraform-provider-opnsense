@@ -12,6 +12,7 @@ import (
 // Resources returns the list of interface resource types.
 func Resources() []func() resource.Resource {
 	return []func() resource.Resource{
+		newAssignmentResource,
 		newLoopbackResource,
 		newVxlanResource,
 		newNeighborResource,

@@ -285,10 +285,10 @@ development_status:
   # === PROVIDER MANAGEMENT ROADMAP (provider-management-roadmap-2026-09-28.md) ===
 
   # Epic 30: OPNsense Assignment API Adoption
-  epic-30: in-progress
-  30-1-track-opnsense-assignment-api-release: review
-  30-2-prototype-interface-assignment-ip-resource: backlog
-  30-3-update-interface-support-matrix: review
+  epic-30: done
+  30-1-track-opnsense-assignment-api-release: done
+  30-2-prototype-interface-assignment-ip-resource: done   # reviewed implementation and live 26.7.7 lifecycle/drift/restoration gates complete
+  30-3-update-interface-support-matrix: done
   epic-30-retrospective: optional
 
   # Epic 31: Provider Completeness, Positioning, and Migration

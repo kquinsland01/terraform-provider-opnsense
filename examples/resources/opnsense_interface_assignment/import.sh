@@ -1,0 +1,1 @@
+terraform import opnsense_interface_assignment.pxe opt3
