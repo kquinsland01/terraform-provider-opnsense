@@ -20,12 +20,12 @@ This matrix is the current source of truth for release positioning. It reconcile
 | Area | Count | Status |
 |---|---:|---|
 | Resources | 108 | Supported |
-| Data sources | 93 | Registered; Story 31.0c repair-2 field-complete OpenVPN reads passed digest-bound disposable proof |
+| Data sources | 94 | Registered; Story 31.0d adds the digest-bound, field-complete read-only Unbound settings view |
 | Resource docs | 108 | Supported |
-| Data source docs | 93 | Generated |
+| Data source docs | 94 | Generated |
 | Ephemeral resources / docs | 1 / 1 | Terraform 1.10+ OpenVPN key generator passed final protocol/non-persistence proof; implementation in review |
-| Remaining field/surface gaps | 7 audit-derived P0/P1 story groups (Stories 31.0d-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
-| Remaining resource-matching data-source gaps | 17 | Coming |
+| Remaining field/surface gaps | 6 audit-derived P0/P1 story groups (Stories 31.0e-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Remaining resource-matching data-source gaps | 16 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
 
@@ -76,17 +76,17 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | System | gateway, route, system info, tunable, VIP, VLAN |
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA |
-| Unbound | ACL, domain override, host alias, host override |
+| Unbound | ACL, domain override, host alias, host override, settings |
 | WireGuard | peer, server |
 
 ## Coming: Buildable Provider Work
 
 | Domain | Work |
 |---|---|
-| Data-source parity | Add read-only data sources for the 17 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
+| Data-source parity | Add read-only data sources for the 16 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Audited field/surface parity | Complete Stories 31.0d–31.0j for Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Audited field/surface parity | Complete Stories 31.0e–31.0j for WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
 | Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research
@@ -97,7 +97,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | System / HA | HASync configuration needs request/response shape research because current `Hasync.xml` uses dynamic `JsonKeyValueStoreField` `syncitems`; HASync status `services`/`version` are data-source candidates after live validation, while service operations are action candidates only after product/framework decision. |
 | Interfaces | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable 26.7.7 lifecycle/drift/restoration proof. PPPoE semantics remain separate research. |
 
-Source NAT is supported as `opnsense_firewall_nat_outbound`. Basic Unbound query forwarding is supported as `opnsense_unbound_domain_override`; DNS-over-TLS `server_port`/`type`/`verify_cn` parity is tracked by Story 31.0d.
+Source NAT is supported as `opnsense_firewall_nat_outbound`. Story 31.0d Repair 7 implements and digest-bound proves Unbound query and DNS-over-TLS forwarding plus complete read-only settings; exactly four audited parity rows are reconciled and four-layer convergence is clean.
 
 ## Upstream-Blocked
 

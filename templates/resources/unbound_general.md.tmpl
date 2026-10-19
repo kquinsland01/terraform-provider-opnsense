@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "DNS"
+description: |-
+  Manages the general, advanced, ACL-default, and forwarding-enable branches of Unbound without overwriting hosts, aliases, ACL items, DNSBL blocklists, or forwards.
+---
+
+# {{.Name}} ({{.Type}})
+
+This singleton retains the established `opnsense_unbound_general` name and fixed import ID. It owns only the general, advanced, ACL-default, and forwarding-enable branches. `terraform destroy` removes it from state without resetting appliance settings.
+
+The legacy `no_aaaa_records` attribute maps to OPNsense's `noarecords` control, which removes A records despite the historical Terraform name. Each successful mutation is activated once through the Unbound general reconfigure endpoint.
+
+On stable OPNsense releases older than 26.7.7, the established general-branch attributes continue to use the legacy wire contract and reconfigure endpoint. The advanced, ACL-default, and forwarding-enable parity attributes require stable OPNsense 26.7.7 or newer; configuring one on an older or unverifiable appliance returns an explicit compatibility error.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_unbound_general/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+{{codefile "shell" "examples/resources/opnsense_unbound_general/import.sh"}}

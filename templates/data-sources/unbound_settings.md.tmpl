@@ -1,0 +1,20 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "DNS"
+description: |-
+  Reads the complete stable Unbound settings surface without writable ownership.
+---
+
+# {{.Name}} ({{.Type}})
+
+This view aggregates the settings owned by `opnsense_unbound_general` and `opnsense_unbound_dnsbl`. Every current array-backed DNSBL item is exposed through typed `dnsbl_items`, including its UUID and all current blocklist fields. Canonical `dnsbl_json` remains available as a supplemental lossless representation. This data source never writes appliance settings.
+
+The complete aggregate wire shape requires a verified stable OPNsense 26.7.7 or newer appliance. Older releases return an explicit compatibility error instead of a partial aggregate.
+
+The legacy `no_aaaa_records` attribute reports OPNsense's upstream `noarecords` control, which removes A records despite the historical Terraform name.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_unbound_settings/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

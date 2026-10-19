@@ -21,11 +21,17 @@ func TestDataSources_schemaIDs(t *testing.T) {
 	t.Parallel()
 
 	constructors := DataSources()
-	if len(constructors) != 4 {
-		t.Fatalf("expected 4 Unbound data sources, got %d", len(constructors))
+	if len(constructors) != 5 {
+		t.Fatalf("expected 5 Unbound data sources, got %d", len(constructors))
 	}
-	for _, constructor := range constructors {
+	for _, constructor := range constructors[:4] {
 		assertRequiredID(t, constructor())
+	}
+	var settingsResp datasource.SchemaResponse
+	constructors[4]().Schema(context.Background(), datasource.SchemaRequest{}, &settingsResp)
+	id, ok := settingsResp.Schema.Attributes["id"].(dsschema.StringAttribute)
+	if !ok || !id.Computed {
+		t.Fatalf("settings id must be a computed StringAttribute, got %#v", settingsResp.Schema.Attributes["id"])
 	}
 }
 
@@ -58,6 +64,31 @@ func TestHostOverrideDataSource_read(t *testing.T) {
 	}
 	if state.Hostname.ValueString() != "www" || state.RR.ValueString() != "A" || !state.Enabled.ValueBool() {
 		t.Fatalf("unexpected state: %#v", state)
+	}
+}
+
+func TestSettingsDataSourceReadSetsTypedDNSBLItems(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && r.URL.Path == "/api/core/firmware/status" {
+			_, _ = w.Write([]byte(`{"product":{"product_name":"OPNsense","product_id":"opnsense","product_version":"26.7.7"}}`))
+			return
+		}
+		if r.Method != http.MethodGet || r.URL.Path != generalReqOpts.GetEndpoint {
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+		dnsbl := map[string]any{"blocklist": map[string]any{"fixture": map[string]any{"enabled": "1", "type": "ag", "lists": "", "allowlists": "", "blocklists": "", "wildcards": "", "source_nets": "", "address": "192.0.2.31", "nxdomain": "1", "cache_ttl": "300", "description": "fixture"}}}
+		_, _ = w.Write(completeUnboundSettingsResponse(t, "53", "0", "0", dnsbl))
+	}))
+	t.Cleanup(server.Close)
+
+	ds := newSettingsDataSource()
+	configureDataSource(t, ds, testClient(t, server.URL))
+	schema := dataSourceSchema(t, ds)
+	resp := datasource.ReadResponse{State: tfsdk.State{Schema: schema}}
+	ds.Read(context.Background(), datasource.ReadRequest{}, &resp)
+	if resp.Diagnostics.HasError() {
+		t.Fatalf("read diagnostics: %v", resp.Diagnostics)
 	}
 }
 

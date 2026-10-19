@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "DNS"
+description: |-
+  Manages the compatibility DNSBL owner against OPNsense's current array-backed blocklist model.
+---
+
+# {{.Name}} ({{.Type}})
+
+This singleton preserves the established HCL and import ID while translating it to the current `dnsbl.blocklist` wire shape. On an empty appliance it creates and privately tracks its own item. If any item already exists, normal create stops with an import-required diagnostic instead of overwriting unowned configuration. Import may explicitly adopt exactly one existing item and rejects multiple candidates. Once tracked, unrelated items are preserved. `safe_search` is stored by current OPNsense releases in `general.safesearch`, but remains owned here for state compatibility.
+
+Destroy is state-only and does not reset or delete the appliance blocklist.
+
+Stable OPNsense 26.7.7 and newer use the current array-backed item contract described above. Older stable releases retain the established singleton DNSBL contract and permissive legacy reconfigure response. The provider verifies the appliance identity and version before selecting either path.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_unbound_dnsbl/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+{{codefile "shell" "examples/resources/opnsense_unbound_dnsbl/import.sh"}}

@@ -5,7 +5,9 @@ description: |-
   Manages an Unbound domain override on OPNsense.
 ---
 # {{.Name}} ({{.Type}})
-Manages an Unbound DNS domain override (forwarding rule) on OPNsense.
+Manages an Unbound DNS query or DNS-over-TLS forward on OPNsense. `type = "query"` routes mutations through the forward endpoints and defaults an omitted `server_port` to 53; `type = "dot"` routes through the DoT endpoints and defaults an omitted port to 853. An explicitly configured port is always preserved. A blank `verify_cn` is valid for intentionally unverified or self-signed TLS.
+
+The established query-forward shape remains supported on older stable OPNsense releases through its legacy response and reconfigure contract. DNS-over-TLS, a non-53 query port, or a non-empty `verify_cn` requires stable OPNsense 26.7.7 or newer. Current releases are decoded strictly; missing type or port fields are not silently defaulted.
 ## Example Usage
 {{tffile "examples/resources/opnsense_unbound_domain_override/resource.tf"}}
 {{ .SchemaMarkdown | trimspace }}

@@ -35,3 +35,6 @@ output "unbound_domain_override_id" {
 - `domain` (String) Domain to override.
 - `enabled` (Boolean) Whether this domain override is enabled.
 - `server` (String) Destination DNS server.
+- `server_port` (Number) Destination DNS server port.
+- `type` (String) Forward type (`query` or `dot`).
+- `verify_cn` (String) TLS certificate name, which may be blank.

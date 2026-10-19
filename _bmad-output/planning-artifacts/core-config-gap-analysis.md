@@ -25,10 +25,10 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Area | Count | Status |
 |---|---:|---|
 | Resources | 108 | Supported |
-| Data sources | 92 | Supported |
+| Data sources | 94 | Supported |
 | Resource docs | 108 | Supported |
-| Data source docs | 92 | Supported |
-| Resource-matching data-source backlog | 17 | Coming |
+| Data source docs | 94 | Supported |
+| Resource-matching data-source backlog | 16 | Coming |
 | Verified provider-owned resource candidates | 0 plus research follow-ups | Needs research |
 
 ## Domain-by-Domain Status
@@ -133,7 +133,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Unbound ACL | Supported | Resource only |
 | Unbound general | Supported | Singleton resource |
 | Unbound DNSBL/blocklist | Supported | Resource |
-| Unbound forward | Partial / buildable | `opnsense_unbound_domain_override` owns `/api/unbound/settings/*_forward` and covers query forwarding; Story 31.0d adds stable DNS-over-TLS `server_port`, `type`, and `verify_cn` parity. |
+| Unbound forward | Covered | Story 31.0d Repair 7 implements and candidate-proves strict, endpoint-correct independent query and DNS-over-TLS lifecycles including non-mutating post-destroy zero-object checks. |
 | Dnsmasq settings | Supported | Resource only |
 | Dnsmasq host/domain/range/option/tag/boot | Supported | UUID item resources and data sources using `dnsmasq/settings` item endpoints plus `dnsmasq/service/reconfigure`. |
 

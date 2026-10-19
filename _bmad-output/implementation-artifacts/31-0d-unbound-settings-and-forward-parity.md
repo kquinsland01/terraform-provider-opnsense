@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+review
 
 ## Priority
 
@@ -21,3 +21,7 @@ Keep `opnsense_unbound_general`, `opnsense_unbound_dnsbl`, and `opnsense_unbound
 ## Verification
 
 Unbound unit/schema tests, singleton and forward disposable-appliance acceptance, docs generation, and `make check`.
+
+## Implementation Evidence
+
+Repair 7 passes exact-tree and promoted-digest OPNsense 26.7.7 proof, including handshake-driven serialization tests, strict null-metadata coverage, state-only singleton destroy, exact restore, and zero leftovers. Exactly four Story 31.0d audit rows are reconciled, and four-layer convergence is clean. The story is ready for review.

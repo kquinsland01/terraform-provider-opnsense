@@ -11,9 +11,9 @@ import (
 	"strings"
 )
 
-// ValidationError is returned when a mutation response has result != "saved".
-// OPNsense returns HTTP 200 on validation errors — the API client must parse
-// the response body to detect these.
+// ValidationError is returned when a mutation response explicitly reports
+// result="failed". OPNsense returns HTTP 200 on validation errors, while
+// missing or unknown results remain ambiguous ordinary errors for recovery.
 type ValidationError struct {
 	Fields map[string]string // field name → error message
 }
@@ -106,17 +106,23 @@ type mutationResponse struct {
 	Validations map[string]string `json:"validations"`
 }
 
-// ParseMutationResponse parses a mutation API response body.
-// Returns the UUID on success, or a ValidationError if result != "saved".
+// ParseMutationResponse parses a mutation API response body. Only an explicit
+// failed result is a deterministic validation rejection. Missing or unknown
+// results are ambiguous mutation outcomes so callers can run authoritative
+// recovery instead of assuming that the mutation did not commit.
 func ParseMutationResponse(body []byte) (string, error) {
 	var resp mutationResponse
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return "", fmt.Errorf("failed to parse mutation response: %w", err)
 	}
-	if resp.Result != "saved" {
+	switch resp.Result {
+	case "saved":
+		return resp.UUID, nil
+	case "failed":
 		return "", &ValidationError{Fields: resp.Validations}
+	default:
+		return "", fmt.Errorf("ambiguous mutation response: expected result %q or %q, got %q", "saved", "failed", resp.Result)
 	}
-	return resp.UUID, nil
 }
 
 // ParseAddResponse requires both an affirmative save and a recoverable UUID.

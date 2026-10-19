@@ -21,11 +21,13 @@ func TestAccUnboundDomainOverride_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Step 1: Create and verify.
 			{
-				Config: testAccUnboundDomainOverrideConfig("example.com", "10.0.0.1"),
+				Config: testAccUnboundDomainOverrideConfig("example.com", "query", "10.0.0.1", 53, ""),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opnsense_unbound_domain_override.test", "id"),
 					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "domain", "example.com"),
 					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "server", "10.0.0.1"),
+					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "type", "query"),
+					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "server_port", "53"),
 					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "enabled", "true"),
 				),
 			},
@@ -35,23 +37,34 @@ func TestAccUnboundDomainOverride_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Step 3: Update server and verify.
+			// Step 3: Change endpoint family in place and verify DoT state.
 			{
-				Config: testAccUnboundDomainOverrideConfig("example.com", "10.0.0.2"),
+				Config: testAccUnboundDomainOverrideConfig("example.com", "dot", "10.0.0.2", 853, "dns.example.com"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "domain", "example.com"),
 					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "server", "10.0.0.2"),
+					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "type", "dot"),
+					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "server_port", "853"),
+					resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "verify_cn", "dns.example.com"),
 				),
+			},
+			// Step 4: Blank CN is a valid explicit insecure choice.
+			{
+				Config: testAccUnboundDomainOverrideConfig("example.com", "dot", "10.0.0.2", 853, ""),
+				Check:  resource.TestCheckResourceAttr("opnsense_unbound_domain_override.test", "verify_cn", ""),
 			},
 		},
 	})
 }
 
-func testAccUnboundDomainOverrideConfig(domain, server string) string {
+func testAccUnboundDomainOverrideConfig(domain, forwardType, server string, port int, verifyCN string) string {
 	return fmt.Sprintf(`
 resource "opnsense_unbound_domain_override" "test" {
   domain = %[1]q
-  server = %[2]q
+  type = %[2]q
+  server = %[3]q
+  server_port = %[4]d
+  verify_cn = %[5]q
 }
-`, domain, server)
+`, domain, forwardType, server, port, verifyCN)
 }

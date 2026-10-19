@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -20,7 +21,7 @@ func TestSearch_SinglePage(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(searchResponse[testResource]{
 			Rows:     []testResource{{Name: "a"}, {Name: "b"}},
 			Total:    2,
-			RowCount: 500,
+			RowCount: 2,
 			Current:  1,
 		})
 	}))
@@ -63,7 +64,7 @@ func TestSearch_MultiPage(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(searchResponse[testResource]{
 				Rows:     []testResource{{Name: "c"}},
 				Total:    3,
-				RowCount: 2,
+				RowCount: 1,
 				Current:  2,
 			})
 		default:
@@ -93,7 +94,7 @@ func TestSearch_EmptyResults(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(searchResponse[testResource]{
 			Rows:     []testResource{},
 			Total:    0,
-			RowCount: 500,
+			RowCount: 0,
 			Current:  1,
 		})
 	}))
@@ -112,6 +113,86 @@ func TestSearch_EmptyResults(t *testing.T) {
 	}
 	if len(results) != 0 {
 		t.Errorf("expected 0 results, got %d", len(results))
+	}
+}
+
+func TestSearch_RejectsPrematureEmptyPage(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_ = json.NewEncoder(w).Encode(searchResponse[testResource]{Rows: []testResource{}, Total: 1, RowCount: 0, Current: 1})
+	}))
+	defer server.Close()
+
+	_, err := Search[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), SearchParams{})
+	if err == nil || !strings.Contains(err.Error(), "empty after collecting 0 of 1") {
+		t.Fatalf("expected premature-empty pagination error, got %v", err)
+	}
+}
+
+func TestSearch_RejectsNegativeTotal(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_ = json.NewEncoder(w).Encode(searchResponse[testResource]{Rows: []testResource{}, Total: -1, RowCount: 0, Current: 1})
+	}))
+	defer server.Close()
+
+	_, err := Search[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), SearchParams{})
+	if err == nil || !strings.Contains(err.Error(), "negative total") {
+		t.Fatalf("expected negative-total pagination error, got %v", err)
+	}
+}
+
+func TestSearch_RejectsMissingOrInconsistentPaginationEnvelope(t *testing.T) {
+	tests := map[string]string{
+		"empty envelope":      `{}`,
+		"missing rows":        `{"rowCount":0,"total":0,"current":1}`,
+		"null rows":           `{"rows":null,"rowCount":0,"total":0,"current":1}`,
+		"missing rowCount":    `{"rows":[],"total":0,"current":1}`,
+		"null rowCount":       `{"rows":[],"rowCount":null,"total":0,"current":1}`,
+		"missing total":       `{"rows":[],"rowCount":0,"current":1}`,
+		"null total":          `{"rows":[],"rowCount":0,"total":null,"current":1}`,
+		"missing current":     `{"rows":[],"rowCount":0,"total":0}`,
+		"null current":        `{"rows":[],"rowCount":0,"total":0,"current":null}`,
+		"wrong current":       `{"rows":[],"rowCount":0,"total":0,"current":2}`,
+		"negative rowCount":   `{"rows":[],"rowCount":-1,"total":0,"current":1}`,
+		"mismatched rowCount": `{"rows":[{"name":"a"}],"rowCount":0,"total":1,"current":1}`,
+	}
+	for name, body := range tests {
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				_, _ = w.Write([]byte(body))
+			}))
+			defer server.Close()
+			_, err := Search[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), SearchParams{})
+			if err == nil {
+				t.Fatal("expected strict pagination-envelope error")
+			}
+		})
+	}
+}
+
+func TestSearch_RejectsChangingOrOverrunTotal(t *testing.T) {
+	tests := map[string]func(http.ResponseWriter, *http.Request){
+		"changing total": func(w http.ResponseWriter, r *http.Request) {
+			var request searchRequest
+			_ = json.NewDecoder(r.Body).Decode(&request)
+			total := 2
+			if request.Current == 2 {
+				total = 3
+			}
+			_ = json.NewEncoder(w).Encode(searchResponse[testResource]{Rows: []testResource{{Name: "item"}}, Total: total, RowCount: 1, Current: request.Current})
+		},
+		"overrun total": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(searchResponse[testResource]{Rows: []testResource{{Name: "a"}, {Name: "b"}}, Total: 1, RowCount: 2, Current: 1})
+		},
+	}
+	for name, handler := range tests {
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(handler))
+			defer server.Close()
+			_, err := Search[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), SearchParams{RowCount: 1})
+			if err == nil {
+				t.Fatal("expected malformed pagination error")
+			}
+		})
 	}
 }
 
