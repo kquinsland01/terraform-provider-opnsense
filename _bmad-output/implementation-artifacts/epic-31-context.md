@@ -25,7 +25,7 @@ Make the provider complete enough to be the default choice for managing an OPNse
 
 ## Requirements & Constraints
 
-- Close the audit-confirmed gaps in firewall/NAT, Kea, OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and configurable retry behavior. Measure parity by usable fields and lifecycle semantics, not resource counts alone.
+- Use the pinned, deterministic ecosystem audit to close field and surface gaps across firewall/NAT, Kea, OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and configurable retry behavior. Measure parity by usable fields and lifecycle semantics, not resource counts alone.
 - Treat the support matrix as the release-positioning source of truth. Clearly classify supported, planned, research-needed, and upstream-blocked capabilities; do not conceal gaps in documentation or claim completeness beyond the evidence.
 - Use one provider per appliance and object domain in steady state. Migration guidance must prohibit two providers from managing the same OPNsense object and must explain dependency-aware import of existing objects without manual state editing, ending in an accurate no-change plan.
 - Preserve the common resource contract across parity work: create, API read-back, in-place update where valid, delete, UUID import, drift detection, missing-object removal from state, correct service reconfigure, and recoverable partial failure. Firewall changes must retain savepoint/apply/rollback safety, and all mutations must remain serialized to protect OPNsense configuration integrity.
@@ -53,7 +53,7 @@ Make the provider complete enough to be the default choice for managing an OPNse
 
 ## Cross-Story Dependencies
 
-- Story 31.0 established the pinned baseline and generated Stories 31.0a–31.0j. Complete P0 Stories 31.0a–31.0f before P1 Stories 31.0g–31.0j, rerunning the deterministic audit after registration or schema changes.
+- Story 31.0 established the pinned baseline and generated Stories 31.0a–31.0j. Firewall/NAT and Kea parity are complete; finish the remaining P0 work in Stories 31.0c–31.0f before P1 Stories 31.0g–31.0j, rerunning the deterministic audit after registration or schema changes.
 - Story 31.1 follows the parity work so README and Registry claims match verified coverage. Story 31.2 then publishes safe migration paths, and Story 31.3 builds adoption stacks on that verified surface.
 - Epic 30 supplies release-gated interface assignment/IP support for OPNsense 26.7.6 or newer; PPPoE remains separately unverified and must not be implied by Epic 31 positioning.
 - Epic 32 supplies broader acceptance-proof and v1-readiness evidence. Epic 31 improves completeness and adoption but does not by itself establish v1 readiness.
