@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -42,7 +43,10 @@ import (
 )
 
 // Ensure OpnsenseProvider satisfies the provider interface.
-var _ provider.Provider = &OpnsenseProvider{}
+var (
+	_ provider.Provider                       = &OpnsenseProvider{}
+	_ provider.ProviderWithEphemeralResources = &OpnsenseProvider{}
+)
 
 // OpnsenseProvider defines the provider implementation.
 type OpnsenseProvider struct {
@@ -143,6 +147,7 @@ func (p *OpnsenseProvider) Configure(ctx context.Context, req provider.Configure
 	// Share the client with resources and data sources.
 	resp.ResourceData = client
 	resp.DataSourceData = client
+	resp.EphemeralResourceData = client
 }
 
 // resolveProviderConfig resolves provider configuration from the HCL model
@@ -279,6 +284,12 @@ func (p *OpnsenseProvider) DataSources(_ context.Context) []func() datasource.Da
 	dataSources = append(dataSources, auth.DataSources()...)
 	dataSources = append(dataSources, iface.DataSources()...)
 	return dataSources
+}
+
+// EphemeralResources returns non-persistent provider operations. Terraform
+// 1.10 or newer is required by Terraform Core to use these blocks.
+func (p *OpnsenseProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return openvpn.EphemeralResources()
 }
 
 // New returns a new provider factory function.

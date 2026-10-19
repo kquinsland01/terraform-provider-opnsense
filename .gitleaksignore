@@ -116,3 +116,7 @@ e2f1f7a8f81d21c25aebf12625d0b4a37086a440:_bmad/_config/files-manifest.csv:generi
 
 # OPNsense API model field name in a committed interface-assignment unit-test table.
 c908164e6f08d6fb603100a8cbb450c1acef0f06:internal/service/iface/assignment_resource_unit_test.go:generic-api-key:433
+
+# Terraform private-state key name (not credential material); detected after the
+# Gitleaks generic-api-key rule changed while scanning the Story 31.0b commit.
+613dcdff38c7773fcb785015f263074a86d24182:internal/service/kea/pending_activation.go:generic-api-key:15

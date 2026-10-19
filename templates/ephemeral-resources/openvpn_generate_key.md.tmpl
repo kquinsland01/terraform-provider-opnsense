@@ -1,0 +1,14 @@
+---
+page_title: "{{.Name}} Ephemeral Resource - terraform-provider-opnsense"
+subcategory: OpenVPN
+description: |-
+  Generates sensitive OpenVPN key material without persisting it in Terraform state.
+---
+
+# {{.Name}} (Ephemeral Resource)
+
+Requires Terraform 1.10 or newer and OPNsense 26.7.6 or newer. The generated
+key exists only for the operation and can feed only an ephemeral-compatible or
+write-only consumer; it cannot feed an ordinary persisted resource attribute.
+
+{{ .SchemaMarkdown | trimspace }}

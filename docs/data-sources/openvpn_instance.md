@@ -32,26 +32,66 @@ output "openvpn_instance_id" {
 ### Read-Only
 
 - `auth` (String) Auth digest algorithm (e.g. 'SHA256').
+- `auth_gen_token` (Number) Authentication token lifetime.
+- `auth_gen_token_renewal` (Number) Authentication token renewal interval.
+- `auth_gen_token_secret` (String, Sensitive) Authentication token secret. Sensitive data-source values remain in Terraform state.
+- `auth_mode` (Set of String) Authentication backends.
+- `bridge_gateway` (String) TAP bridge gateway.
+- `bridge_pool` (String) TAP bridge pool.
 - `ca` (String) Certificate Authority reference (UUID/refid).
+- `carp_depend_on` (String) CARP dependency.
 - `cert` (String) Server/client certificate reference (UUID/refid).
+- `cert_depth` (String) Certificate chain depth.
+- `compress_migrate` (Boolean) Whether compression migration is enabled.
+- `crl` (String) Certificate revocation list reference.
 - `data_ciphers` (Set of String) Allowed data ciphers (e.g. 'AES-256-GCM').
+- `data_ciphers_fallback` (String) Legacy data cipher fallback.
+- `data_ciphers_ordered` (List of String) Allowed data ciphers in priority order.
 - `description` (String) Description.
 - `dev_type` (String) Device type: 'tun', 'tap', or 'ovpn'. Defaults to 'tun'.
+- `dns_domain` (Set of String) Pushed DNS domains.
+- `dns_domain_search` (Set of String) Pushed DNS search domains.
 - `dns_servers` (Set of String) DNS servers pushed to clients.
 - `enabled` (Boolean) Whether the instance is enabled. Defaults to 'true'.
+- `fragment` (Number) Fragment size.
+- `http_proxy` (String) HTTP proxy.
+- `ifconfig_pool_persist` (Boolean) Whether address assignments persist.
 - `keepalive_interval` (Number) Keepalive ping interval in seconds (0 = unset).
 - `keepalive_timeout` (Number) Keepalive timeout in seconds (0 = unset).
 - `local` (String) Local interface address to bind.
+- `local_group` (String) Required local group.
 - `max_clients` (Number) Maximum number of connected clients (0 = unset).
+- `mss_fix` (Boolean) Whether MSS clamping is enabled.
+- `no_pool` (Boolean) Whether the dynamic pool is disabled.
+- `ntp_servers` (Set of String) Pushed NTP servers.
+- `password` (String, Sensitive) Client password. Sensitive data-source values remain in Terraform state.
 - `port` (String) Listen/connect port.
+- `port_share` (String) Shared service host and port.
 - `protocol` (String) Protocol: 'udp', 'udp4', 'udp6', 'tcp', 'tcp4', 'tcp6'. Defaults to 'udp'.
+- `provision_exclusive` (Boolean) Whether sessions are exclusive.
+- `push_excluded_routes` (Set of String) Excluded pushed routes.
+- `push_inactive` (Number) Inactive disconnect interval.
 - `push_route` (Set of String) Networks (CIDR) pushed as routes to clients.
 - `redirect_gateway` (Set of String) redirect-gateway flags (e.g. 'def1', 'bypass-dhcp').
+- `register_dns` (Boolean) Whether register-dns is pushed.
 - `remote` (String) Remote server address (client role).
+- `remote_cert_tls` (Boolean) Whether peer extended key usage is required.
+- `reneg_sec` (Number) Key renegotiation interval.
 - `role` (String) Instance role: 'server' or 'client'.
+- `route` (Set of String) Installed routes.
+- `route_metric` (Number) Route metric.
 - `server` (String) IPv4 tunnel network (CIDR) for server role.
+- `server_ipv6` (String) IPv6 tunnel network.
+- `strict_user_cn` (String) Username/common-name comparison mode.
 - `tls_key` (String) TLS static key reference (UUID of an opnsense_openvpn_static_key).
 - `topology` (String) Topology: 'subnet', 'p2p', or 'net30'. Defaults to 'subnet'.
+- `tun_mtu` (Number) Tunnel MTU.
+- `use_ocsp` (Boolean) Whether OCSP verification is enabled.
+- `username` (String) Client username.
+- `username_as_common_name` (Boolean) Whether username is used as common name.
+- `various_flags` (Set of String) Additional instance flags.
+- `various_push_flags` (Set of String) Additional pushed flags.
 - `verb` (String) Log verbosity level (0-11). Defaults to the OPNsense value when unset.
 - `verify_client_cert` (String) Client certificate verification: 'require' or 'none'. Defaults to 'require'.
+- `verify_x509_name` (String) Expected peer X.509 name.
 - `vpnid` (String) Numeric VPN instance id, auto-assigned by OPNsense.

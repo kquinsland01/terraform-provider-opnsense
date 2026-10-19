@@ -32,16 +32,24 @@ func (d *clientOverwriteDataSource) Schema(_ context.Context, _ datasource.Schem
 				Required:            true,
 				MarkdownDescription: "UUID to look up.",
 			},
-			"enabled":         dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this overwrite is enabled. Defaults to 'true'."},
-			"common_name":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Client certificate common name this overwrite applies to."},
-			"description":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description."},
-			"servers":         dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "OpenVPN instance UUIDs this overwrite applies to (empty = all)."},
-			"block":           dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Block this client from connecting. Defaults to 'false'."},
-			"push_reset":      dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Do not inherit the global push options. Defaults to 'false'."},
-			"tunnel_network":  dsschema.StringAttribute{Computed: true, MarkdownDescription: "Client-specific IPv4 tunnel network (CIDR)."},
-			"local_networks":  dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Local networks (CIDR) reachable by this client."},
-			"remote_networks": dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Remote networks (CIDR) behind this client (iroute)."},
-			"dns_servers":     dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "DNS servers pushed to this client."},
+			"enabled":           dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this overwrite is enabled. Defaults to 'true'."},
+			"common_name":       dsschema.StringAttribute{Computed: true, MarkdownDescription: "Client certificate common name this overwrite applies to."},
+			"description":       dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description."},
+			"servers":           dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "OpenVPN instance UUIDs this overwrite applies to (empty = all)."},
+			"block":             dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Block this client from connecting. Defaults to 'false'."},
+			"push_reset":        dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Do not inherit the global push options. Defaults to 'false'."},
+			"tunnel_network":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Client-specific IPv4 tunnel network (CIDR)."},
+			"tunnel_network_v6": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Client-specific IPv6 tunnel network (CIDR)."},
+			"local_networks":    dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Local networks (CIDR) reachable by this client."},
+			"remote_networks":   dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Remote networks (CIDR) behind this client (iroute)."},
+			"route_gateway":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Default route gateway override."},
+			"redirect_gateway":  dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "redirect-gateway flags."},
+			"register_dns":      dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether register-dns is pushed."},
+			"dns_domain":        dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Pushed DNS domains."},
+			"dns_domain_search": dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Pushed DNS search domains."},
+			"dns_servers":       dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "DNS servers pushed to this client."},
+			"ntp_servers":       dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "NTP servers pushed to this client."},
+			"wins_servers":      dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "WINS servers pushed to this client."},
 		},
 	}
 }
@@ -65,11 +73,31 @@ func (d *clientOverwriteDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 	id := config.ID.ValueString()
+	supported, _, err := openVPNParitySupport(ctx, d.client)
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to determine OpenVPN response contract", err.Error())
+		return
+	}
 	result, err := opnsense.Get[clientOverwriteAPIResponse](ctx, d.client, clientOverwriteReqOpts, id)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading OpenVPN client overwrite", fmt.Sprintf("Could not read OpenVPN client overwrite %s: %s", id, err))
 		return
 	}
-	config.fromAPI(ctx, result, id)
+	if err := config.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding OpenVPN client overwrite", err.Error())
+		return
+	}
+	if !supported {
+		// Additive fields are absent on legacy appliances; the strict owner decoder
+		// accepts that established shape without globally blocking the data source.
+		config.TunnelNetworkV6 = types.StringNull()
+		config.RouteGateway = types.StringNull()
+		config.RedirectGateway = types.SetNull(types.StringType)
+		config.RegisterDNS = types.BoolNull()
+		config.DNSDomain = types.SetNull(types.StringType)
+		config.DNSDomainSearch = types.SetNull(types.StringType)
+		config.NTPServers = types.SetNull(types.StringType)
+		config.WINSServers = types.SetNull(types.StringType)
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

@@ -1,9 +1,9 @@
 ---
 title: Provider Management Roadmap - Complete Provider Coverage and OPNsense Assignment API
 date: 2026-09-28
-last_updated: 2026-10-18
+last_updated: 2026-10-19
 author: BMad PM
-status: current
+status: in-review
 inputs:
   - prd.md
   - post-release-epics.md
@@ -27,7 +27,7 @@ Why this matters: this provider now has broad OPNsense surface coverage, but bre
 |---|---:|---:|
 | Current public release checked | `v0.6.0` | `v0.26.0` |
 | Registry downloads checked | about 8.1K | about 1.33M |
-| Resources / data sources | 108 / 92 | pinned baseline 47 / 45 plus one ephemeral resource |
+| Resources / data sources | 108 / 93 | pinned baseline 47 / 45 plus one registered ephemeral resource; Story 31.0c repair 2 passed digest-bound disposable proof and is in review |
 | Primary advantage | breadth, plugin/service coverage, generated docs | adoption, community recognition, polished positioning |
 | Main product gap | audited field/surface parity, proof, and positioning | coverage breadth |
 
@@ -91,7 +91,7 @@ Goal: make this provider the standard OPNsense provider by closing meaningful co
 | 31.0 Complete Provider Coverage Audit | P0 | done | `_bmad-output/implementation-artifacts/31-0-complete-provider-coverage-audit.md` |
 | 31.0a Firewall and NAT Field Parity | P0 | done | `_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md` |
 | 31.0b Kea Field and Surface Parity | P0 | done | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
-| 31.0c OpenVPN Field and Key Parity | P0 | backlog | `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md` |
+| 31.0c OpenVPN Field and Key Parity | P0 | review (repair 2 converged) | `_bmad-output/implementation-artifacts/spec-31-0c-openvpn-field-and-key-parity.md` |
 | 31.0d Unbound Settings and Forward Parity | P0 | backlog | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
 | 31.0e WireGuard Field and Settings Parity | P0 | backlog | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
 | 31.0f Trust Lifecycle and Settings Parity | P0 | backlog | `_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md` |

@@ -2,7 +2,7 @@
 title: Provider Support Matrix
 date: 2026-09-28
 author: BMad PM
-status: current
+status: in-review
 inputs:
   - prd.md
   - core-config-gap-analysis.md
@@ -20,10 +20,11 @@ This matrix is the current source of truth for release positioning. It reconcile
 | Area | Count | Status |
 |---|---:|---|
 | Resources | 108 | Supported |
-| Data sources | 92 | Supported |
+| Data sources | 93 | Registered; Story 31.0c repair-2 field-complete OpenVPN reads passed digest-bound disposable proof |
 | Resource docs | 108 | Supported |
-| Data source docs | 92 | Supported |
-| Remaining field/surface gaps | 8 audit-derived P0/P1 story groups (Stories 31.0c-31.0j) plus separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Data source docs | 93 | Generated |
+| Ephemeral resources / docs | 1 / 1 | Terraform 1.10+ OpenVPN key generator passed final protocol/non-persistence proof; implementation in review |
+| Remaining field/surface gaps | 7 audit-derived P0/P1 story groups (Stories 31.0d-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
 | Remaining resource-matching data-source gaps | 17 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
@@ -71,7 +72,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Monit | alert, service, test |
 | Quagga / FRR | BGP AS path, BGP community list, BGP neighbor, BGP peer group, BGP redistribution, OSPF area/interface/neighbor/network/prefix list/redistribution/route map, OSPFv3 interface/network/prefix list/redistribution/route map, prefix list, route map, static route |
 | Syslog | destination |
-| OpenVPN | client overwrite, instance |
+| OpenVPN | client overwrite, instance, static key |
 | System | gateway, route, system info, tunable, VIP, VLAN |
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA |
@@ -85,7 +86,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Data-source parity | Add read-only data sources for the 17 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Audited field/surface parity | Complete Stories 31.0c–31.0j for OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Audited field/surface parity | Complete Stories 31.0d–31.0j for Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
 | Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research

@@ -11,9 +11,11 @@
   },
   "local_inventory": {
     "resource_count": 108,
-    "data_source_count": 92,
+    "data_source_count": 93,
     "resource_doc_count": 108,
-    "data_source_doc_count": 92,
+    "data_source_doc_count": 93,
+    "ephemeral_resource_count": 1,
+    "ephemeral_resource_doc_count": 1,
     "resource_only_data_source_gaps": [
       "dnsmasq_settings",
       "interface_assignment",
@@ -22,7 +24,6 @@
       "kea_ctrl_agent",
       "kea_dhcpv4_settings",
       "kea_dhcpv6_settings",
-      "openvpn_static_key",
       "quagga_bgp_global",
       "quagga_general",
       "quagga_ospf6_general",
@@ -905,7 +906,7 @@
       "kind": "resource",
       "name": "openvpn_client_overwrite",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "openvpn_client_overwrite"
       ],
@@ -932,22 +933,21 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally",
-        "local_only": "none material",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "strict owner-local selected-map decoding, explicit-empty collection clears, import-safe optional values, and recoverable pending activation",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof imported the persisted advanced object into isolated Terraform import state, verified every imported attribute, and passed no-diff, drift/repair, explicit-clear, and zero-leftover checks",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_client_overwrite.md",
         "docs/resources/openvpn_client_overwrite.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+      ]
     },
     {
       "kind": "resource",
       "name": "openvpn_instance",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "openvpn_instance"
       ],
@@ -1018,16 +1018,15 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally",
-        "local_only": "verb and API-read vpnid",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "verb, API-read vpnid, additive ordered-cipher projection, strict owner-local decoding, import-safe optional values, and recoverable pending activation",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof imported persisted advanced server and client objects into isolated Terraform import state, verified every imported non-write-only attribute, and passed no-diff, drift/repair, explicit-clear, and zero-leftover checks",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_instance.md",
         "docs/resources/openvpn_instance.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+      ]
     },
     {
       "kind": "resource",
@@ -2407,7 +2406,7 @@
       "kind": "data-source",
       "name": "openvpn_client_overwrite",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "openvpn_client_overwrite"
       ],
@@ -2434,22 +2433,21 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "strict owner-local selected-map decoding and complete shared resource/data-source read model",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof compared the complete client-overwrite resource and data-source states and passed import/no-diff, drift/repair, explicit-clear, and zero-leftover checks",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_client_overwrite.md",
         "docs/data-sources/openvpn_client_overwrite.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+      ]
     },
     {
       "kind": "data-source",
       "name": "openvpn_instance",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "openvpn_instance"
       ],
@@ -2520,23 +2518,24 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally",
-        "local_only": "verb and API-read vpnid",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "verb, API-read vpnid, additive ordered-cipher projection, and strict owner-local selection/numeric decoding",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof compared complete server, no-pool server, and client resource/data-source states except write-only credentials and passed import/no-diff, drift/repair, explicit-clear, and zero-leftover checks",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_instance.md",
         "docs/data-sources/openvpn_instance.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+      ]
     },
     {
       "kind": "data-source",
       "name": "openvpn_static_key",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
-      "local_equivalents": [],
+      "classification": "covered",
+      "local_equivalents": [
+        "openvpn_static_key"
+      ],
       "baseline_fields": [
         "description",
         "id",
@@ -2545,16 +2544,15 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the baseline read-only lookup returns sensitive key material; no local data source exists",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "strict pre-request UUID validation and deterministic missing/malformed response diagnostics",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof performed a strict UUID GET-only lookup and asserted non-empty mode, description, and sensitive key state",
         "sensitive_write_only": "OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_static_key.md",
-        "docs/resources/openvpn_static_key.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+        "docs/data-sources/openvpn_static_key.md"
+      ]
     },
     {
       "kind": "data-source",
@@ -3150,24 +3148,25 @@
       "kind": "ephemeral-resource",
       "name": "openvpn_generate_key",
       "domain": "OpenVPN",
-      "classification": "missing-buildable",
-      "local_equivalents": [],
+      "classification": "covered",
+      "local_equivalents": [
+        "openvpn_generate_key"
+      ],
       "baseline_fields": [
         "key",
         "key_type"
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the gen_key ephemeral result never enters Terraform state; no local ephemeral surface exists",
-        "local_only": "none material",
-        "lifecycle": "calls gen_key on each apply and returns an in-memory value without state persistence",
+        "baseline_only": "none material after correcting the pinned baseline's query-string path and unsupported client key-type behavior to the authoritative OPNsense contract",
+        "local_only": "source-correct path-segment POST contract limited to secret, auth-token, tls-auth, tls-crypt, and tls-crypt-v2-server",
+        "lifecycle": "Digest-bound OPNsense 26.7.7 proof opened all five key types through Terraform Core and write-only consumers; exact generated values were absent from the actual saved plan, state, and Terraform log",
         "sensitive_write_only": "OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/ephemeral-resources/openvpn_generate_key.md",
         "internal/provider/provider.go"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md"
+      ]
     }
   ]
 }

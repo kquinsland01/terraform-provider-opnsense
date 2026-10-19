@@ -1,0 +1,22 @@
+Story 31.0c sanitized live acceptance output
+Run: 20261019-repair2-field-complete
+Target: disposable OPNsense 26.7.7, VM opnsense-acceptance-102, UUID aa90e347-371e-4e3b-8ba7-af7218b8a92b
+Command: test/scripts/run-story-31-0c-acceptance.sh
+Code/test digest before run: 0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4
+
+=== RUN   TestAccOpenVPNGenerateKeyEphemeralProtocol
+    Terraform Core/provider protocol exercised all five supported key types.
+    Five write-only consumers received generated keys; the actual saved plan, state, and Terraform log contained none of those exact values.
+--- PASS: TestAccOpenVPNGenerateKeyEphemeralProtocol
+=== RUN   TestAccOpenVPNAdvancedParity
+    OpenVPN parity fixture marker=tf-story31c-dm8xu0a7821f
+    Complete resource/data-source state equality passed for server, no-pool server, client, and client overwrite, excluding only write-only credentials.
+    OPENVPN_PARITY_CLEANUP owner=instance marker=tf-story31c-dm8xu0a7821f total=0
+    OPENVPN_PARITY_CLEANUP owner=client-overwrite marker=tf-story31c-dm8xu0a7821f total=0
+--- PASS: TestAccOpenVPNAdvancedParity
+=== RUN   TestAccOpenVPNStaticKeyLookup
+--- PASS: TestAccOpenVPNStaticKeyLookup
+PASS
+Code/test digest after run: 0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4
+OPENVPN_PARITY_EVIDENCE tests=3 cleanup_instance=0 cleanup_client_overwrite=0 secret_scan=clean
+Credentials, endpoint URLs, fixture dependency identifiers, generated keys, ephemeral markers, state files, and unsanitized logs are intentionally omitted.

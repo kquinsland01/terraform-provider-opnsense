@@ -18,6 +18,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	providerimpl "github.com/matthew-on-git/terraform-provider-opnsense/internal/provider"
@@ -78,6 +80,8 @@ type LocalInventory struct {
 	DataSourceCount    int      `json:"data_source_count"`
 	ResourceDocCount   int      `json:"resource_doc_count"`
 	DataSourceDocCount int      `json:"data_source_doc_count"`
+	EphemeralCount     int      `json:"ephemeral_resource_count"`
+	EphemeralDocCount  int      `json:"ephemeral_resource_doc_count"`
 	ResourceOnly       []string `json:"resource_only_data_source_gaps"`
 	DataSourceOnly     []string `json:"data_source_only"`
 }
@@ -129,11 +133,15 @@ func (m *Manifest) Validate(root string) error {
 	registrations := localRegistrations()
 	resourceDocs, resourceDocsErr := localDocNames(root, "resources")
 	dataSourceDocs, dataSourceDocsErr := localDocNames(root, "data-sources")
+	ephemeralDocs, ephemeralDocsErr := localDocNames(root, "ephemeral-resources")
 	if resourceDocsErr != nil {
 		problems = append(problems, "read resource docs: "+resourceDocsErr.Error())
 	}
 	if dataSourceDocsErr != nil {
 		problems = append(problems, "read data-source docs: "+dataSourceDocsErr.Error())
+	}
+	if ephemeralDocsErr != nil {
+		problems = append(problems, "read ephemeral-resource docs: "+ephemeralDocsErr.Error())
 	}
 	if resourceDocsErr == nil && len(resourceDocs) != m.LocalInventory.ResourceDocCount {
 		problems = append(problems, fmt.Sprintf("declared resource_doc_count=%d, actual=%d", m.LocalInventory.ResourceDocCount, len(resourceDocs)))
@@ -141,14 +149,23 @@ func (m *Manifest) Validate(root string) error {
 	if dataSourceDocsErr == nil && len(dataSourceDocs) != m.LocalInventory.DataSourceDocCount {
 		problems = append(problems, fmt.Sprintf("declared data_source_doc_count=%d, actual=%d", m.LocalInventory.DataSourceDocCount, len(dataSourceDocs)))
 	}
+	if ephemeralDocsErr == nil && len(ephemeralDocs) != m.LocalInventory.EphemeralDocCount {
+		problems = append(problems, fmt.Sprintf("declared ephemeral_resource_doc_count=%d, actual=%d", m.LocalInventory.EphemeralDocCount, len(ephemeralDocs)))
+	}
 	if len(registrations["resource"]) != m.LocalInventory.ResourceCount || len(registrations["data-source"]) != m.LocalInventory.DataSourceCount {
 		problems = append(problems, fmt.Sprintf("declared local registrations drifted: resources=%d/%d data-sources=%d/%d", m.LocalInventory.ResourceCount, len(registrations["resource"]), m.LocalInventory.DataSourceCount, len(registrations["data-source"])))
+	}
+	if len(registrations["ephemeral-resource"]) != m.LocalInventory.EphemeralCount {
+		problems = append(problems, fmt.Sprintf("declared ephemeral registrations drifted: ephemeral-resources=%d/%d", m.LocalInventory.EphemeralCount, len(registrations["ephemeral-resource"])))
 	}
 	if resourceDocsErr == nil && !sameNames(registrations["resource"], resourceDocs) {
 		problems = append(problems, "registered resources do not match generated resource docs")
 	}
 	if dataSourceDocsErr == nil && !sameNames(registrations["data-source"], dataSourceDocs) {
 		problems = append(problems, "registered data sources do not match generated data-source docs")
+	}
+	if ephemeralDocsErr == nil && !sameNames(registrations["ephemeral-resource"], ephemeralDocs) {
+		problems = append(problems, "registered ephemeral resources do not match generated ephemeral-resource docs")
 	}
 	if m.SchemaVersion != 1 {
 		problems = append(problems, "schema_version must be 1")
@@ -225,9 +242,13 @@ func (m *Manifest) Validate(root string) error {
 				}
 				docs := resourceDocs
 				docKind := "resource"
-				if row.Kind == "data-source" {
+				switch row.Kind {
+				case "data-source":
 					docs = dataSourceDocs
 					docKind = "data-source"
+				case "ephemeral-resource":
+					docs = ephemeralDocs
+					docKind = "ephemeral-resource"
 				}
 				if !docs[equivalent] {
 					problems = append(problems, fmt.Sprintf("covered surface %s local equivalent %q lacks %s docs", key, equivalent, docKind))
@@ -277,8 +298,7 @@ func isCovered(classification string) bool {
 
 func localRegistrations() map[string]map[string]bool {
 	registrations := map[string]map[string]bool{
-		"resource":    {},
-		"data-source": {},
+		"resource": {}, "data-source": {}, "ephemeral-resource": {},
 	}
 	p := providerimpl.New("coverage-audit")()
 	for _, factory := range p.Resources(context.Background()) {
@@ -290,6 +310,14 @@ func localRegistrations() map[string]map[string]bool {
 		var resp datasource.MetadataResponse
 		factory().Metadata(context.Background(), datasource.MetadataRequest{ProviderTypeName: "opnsense"}, &resp)
 		registrations["data-source"][strings.TrimPrefix(resp.TypeName, "opnsense_")] = true
+	}
+	withEphemeral, ok := p.(provider.ProviderWithEphemeralResources)
+	if ok {
+		for _, factory := range withEphemeral.EphemeralResources(context.Background()) {
+			var resp ephemeral.MetadataResponse
+			factory().Metadata(context.Background(), ephemeral.MetadataRequest{ProviderTypeName: "opnsense"}, &resp)
+			registrations["ephemeral-resource"][strings.TrimPrefix(resp.TypeName, "opnsense_")] = true
+		}
 	}
 	return registrations
 }

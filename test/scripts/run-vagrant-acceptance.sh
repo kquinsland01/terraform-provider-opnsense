@@ -11,6 +11,7 @@ PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../.." && pwd)
 DEVRAIL_IMAGE=${DEVRAIL_IMAGE:-ghcr.io/devrail-dev/dev-toolchain:1.12.0}
 TEST_REGEX=${TEST_REGEX:-TestAcc}
 TEST_TIMEOUT=${TEST_TIMEOUT:-30m}
+TEST_VERBOSE=${TEST_VERBOSE:-0}
 RESULTS_DIR=${RESULTS_DIR:-${PROJECT_ROOT}/test/acceptance-results}
 RUN_ID=${RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}
 RUN_DIR=${RESULTS_DIR}/${RUN_ID}
@@ -32,6 +33,7 @@ Optional environment:
 
   TEST_REGEX=TestAcc                       Go -run pattern
   TEST_TIMEOUT=30m                         Per-package Go test timeout
+  TEST_VERBOSE=1                           Emit exact per-test PASS/SKIP lines
   DEVRAIL_IMAGE=ghcr.io/devrail-dev/dev-toolchain:1.12.0
   OPNSENSE_ACCEPTANCE_PACKAGES='./internal/service/firewall ./internal/service/haproxy'
   RESULTS_DIR=test/acceptance-results
@@ -74,7 +76,36 @@ docker_env=(
   -e "OPNSENSE_ALLOW_INSECURE=${OPNSENSE_ALLOW_INSECURE}"
 )
 
-for optional_env in OPNSENSE_ACME_ISSUE OPNSENSE_ACME_CERT_DOMAIN OPNSENSE_ACME_ACCOUNT_UUID OPNSENSE_ACME_VALIDATION_UUID OPNSENSE_HAPROXY_CERT_REFID OPNSENSE_INTERFACE_ASSIGNMENT OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_ADDRESS OPNSENSE_INTERFACE_ASSIGNMENT_UPDATED_IPV4_ADDRESS OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_PREFIX_LENGTH OPNSENSE_FIREWALL_PARITY OPNSENSE_FIREWALL_TEST_INTERFACE OPNSENSE_FIREWALL_TEST_INTERFACES OPNSENSE_KEA_PARITY OPNSENSE_KEA_TEST_INTERFACE; do
+optional_envs=(
+  OPNSENSE_ACME_ISSUE
+  OPNSENSE_ACME_CERT_DOMAIN
+  OPNSENSE_ACME_ACCOUNT_UUID
+  OPNSENSE_ACME_VALIDATION_UUID
+  OPNSENSE_HAPROXY_CERT_REFID
+  OPNSENSE_INTERFACE_ASSIGNMENT
+  OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_ADDRESS
+  OPNSENSE_INTERFACE_ASSIGNMENT_UPDATED_IPV4_ADDRESS
+  OPNSENSE_INTERFACE_ASSIGNMENT_IPV4_PREFIX_LENGTH
+  OPNSENSE_FIREWALL_PARITY
+  OPNSENSE_FIREWALL_TEST_INTERFACE
+  OPNSENSE_FIREWALL_TEST_INTERFACES
+  OPNSENSE_KEA_PARITY
+  OPNSENSE_KEA_TEST_INTERFACE
+  OPNSENSE_OPENVPN_PARITY
+  OPNSENSE_DISPOSABLE_VM_NAME
+  OPNSENSE_DISPOSABLE_VM_UUID
+  OPNSENSE_OPENVPN_IDENTITY_ATTESTATION
+  OPNSENSE_OPENVPN_TEST_CA
+  OPNSENSE_OPENVPN_TEST_CERT
+  OPNSENSE_OPENVPN_TEST_CRL
+  OPNSENSE_OPENVPN_TEST_STATIC_KEY_UUID
+  OPNSENSE_OPENVPN_TEST_LOCAL_GROUP
+  OPNSENSE_OPENVPN_TEST_CARP
+  OPNSENSE_OPENVPN_TF_WORKDIR
+  TF_LOG
+  TF_LOG_PATH
+)
+for optional_env in "${optional_envs[@]}"; do
   if [ -n "${!optional_env:-}" ]; then
     docker_env+=( -e "${optional_env}=${!optional_env}" )
   fi
@@ -105,12 +136,16 @@ log_info "running ${#packages[@]} package(s) with -run ${TEST_REGEX}"
 log_info "results: ${RUN_DIR}"
 
 failures=0
+go_test_args=(-run "${TEST_REGEX}" -count=1 -p 1 -timeout "${TEST_TIMEOUT}")
+if [ "${TEST_VERBOSE}" = "1" ]; then
+  go_test_args+=(-v)
+fi
 for pkg in "${packages[@]}"; do
   safe_name=${pkg//\//_}
   safe_name=${safe_name//./_}
   log_file=${RUN_DIR}/${safe_name}.log
   log_info "testing ${pkg}"
-  if "${docker_base[@]}" go test -run "${TEST_REGEX}" -count=1 -p 1 -timeout "${TEST_TIMEOUT}" "${pkg}" >"${log_file}" 2>&1; then
+  if "${docker_base[@]}" go test "${go_test_args[@]}" "${pkg}" >"${log_file}" 2>&1; then
     printf 'pass\t%s\t%s\n' "${pkg}" "${log_file}" >> "${summary_file}"
   else
     failures=$((failures + 1))
