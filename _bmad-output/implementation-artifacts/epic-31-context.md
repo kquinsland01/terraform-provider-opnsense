@@ -53,7 +53,7 @@ Make the provider complete enough to be the default choice for managing an OPNse
 
 ## Cross-Story Dependencies
 
-- Story 31.0 established the pinned baseline and generated Stories 31.0a–31.0j. Firewall/NAT and Kea parity are complete; finish the remaining P0 work in Stories 31.0c–31.0f before P1 Stories 31.0g–31.0j, rerunning the deterministic audit after registration or schema changes.
+- Story 31.0 established the pinned baseline and generated Stories 31.0a–31.0j. Stories 31.0a–31.0d have reached done or review; complete the remaining P0 work in Stories 31.0e–31.0f before P1 Stories 31.0g–31.0j, rerunning the deterministic audit after registration or schema changes.
 - Story 31.1 follows the parity work so README and Registry claims match verified coverage. Story 31.2 then publishes safe migration paths, and Story 31.3 builds adoption stacks on that verified surface.
 - Epic 30 supplies release-gated interface assignment/IP support for OPNsense 26.7.6 or newer; PPPoE remains separately unverified and must not be implied by Epic 31 positioning.
 - Epic 32 supplies broader acceptance-proof and v1-readiness evidence. Epic 31 improves completeness and adoption but does not by itself establish v1 readiness.
