@@ -1,0 +1,57 @@
+{
+  "story": "31.0c",
+  "run_id": "20261019-repair2-field-complete",
+  "evidence_status": "final-live-pass",
+  "final_live_proof": true,
+  "attestation": {
+    "algorithm": "sha256",
+    "command": "test/scripts/story-31-0c-code-digest.sh",
+    "scope": "Sorted paths and contents for provider/acctest sources, OpenVPN implementation and tests, dependency locks, the acceptance runners, and the digest script itself; independent of HEAD, index, and dirty-worktree state",
+    "pre_live_digest": "0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4",
+    "post_live_digest": "0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4",
+    "sanitized_non_cached_output": "_bmad-output/implementation-artifacts/31-0c-live-output.txt"
+  },
+  "target": {
+    "product": "OPNsense",
+    "version": "26.7.7",
+    "disposable": true,
+    "vm_name": "opnsense-acceptance-102",
+    "vm_uuid": "aa90e347-371e-4e3b-8ba7-af7218b8a92b"
+  },
+  "command": "test/scripts/run-story-31-0c-acceptance.sh",
+  "result": {
+    "status": "pass",
+    "skipped": false,
+    "tests": {
+      "TestAccOpenVPNAdvancedParity": "pass",
+      "TestAccOpenVPNGenerateKeyEphemeralProtocol": "pass",
+      "TestAccOpenVPNStaticKeyLookup": "pass"
+    },
+    "coverage": [
+      "advanced instance and client-overwrite CRUD/read/import",
+      "complete resource-to-data-source state equality for server, no-pool server, client, and client overwrite, excluding only write-only credentials",
+      "stable no-change plans",
+      "out-of-band drift detection and repair",
+      "populated-to-explicit-empty collection updates",
+      "strict static-key UUID lookup",
+      "Terraform provider configuration handoff to ephemeral resources",
+      "all five source-supported key types through Terraform Core",
+      "exact generated key absence from saved plan, persisted state, and Terraform logs",
+      "owner-specific zero-match cleanup"
+    ]
+  },
+  "cleanup": {
+    "fixture_marker": "tf-story31c-dm8xu0a7821f",
+    "owners": {
+      "instance": 0,
+      "client-overwrite": 0
+    }
+  },
+  "artifact_scan": {
+    "terraform_plan": "clean",
+    "terraform_state": "clean",
+    "terraform_logs": "clean",
+    "retained_evidence": "clean"
+  },
+  "secrets_retained": false
+}

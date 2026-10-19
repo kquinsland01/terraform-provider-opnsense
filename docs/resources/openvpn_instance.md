@@ -40,27 +40,67 @@ resource "opnsense_openvpn_instance" "server" {
 ### Optional
 
 - `auth` (String) Auth digest algorithm (e.g. `SHA256`).
+- `auth_gen_token` (Number) Generated authentication token lifetime.
+- `auth_gen_token_renewal` (Number) Generated authentication token renewal interval.
+- `auth_gen_token_secret` (String, Sensitive) Secret used to sign generated authentication tokens.
+- `auth_mode` (Set of String) Authentication backend identifiers.
+- `bridge_gateway` (String) Bridge gateway address for TAP mode.
+- `bridge_pool` (String) Bridge pool range for TAP mode.
 - `ca` (String) Certificate Authority reference (UUID/refid).
+- `carp_depend_on` (String) CARP virtual IP this instance depends on.
 - `cert` (String) Server/client certificate reference (UUID/refid).
+- `cert_depth` (String) Maximum certificate chain depth.
+- `compress_migrate` (Boolean) Enable legacy compression migration.
+- `crl` (String) Certificate revocation list reference.
 - `data_ciphers` (Set of String) Allowed data ciphers (e.g. `AES-256-GCM`).
+- `data_ciphers_fallback` (String) Fallback data cipher for legacy clients.
+- `data_ciphers_ordered` (List of String) Priority-ordered data ciphers. When both cipher attributes are configured they must contain identical values.
 - `description` (String) Description.
 - `dev_type` (String) Device type: `tun`, `tap`, or `ovpn`. Defaults to `tun`.
+- `dns_domain` (Set of String) DNS domains pushed to clients.
+- `dns_domain_search` (Set of String) DNS search domains pushed to clients.
 - `dns_servers` (Set of String) DNS servers pushed to clients.
 - `enabled` (Boolean) Whether the instance is enabled. Defaults to `true`.
+- `fragment` (Number) Internal datagram fragmentation size.
+- `http_proxy` (String) Client HTTP proxy in `host:port` form.
+- `ifconfig_pool_persist` (Boolean) Persist client address assignments.
 - `keepalive_interval` (Number) Keepalive ping interval in seconds (0 = unset).
 - `keepalive_timeout` (Number) Keepalive timeout in seconds (0 = unset).
 - `local` (String) Local interface address to bind.
+- `local_group` (String) Required local authentication group.
 - `max_clients` (Number) Maximum number of connected clients (0 = unset).
+- `mss_fix` (Boolean) Clamp TCP MSS to the tunnel MTU.
+- `no_pool` (Boolean) Disable the dynamic address pool.
+- `ntp_servers` (Set of String) NTP servers pushed to clients.
+- `password` (String, Sensitive) Client-mode password. The prior configured value is preserved when OPNsense omits it on read.
 - `port` (String) Listen/connect port.
+- `port_share` (String) Share the OpenVPN port with another service using `host:port`.
 - `protocol` (String) Protocol: `udp`, `udp4`, `udp6`, `tcp`, `tcp4`, `tcp6`. Defaults to `udp`.
+- `provision_exclusive` (Boolean) Allow only the newest session for a common name.
+- `push_excluded_routes` (Set of String) Routes excluded from client route pushes.
+- `push_inactive` (Number) Disconnect clients after this many inactive seconds.
 - `push_route` (Set of String) Networks (CIDR) pushed as routes to clients.
 - `redirect_gateway` (Set of String) redirect-gateway flags (e.g. `def1`, `bypass-dhcp`).
+- `register_dns` (Boolean) Request Windows clients to register DNS.
 - `remote` (String) Remote server address (client role).
+- `remote_cert_tls` (Boolean) Require the peer certificate extended key usage.
+- `reneg_sec` (Number) Data-channel key renegotiation interval.
+- `route` (Set of String) Local routes installed by OpenVPN.
+- `route_metric` (Number) Installed route metric.
 - `server` (String) IPv4 tunnel network (CIDR) for server role.
+- `server_ipv6` (String) IPv6 tunnel network in CIDR notation.
+- `strict_user_cn` (String) Username/common-name matching mode.
 - `tls_key` (String) TLS static key reference (UUID of an opnsense_openvpn_static_key).
 - `topology` (String) Topology: `subnet`, `p2p`, or `net30`. Defaults to `subnet`.
+- `tun_mtu` (Number) Tunnel MTU.
+- `use_ocsp` (Boolean) Verify peer certificates using OCSP.
+- `username` (String) Client-mode username.
+- `username_as_common_name` (Boolean) Use the authenticated username as common name.
+- `various_flags` (Set of String) Additional OpenVPN instance flags.
+- `various_push_flags` (Set of String) Additional flags pushed to clients.
 - `verb` (String) Log verbosity level (0-11). Defaults to the OPNsense value when unset.
 - `verify_client_cert` (String) Client certificate verification: `require` or `none`. Defaults to `require`.
+- `verify_x509_name` (String) Expected peer certificate X.509 name.
 
 ### Read-Only
 

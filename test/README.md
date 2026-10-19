@@ -128,6 +128,30 @@ Keep all four Kea service/HA flags (DHCPv4, DHCPv4 HA, DHCPv6, and DHCPv6 HA)
 disabled throughout the run. Never point this test
 at a production appliance or a management interface.
 
+## OpenVPN field and key parity tests
+
+Story 31.0c uses a dedicated digest-bound runner against exactly OPNsense
+26.7.7. It creates only disabled, collision-tagged instances and client
+overwrites and delegates the focused Go tests to the existing DevRail/Vagrant
+acceptance container. The runner requires an external executable that queries
+the hypervisor/inventory and prints independently observed `name=` and `uuid=`
+lines; a caller-supplied disposable flag alone is not accepted.
+
+Set the normal API variables, the expected VM name/UUID, the absolute identity
+probe path, the output of `test/scripts/story-31-0c-code-digest.sh`, and valid
+existing reference IDs for the CA, certificate, CRL, static key, local group,
+and CARP VIP. Then run:
+
+```sh
+test/scripts/run-story-31-0c-acceptance.sh
+```
+
+The runner requires exact non-skipped PASS lines for advanced CRUD/import,
+static-key lookup, and the Terraform CLI ephemeral protocol test. It parses two
+marker-bound zero-count cleanup lines, scans temporary logs for key/secret
+material, verifies the candidate digest before and after, and removes the
+temporary artifacts. Do not run it against a production appliance.
+
 ## Interface assignment/IP tests
 
 The interface-assignment lifecycle test is opt-in because it changes addressing.

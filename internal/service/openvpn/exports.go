@@ -6,6 +6,7 @@ package openvpn
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
@@ -23,5 +24,11 @@ func DataSources() []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newInstanceDataSource,
 		newClientOverwriteDataSource,
+		newStaticKeyDataSource,
 	}
+}
+
+// EphemeralResources returns OpenVPN values that exist only during an operation.
+func EphemeralResources() []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{newGenerateKeyEphemeral}
 }

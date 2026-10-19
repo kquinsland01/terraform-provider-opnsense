@@ -2,7 +2,7 @@
 
 Pinned baseline: `browningluke/opnsense` v0.26.0 at `33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba` (47 resources, 45 data sources, 1 ephemeral resource, and provider retry configuration).
 
-Current local inventory: **108 resources and 92 data sources**, with 108/92 generated docs. There are **17 resource-only same-name data-source gaps** and `system_info` is data-only.
+Current local inventory: **108 resources and 93 data sources**, with 108/93 generated docs. There are **16 resource-only same-name data-source gaps** and `system_info` is data-only.
 
 ## Ownership Direction
 
@@ -10,10 +10,10 @@ Use one provider per appliance and object domain in steady state. Never configur
 
 ## Classification Summary
 
-- `covered`: 39
+- `covered`: 45
 - `covered-different-name`: 14
 - `covered-broader`: 2
-- `missing-buildable`: 33
+- `missing-buildable`: 27
 - `missing-upstream-blocked`: 0
 - `intentionally-different`: 6
 - `needs-field-audit`: 0
@@ -26,7 +26,7 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **IPsec:** 6 surfaces (`covered`=2, `covered-different-name`=2, `missing-buildable`=2)
 - **Interfaces:** 8 surfaces (`covered-different-name`=4, `missing-buildable`=4)
 - **Kea:** 20 surfaces (`covered`=12, `covered-different-name`=2, `intentionally-different`=6)
-- **OpenVPN:** 7 surfaces (`covered`=1, `missing-buildable`=6)
+- **OpenVPN:** 7 surfaces (`covered`=7)
 - **Provider:** 1 surfaces (`missing-buildable`=1)
 - **Quagga/BGP:** 10 surfaces (`covered`=4, `covered-different-name`=2, `missing-buildable`=4)
 - **Routing:** 2 surfaces (`covered-different-name`=2)
@@ -340,29 +340,27 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_subnet.md; docs/resources/kea_dhcpv4_subnet.md
 
-#### `resource:openvpn_client_overwrite` — missing-buildable
+#### `resource:openvpn_client_overwrite` — covered
 
 - **Domain / local mapping:** OpenVPN / `openvpn_client_overwrite`
 - **Baseline fields:** block, common_name, description, dns_domain, dns_domain_search, dns_servers, enabled, id, local_networks, ntp_servers, push_reset, redirect_gateway, register_dns, remote_networks, route_gateway, servers, tunnel_network, tunnel_network_v6, wins_servers
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** strict owner-local selected-map decoding, explicit-empty collection clears, import-safe optional values, and recoverable pending activation
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof imported the persisted advanced object into isolated Terraform import state, verified every imported attribute, and passed no-diff, drift/repair, explicit-clear, and zero-leftover checks
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_client_overwrite.md; docs/resources/openvpn_client_overwrite.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
 
-#### `resource:openvpn_instance` — missing-buildable
+#### `resource:openvpn_instance` — covered
 
 - **Domain / local mapping:** OpenVPN / `openvpn_instance`
 - **Baseline fields:** auth_digest, auth_gen_token, auth_gen_token_renewal, auth_gen_token_secret, auth_mode, bridge_gateway, bridge_pool, carp_depend_on, cert_depth, certificate, certificate_authority, compress_migrate, crl, data_ciphers, data_ciphers_fallback, description, dev_type, dns_domain, dns_domain_search, dns_servers, enabled, fragment, http_proxy, id, ifconfig_pool_persist, keepalive_interval, keepalive_timeout, local, local_group, max_clients, mss_fix, no_pool, ntp_servers, password, port, port_share, protocol, provision_exclusive, push_excluded_routes, push_inactive, push_route, redirect_gateway, register_dns, remote, remote_cert_tls, reneg_sec, role, route, route_metric, server, server_ipv6, strict_user_cn, tls_key, topology, tun_mtu, use_ocsp, username, username_as_common_name, various_flags, various_push_flags, verify_client_cert, verify_x509_name, vpn_id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally
-- **Local-only:** verb and API-read vpnid
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** verb, API-read vpnid, additive ordered-cipher projection, strict owner-local decoding, import-safe optional values, and recoverable pending activation
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof imported persisted advanced server and client objects into isolated Terraform import state, verified every imported non-write-only attribute, and passed no-diff, drift/repair, explicit-clear, and zero-leftover checks
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/openvpn_instance.md; docs/resources/openvpn_instance.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
 
 #### `resource:openvpn_static_key` — covered
 
@@ -853,41 +851,38 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_subnet.md; docs/data-sources/kea_dhcpv4_subnet.md
 
-#### `data-source:openvpn_client_overwrite` — missing-buildable
+#### `data-source:openvpn_client_overwrite` — covered
 
 - **Domain / local mapping:** OpenVPN / `openvpn_client_overwrite`
 - **Baseline fields:** block, common_name, description, dns_domain, dns_domain_search, dns_servers, enabled, id, local_networks, ntp_servers, push_reset, redirect_gateway, register_dns, remote_networks, route_gateway, servers, tunnel_network, tunnel_network_v6, wins_servers
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS/search domain, NTP, redirect/register-DNS, route-gateway, IPv6 tunnel, and WINS fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** strict owner-local selected-map decoding and complete shared resource/data-source read model
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof compared the complete client-overwrite resource and data-source states and passed import/no-diff, drift/repair, explicit-clear, and zero-leftover checks
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_client_overwrite.md; docs/data-sources/openvpn_client_overwrite.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
 
-#### `data-source:openvpn_instance` — missing-buildable
+#### `data-source:openvpn_instance` — covered
 
 - **Domain / local mapping:** OpenVPN / `openvpn_instance`
 - **Baseline fields:** auth_digest, auth_gen_token, auth_gen_token_renewal, auth_gen_token_secret, auth_mode, bridge_gateway, bridge_pool, carp_depend_on, cert_depth, certificate, certificate_authority, compress_migrate, crl, data_ciphers, data_ciphers_fallback, description, dev_type, dns_domain, dns_domain_search, dns_servers, enabled, fragment, http_proxy, id, ifconfig_pool_persist, keepalive_interval, keepalive_timeout, local, local_group, max_clients, mss_fix, no_pool, ntp_servers, password, port, port_share, protocol, provision_exclusive, push_excluded_routes, push_inactive, push_route, redirect_gateway, register_dns, remote, remote_cert_tls, reneg_sec, role, route, route_metric, server, server_ipv6, strict_user_cn, tls_key, topology, tun_mtu, use_ocsp, username, username_as_common_name, various_flags, various_push_flags, verify_client_cert, verify_x509_name, vpn_id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** token, bridge, CRL/OCSP, IPv6, client credential, routing, MTU/MSS, cipher fallback, DNS/search/NTP, and advanced flag fields are absent locally
-- **Local-only:** verb and API-read vpnid
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** verb, API-read vpnid, additive ordered-cipher projection, and strict owner-local selection/numeric decoding
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof compared complete server, no-pool server, and client resource/data-source states except write-only credentials and passed import/no-diff, drift/repair, explicit-clear, and zero-leftover checks
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_instance.md; docs/data-sources/openvpn_instance.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
 
-#### `data-source:openvpn_static_key` — missing-buildable
+#### `data-source:openvpn_static_key` — covered
 
-- **Domain / local mapping:** OpenVPN / none
+- **Domain / local mapping:** OpenVPN / `openvpn_static_key`
 - **Baseline fields:** description, id, key, mode
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the baseline read-only lookup returns sensitive key material; no local data source exists
-- **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** strict pre-request UUID validation and deterministic missing/malformed response diagnostics
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof performed a strict UUID GET-only lookup and asserted non-empty mode, description, and sensitive key state
 - **Sensitive/write-only:** OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_static_key.md; docs/resources/openvpn_static_key.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/openvpn_static_key.md; docs/data-sources/openvpn_static_key.md
 
 #### `data-source:quagga_bgp_aspath` — covered
 
@@ -1099,20 +1094,19 @@ Use one provider per appliance and object domain in steady state. Never configur
 
 ### Ephemeral Resource
 
-#### `ephemeral-resource:openvpn_generate_key` — missing-buildable
+#### `ephemeral-resource:openvpn_generate_key` — covered
 
-- **Domain / local mapping:** OpenVPN / none
+- **Domain / local mapping:** OpenVPN / `openvpn_generate_key`
 - **Baseline fields:** key, key_type
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the gen_key ephemeral result never enters Terraform state; no local ephemeral surface exists
-- **Local-only:** none material
-- **Lifecycle:** calls gen_key on each apply and returns an in-memory value without state persistence
+- **Baseline-only:** none material after correcting the pinned baseline's query-string path and unsupported client key-type behavior to the authoritative OPNsense contract
+- **Local-only:** source-correct path-segment POST contract limited to secret, auth-token, tls-auth, tls-crypt, and tls-crypt-v2-server
+- **Lifecycle:** Digest-bound OPNsense 26.7.7 proof opened all five key types through Terraform Core and write-only consumers; exact generated values were absent from the actual saved plan, state, and Terraform log
 - **Sensitive/write-only:** OpenVPN key is sensitive; the ephemeral form avoids state while the lookup stores a sensitive value
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/ephemeral-resources/openvpn_generate_key.md; internal/provider/provider.go
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md`
 
 ## Local Inventory Exceptions
 
-Resource-only same-name data-source gaps (17): `dnsmasq_settings`, `interface_assignment`, `ipsec_key_pair`, `ipsec_psk`, `kea_ctrl_agent`, `kea_dhcpv4_settings`, `kea_dhcpv6_settings`, `openvpn_static_key`, `quagga_bgp_global`, `quagga_general`, `quagga_ospf6_general`, `quagga_ospf_general`, `quagga_rip`, `quagga_static`, `trust_cert`, `unbound_dnsbl`, `unbound_general`.
+Resource-only same-name data-source gaps (16): `dnsmasq_settings`, `interface_assignment`, `ipsec_key_pair`, `ipsec_psk`, `kea_ctrl_agent`, `kea_dhcpv4_settings`, `kea_dhcpv6_settings`, `quagga_bgp_global`, `quagga_general`, `quagga_ospf6_general`, `quagga_ospf_general`, `quagga_rip`, `quagga_static`, `trust_cert`, `unbound_dnsbl`, `unbound_general`.
 
 Data-only: `system_info`.

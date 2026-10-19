@@ -33,13 +33,21 @@ resource "opnsense_openvpn_client_overwrite" "branch_office" {
 
 - `block` (Boolean) Block this client from connecting. Defaults to `false`.
 - `description` (String) Description.
+- `dns_domain` (Set of String) DNS domains pushed to this client.
+- `dns_domain_search` (Set of String) DNS search domains pushed to this client.
 - `dns_servers` (Set of String) DNS servers pushed to this client.
 - `enabled` (Boolean) Whether this overwrite is enabled. Defaults to `true`.
 - `local_networks` (Set of String) Local networks (CIDR) reachable by this client.
+- `ntp_servers` (Set of String) NTP servers pushed to this client.
 - `push_reset` (Boolean) Do not inherit the global push options. Defaults to `false`.
+- `redirect_gateway` (Set of String) redirect-gateway flags pushed to this client.
+- `register_dns` (Boolean) Push register-dns to Windows clients.
 - `remote_networks` (Set of String) Remote networks (CIDR) behind this client (iroute).
+- `route_gateway` (String) Default route gateway override.
 - `servers` (Set of String) OpenVPN instance UUIDs this overwrite applies to (empty = all).
 - `tunnel_network` (String) Client-specific IPv4 tunnel network (CIDR).
+- `tunnel_network_v6` (String) Client-specific IPv6 tunnel network (CIDR).
+- `wins_servers` (Set of String) WINS servers pushed to this client.
 
 ### Read-Only
 

@@ -93,6 +93,10 @@ func TestMatrixClassificationExamples(t *testing.T) {
 	if interfaceData.Classification != "missing-buildable" || interfaceData.FollowUp == "" {
 		t.Fatalf("interface data-source classification = %q, follow-up = %q", interfaceData.Classification, interfaceData.FollowUp)
 	}
+	openVPNKey := findSurface(t, audit, "ephemeral-resource", "openvpn_generate_key")
+	if openVPNKey.Classification != "covered" || strings.Join(openVPNKey.LocalEquivalents, ",") != "openvpn_generate_key" || openVPNKey.FollowUp != "" {
+		t.Fatalf("OpenVPN ephemeral classification = %q, equivalents = %v, follow-up = %q", openVPNKey.Classification, openVPNKey.LocalEquivalents, openVPNKey.FollowUp)
+	}
 }
 
 func TestManifestRejectsInvalidMatrixRows(t *testing.T) {

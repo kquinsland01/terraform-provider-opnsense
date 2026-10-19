@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	frameworkprovider "github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
@@ -70,6 +71,39 @@ func TestProvider_Schema_HasExpectedAttributes(t *testing.T) {
 	}
 	if !insecureAttr.IsOptional() {
 		t.Error("expected 'insecure' to be Optional")
+	}
+}
+
+func TestProvider_EphemeralRegistrationAndConfigurationHandoff(t *testing.T) {
+	t.Parallel()
+	p := New("test")().(*OpnsenseProvider)
+	if got := len(p.EphemeralResources(context.Background())); got != 1 {
+		t.Fatalf("ephemeral registrations = %d, want 1", got)
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/core/menu/search" {
+			t.Fatalf("unexpected path %q", r.URL.Path)
+		}
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	}))
+	defer server.Close()
+	var schemaResp frameworkprovider.SchemaResponse
+	p.Schema(context.Background(), frameworkprovider.SchemaRequest{}, &schemaResp)
+	state := tfsdk.State{Schema: schemaResp.Schema}
+	model := OpnsenseProviderModel{URI: types.StringValue(server.URL), APIKey: types.StringValue("test-key"), APISecret: types.StringValue("test-secret"), Insecure: types.BoolValue(false)}
+	if diags := state.Set(context.Background(), &model); diags.HasError() {
+		t.Fatal(diags)
+	}
+	var configureResp frameworkprovider.ConfigureResponse
+	p.Configure(context.Background(), frameworkprovider.ConfigureRequest{Config: tfsdk.Config{Raw: state.Raw, Schema: schemaResp.Schema}}, &configureResp)
+	if configureResp.Diagnostics.HasError() {
+		t.Fatal(configureResp.Diagnostics)
+	}
+	if configureResp.ResourceData == nil || configureResp.DataSourceData == nil || configureResp.EphemeralResourceData == nil {
+		t.Fatal("provider did not hand configuration to every owner kind")
+	}
+	if configureResp.ResourceData != configureResp.EphemeralResourceData || configureResp.DataSourceData != configureResp.EphemeralResourceData {
+		t.Fatal("resource, data-source, and ephemeral owners received different clients")
 	}
 }
 

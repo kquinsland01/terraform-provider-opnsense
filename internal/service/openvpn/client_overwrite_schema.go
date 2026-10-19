@@ -50,6 +50,7 @@ func (r *clientOverwriteResource) Schema(_ context.Context, _ resource.SchemaReq
 				Optional: true, Computed: true, Default: stringdefault.StaticString(""),
 				MarkdownDescription: "Client-specific IPv4 tunnel network (CIDR).",
 			},
+			"tunnel_network_v6": schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Client-specific IPv6 tunnel network (CIDR)."},
 			"local_networks": schema.SetAttribute{
 				ElementType: types.StringType, Optional: true, Computed: true,
 				MarkdownDescription: "Local networks (CIDR) reachable by this client.",
@@ -58,10 +59,17 @@ func (r *clientOverwriteResource) Schema(_ context.Context, _ resource.SchemaReq
 				ElementType: types.StringType, Optional: true, Computed: true,
 				MarkdownDescription: "Remote networks (CIDR) behind this client (iroute).",
 			},
+			"route_gateway":     schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Default route gateway override."},
+			"redirect_gateway":  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "redirect-gateway flags pushed to this client."},
+			"register_dns":      schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Push register-dns to Windows clients."},
+			"dns_domain":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "DNS domains pushed to this client."},
+			"dns_domain_search": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "DNS search domains pushed to this client."},
 			"dns_servers": schema.SetAttribute{
 				ElementType: types.StringType, Optional: true, Computed: true,
 				MarkdownDescription: "DNS servers pushed to this client.",
 			},
+			"ntp_servers":  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "NTP servers pushed to this client."},
+			"wins_servers": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "WINS servers pushed to this client."},
 		},
 	}
 }

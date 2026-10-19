@@ -7,8 +7,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
 
 // StaticKeyResourceModel is the Terraform state model for opnsense_openvpn_static_key.
@@ -20,9 +18,9 @@ type StaticKeyResourceModel struct {
 }
 
 type staticKeyAPIResponse struct {
-	Mode        opnsense.SelectedMap `json:"mode"`
-	Key         string               `json:"key"`
-	Description string               `json:"description"`
+	Mode        strictSelectedMap `json:"mode"`
+	Key         string            `json:"key"`
+	Description string            `json:"description"`
 }
 
 type staticKeyAPIRequest struct {
