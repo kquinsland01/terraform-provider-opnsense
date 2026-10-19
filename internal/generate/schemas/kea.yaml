@@ -72,3 +72,65 @@ resources:
       - {name: Name, tf: name, json: name, type: string, required: true, test_value: '"tfaccpeer"', desc: "Unique name of the HA peer (must match the server name)."}
       - {name: Role, tf: role, json: role, type: selectmap, default: "primary", desc: "HA role: primary or standby."}
       - {name: URL, tf: url, json: url, type: string, required: true, test_value: '"http://192.0.2.5:8000/"', desc: "Control-agent URL of the peer."}
+
+  - name: dhcpv6_peer
+    go_type: DHCPv6Peer
+    type_name: kea_dhcpv6_peer
+    title: a Kea DHCPv6 High Availability peer
+    kind: item
+    recover_create: true
+    pending_activation: true
+    strict_delete_response: true
+    strict_missing_object_response: true
+    minimum_version: "26.7.7"
+    composite_destroy: checkKeaGeneratedPeerCleanup(t)
+    unique_test: true
+    response_validator: validateDHCPv6PeerResponse(m)
+    test_precheck: keaParityGeneratedPreCheck(t)
+    reconfigure: /api/kea/service/reconfigure
+    monad: peer
+    endpoints:
+      add: /api/kea/dhcpv6/add_peer
+      get: /api/kea/dhcpv6/get_peer
+      set: /api/kea/dhcpv6/set_peer
+      del: /api/kea/dhcpv6/del_peer
+      search: /api/kea/dhcpv6/search_peer
+    fields:
+      - {name: Name, tf: name, json: name, type: string, required: true, test_value: '"tfaccpeer6-%[1]s"', update_test_value: '"tfaccpeer6-updated-%[1]s"', desc: "Unique DHCPv6 HA peer name."}
+      - {name: Role, tf: role, json: role, type: selectmap, response_type: strict_selectmap, default: "primary", static_default: true, options: [primary, standby], test_value: '"primary"', update_test_value: '"standby"', desc: "DHCPv6 HA role: primary or standby; defaults to primary."}
+      - {name: URL, tf: url, json: url, type: string, required: true, test_value: '"http://[2001:db8::5]:8000/"', update_test_value: '"http://[2001:db8::6]:8000/"', desc: "Control-agent URL of the DHCPv6 peer."}
+
+  - name: dhcpv6_pd_pool
+    go_type: DHCPv6PDPool
+    type_name: kea_dhcpv6_pd_pool
+    title: a Kea DHCPv6 delegated-prefix pool
+    kind: item
+    recover_create: true
+    pending_activation: true
+    strict_delete_response: true
+    strict_missing_object_response: true
+    minimum_version: "26.7.7"
+    composite_destroy: checkKeaGeneratedPDPoolCleanup(t)
+    resource_from_api: fromAPIResource
+    unique_test: true
+    response_validator: validateDHCPv6PDPoolResponse(m)
+    test_precheck: keaParityGeneratedPreCheck(t)
+    reconfigure: /api/kea/service/reconfigure
+    monad: pd_pool
+    test_prereq: |
+      resource "opnsense_kea_dhcpv6_subnet" "pd_parent" {
+        subnet     = "fd32:%[3]x::/48"
+        interface  = %[2]q
+      }
+    endpoints:
+      add: /api/kea/dhcpv6/add_pd_pool
+      get: /api/kea/dhcpv6/get_pd_pool
+      set: /api/kea/dhcpv6/set_pd_pool
+      del: /api/kea/dhcpv6/del_pd_pool
+      search: /api/kea/dhcpv6/search_pd_pool
+    fields:
+      - {name: SubnetID, tf: subnet_id, json: subnet, type: string, response_type: strict_selectmap, required: true, test_value: 'opnsense_kea_dhcpv6_subnet.pd_parent.id', desc: "UUID of the parent Kea DHCPv6 subnet."}
+      - {name: Prefix, tf: prefix, json: prefix, type: string, required: true, normalize_cidr_to_address: true, preserve_equivalent_cidr: true, test_value: '"fd32:%[3]x::/48"', desc: "Aligned IPv6 aggregate prefix address or CIDR prefix.", data_source_desc: "Aligned IPv6 aggregate prefix address exactly as returned by the API (address-only, without CIDR suffix)."}
+      - {name: PrefixLength, tf: prefix_len, json: prefix_len, type: int, required: true, min: 1, max: 128, strict_response: true, test_value: '48', desc: "Length of the aggregate prefix."}
+      - {name: DelegatedLength, tf: delegated_len, json: delegated_len, type: int, required: true, min: 1, max: 128, strict_response: true, test_value: '64', update_test_value: '80', desc: "Length delegated to each client; must be longer than prefix_len."}
+      - {name: Description, tf: description, json: description, type: string, omit_unknown: true, test_value: '"Story31b-generated-%[1]s-pd"', update_test_value: '"Story31b-generated-%[1]s-pd-updated"', desc: "Description of the delegated-prefix pool."}

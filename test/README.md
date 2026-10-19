@@ -107,6 +107,27 @@ TEST_REGEX='TestAccFirewall(Alias|FilterRule|NatPortForward)_advancedParity' \
 
 Do not point these tests at production or management objects.
 
+## Kea field and surface parity tests
+
+Story 31.0b tests are separately opt-in and require a disposable OPNsense
+26.7.7 or newer appliance plus an isolated interface. The preflight refuses to
+run unless Kea DHCPv4, DHCPv6, and both HA configurations are disabled. The
+suite proves advanced v4/v6 subnet read-back, typed DHCPv6 peer and PD-pool
+lifecycle/import/update/drift repair, dependency-ordered cleanup, data-source
+parity, stable plans, and four exact zero-match cleanup searches.
+
+```sh
+export OPNSENSE_KEA_PARITY=1
+export OPNSENSE_KEA_TEST_INTERFACE=opt3
+
+TEST_REGEX='TestAcc(Kea.*Parity|DHCPv6(Peer|PDPool)_basic)' \
+  test/scripts/run-vagrant-acceptance.sh --package ./internal/service/kea
+```
+
+Keep all four Kea service/HA flags (DHCPv4, DHCPv4 HA, DHCPv6, and DHCPv6 HA)
+disabled throughout the run. Never point this test
+at a production appliance or a management interface.
+
 ## Interface assignment/IP tests
 
 The interface-assignment lifecycle test is opt-in because it changes addressing.

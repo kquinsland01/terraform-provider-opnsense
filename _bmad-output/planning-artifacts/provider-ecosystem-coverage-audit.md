@@ -2,7 +2,7 @@
 
 Pinned baseline: `browningluke/opnsense` v0.26.0 at `33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba` (47 resources, 45 data sources, 1 ephemeral resource, and provider retry configuration).
 
-Current local inventory: **106 resources and 90 data sources**, with 106/90 generated docs. There are **17 resource-only same-name data-source gaps** and `system_info` is data-only.
+Current local inventory: **108 resources and 92 data sources**, with 108/92 generated docs. There are **17 resource-only same-name data-source gaps** and `system_info` is data-only.
 
 ## Ownership Direction
 
@@ -10,10 +10,10 @@ Use one provider per appliance and object domain in steady state. Never configur
 
 ## Classification Summary
 
-- `covered`: 31
+- `covered`: 39
 - `covered-different-name`: 14
 - `covered-broader`: 2
-- `missing-buildable`: 41
+- `missing-buildable`: 33
 - `missing-upstream-blocked`: 0
 - `intentionally-different`: 6
 - `needs-field-audit`: 0
@@ -25,7 +25,7 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Firewall/NAT:** 12 surfaces (`covered`=10, `covered-different-name`=2)
 - **IPsec:** 6 surfaces (`covered`=2, `covered-different-name`=2, `missing-buildable`=2)
 - **Interfaces:** 8 surfaces (`covered-different-name`=4, `missing-buildable`=4)
-- **Kea:** 20 surfaces (`covered`=4, `covered-different-name`=2, `missing-buildable`=8, `intentionally-different`=6)
+- **Kea:** 20 surfaces (`covered`=12, `covered-different-name`=2, `intentionally-different`=6)
 - **OpenVPN:** 7 surfaces (`covered`=1, `missing-buildable`=6)
 - **Provider:** 1 surfaces (`missing-buildable`=1)
 - **Quagga/BGP:** 10 surfaces (`covered`=4, `covered-different-name`=2, `missing-buildable`=4)
@@ -252,41 +252,38 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv4_reservation.md; docs/resources/kea_dhcpv4_reservation.md
 
-#### `resource:kea_dhcpv4_subnet` — missing-buildable
+#### `resource:kea_dhcpv4_subnet` — covered
 
 - **Domain / local mapping:** Kea / `kea_dhcpv4_subnet`
 - **Baseline fields:** auto_collect, description, dns_servers, domain_name, domain_search, id, match_client_id, next_server, ntp_servers, pools, routers, static_routes, subnet, tftp_bootfile, tftp_server, time_servers
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** auto-collect, DNS/domain/search, routers, static routes, NTP/time servers, and PXE/TFTP fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** newline-compatible pools, allocator, ping-check, deterministic comma-pair static routes, and pre-mutation validation
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved advanced DHCPv4 create/read/import, populated-to-explicit-empty update, out-of-band drift detection and repair, stable no-change plans, exact API read-back, affirmative reconfigure, and strict zero-match cleanup
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv4_subnet.md; docs/resources/kea_dhcpv4_subnet.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
 
-#### `resource:kea_dhcpv6_pd_pool` — missing-buildable
+#### `resource:kea_dhcpv6_pd_pool` — covered
 
-- **Domain / local mapping:** Kea / none
+- **Domain / local mapping:** Kea / `kea_dhcpv6_pd_pool`
 - **Baseline fields:** delegated_len, description, id, prefix, prefix_len, subnet_id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the stable delegated-prefix pool item surface has no local resource or data source
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** aligned-prefix and delegation-length validation plus recoverable create identity
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved generated and parity PD-pool create/read/import/update/delete, CIDR resource stability, parent relationship handling, runtime compatibility gating, affirmative reconfigure, and strict zero-match cleanup
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_pd_pool.md; internal/provider/provider.go
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_pd_pool.md; docs/resources/kea_dhcpv6_pd_pool.md
 
-#### `resource:kea_dhcpv6_peer` — missing-buildable
+#### `resource:kea_dhcpv6_peer` — covered
 
-- **Domain / local mapping:** Kea / none
+- **Domain / local mapping:** Kea / `kea_dhcpv6_peer`
 - **Baseline fields:** id, name, role, url
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the stable DHCPv6 HA peer item surface has no local resource or data source
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** absolute HTTP/HTTPS URL validation and recoverable create identity
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved generated and parity peer create/read/import/update, role drift detection and repair, stable no-change plans, runtime compatibility gating, affirmative reconfigure, and strict zero-match cleanup
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_peer.md; internal/provider/provider.go
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_peer.md; docs/resources/kea_dhcpv6_peer.md
 
 #### `resource:kea_dhcpv6_reservation` — covered
 
@@ -299,17 +296,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_reservation.md; docs/resources/kea_dhcpv6_reservation.md
 
-#### `resource:kea_dhcpv6_subnet` — missing-buildable
+#### `resource:kea_dhcpv6_subnet` — covered
 
 - **Domain / local mapping:** Kea / `kea_dhcpv6_subnet`
 - **Baseline fields:** allocator, description, dns_servers, domain_search, id, interface, pd_allocator, pools, subnet
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS servers and domain-search fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** interface, allocator, PD allocator, newline-compatible pools, and unknown-safe collection requests
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved IPv6 subnet create/read/import, DNS/search populated-to-empty update, stable no-change plans, PD-parent lifecycle ordering, affirmative reconfigure, and strict zero-match cleanup
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/kea_dhcpv6_subnet.md; docs/resources/kea_dhcpv6_subnet.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
 
 #### `resource:kea_peer` — intentionally-different
 
@@ -769,41 +765,38 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv4_reservation.md; docs/data-sources/kea_dhcpv4_reservation.md
 
-#### `data-source:kea_dhcpv4_subnet` — missing-buildable
+#### `data-source:kea_dhcpv4_subnet` — covered
 
 - **Domain / local mapping:** Kea / `kea_dhcpv4_subnet`
 - **Baseline fields:** auto_collect, description, dns_servers, domain_name, domain_search, id, match_client_id, next_server, ntp_servers, pools, routers, static_routes, subnet, tftp_bootfile, tftp_server, time_servers
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** auto-collect, DNS/domain/search, routers, static routes, NTP/time servers, and PXE/TFTP fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** allocator, ping-check, and deterministic static-route pair decoding
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved UUID lookup and exact advanced API truth for DNS/domain/search, routers, static-route pairs, NTP/time, PXE/TFTP fields, and explicit clears
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv4_subnet.md; docs/data-sources/kea_dhcpv4_subnet.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
 
-#### `data-source:kea_dhcpv6_pd_pool` — missing-buildable
+#### `data-source:kea_dhcpv6_pd_pool` — covered
 
-- **Domain / local mapping:** Kea / none
+- **Domain / local mapping:** Kea / `kea_dhcpv6_pd_pool`
 - **Baseline fields:** delegated_len, description, id, prefix, prefix_len, subnet_id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the stable delegated-prefix pool item surface has no local resource or data source
+- **Baseline-only:** none material after semantic name/type normalization
 - **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved UUID lookup and address-only API truth for prefix, prefix/delegated lengths, parent subnet, and description under the runtime compatibility gate
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_pd_pool.md; internal/provider/provider.go
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_pd_pool.md; docs/data-sources/kea_dhcpv6_pd_pool.md
 
-#### `data-source:kea_dhcpv6_peer` — missing-buildable
+#### `data-source:kea_dhcpv6_peer` — covered
 
-- **Domain / local mapping:** Kea / none
+- **Domain / local mapping:** Kea / `kea_dhcpv6_peer`
 - **Baseline fields:** id, name, role, url
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** the stable DHCPv6 HA peer item surface has no local resource or data source
+- **Baseline-only:** none material after semantic name/type normalization
 - **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved UUID lookup and exact API-truth name, URL, and selected role under the runtime 26.7.7 compatibility gate
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_peer.md; internal/provider/provider.go
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_peer.md; docs/data-sources/kea_dhcpv6_peer.md
 
 #### `data-source:kea_dhcpv6_reservation` — covered
 
@@ -816,17 +809,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_reservation.md; docs/data-sources/kea_dhcpv6_reservation.md
 
-#### `data-source:kea_dhcpv6_subnet` — missing-buildable
+#### `data-source:kea_dhcpv6_subnet` — covered
 
 - **Domain / local mapping:** Kea / `kea_dhcpv6_subnet`
 - **Baseline fields:** allocator, description, dns_servers, domain_search, id, interface, pd_allocator, pools, subnet
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS servers and domain-search fields are absent locally
-- **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** interface, allocator, PD allocator, and newline-compatible pools
+- **Lifecycle:** Disposable OPNsense 26.7.7 run 20261018T233224Z proved UUID lookup and exact API-truth DNS/search members, interface/allocator relationships, and explicit clears
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/kea_dhcpv6_subnet.md; docs/data-sources/kea_dhcpv6_subnet.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md`
 
 #### `data-source:kea_peer` — intentionally-different
 

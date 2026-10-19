@@ -1,0 +1,22 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Manages a Kea DHCPv4 subnet, including advanced DHCP option fields.
+---
+
+# {{.Name}} ({{.Type}})
+
+Manages a Kea DHCPv4 subnet through the stable OPNsense API. Set `auto_collect = false` when explicitly managing router, DNS, or NTP values; collections are preserved losslessly on import and refresh, and explicit empty values clear their remote options. `pools` remains a newline-compatible string. The resource may be safely configured while the Kea DHCPv4 service is disabled. Deprecated generic `opnsense_kea_peer`, `opnsense_kea_reservation`, and `opnsense_kea_subnet` aliases are intentionally not exposed.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_kea_dhcpv4_subnet/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import by the OPNsense UUID. Advanced parity was verified with OPNsense 26.7.7 or newer.
+
+{{codefile "shell" "examples/resources/opnsense_kea_dhcpv4_subnet/import.sh"}}

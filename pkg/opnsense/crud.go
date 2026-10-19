@@ -50,7 +50,7 @@ func Add[K any](ctx context.Context, c *Client, opts ReqOpts, resource *K) (stri
 		return "", fmt.Errorf("add %s: failed to read response: %w", opts.AddEndpoint, err)
 	}
 
-	uuid, err := ParseMutationResponse(respBody)
+	uuid, err := ParseAddResponse(respBody)
 	if err != nil {
 		return "", err
 	}
@@ -92,7 +92,7 @@ func Get[K any](ctx context.Context, c *Client, opts ReqOpts, id string) (*K, er
 		return nil, fmt.Errorf("get %s: failed to read response: %w", opts.GetEndpoint, err)
 	}
 
-	return unmarshalWrapped[K](opts.Monad, respBody)
+	return unmarshalWrapped[K](opts.Monad, respBody, !opts.StrictMissingObjectResponse)
 }
 
 // Update modifies an existing resource via the OPNsense API. The resource
@@ -172,7 +172,11 @@ func Delete(ctx context.Context, c *Client, opts ReqOpts, id string) error {
 	if err != nil {
 		return fmt.Errorf("delete %s: failed to read response: %w", opts.DeleteEndpoint, err)
 	}
-	if err := ParseDeleteResponse(respBody); err != nil {
+	parseDelete := ParseDeleteResponse
+	if opts.StrictDeleteResponse {
+		parseDelete = ParseStrictDeleteResponse
+	}
+	if err := parseDelete(respBody); err != nil {
 		return err
 	}
 
@@ -215,7 +219,7 @@ func GetSingleton[K any](ctx context.Context, c *Client, opts ReqOpts) (*K, erro
 		return nil, fmt.Errorf("get %s: failed to read response: %w", opts.GetEndpoint, err)
 	}
 
-	return unmarshalWrapped[K](opts.Monad, respBody)
+	return unmarshalWrapped[K](opts.Monad, respBody, true)
 }
 
 // UpdateSingleton updates a singleton settings object via a set endpoint that
@@ -282,27 +286,61 @@ func marshalWrapped[K any](monad string, resource *K) ([]byte, error) {
 
 // unmarshalWrapped extracts a resource struct from a monad-wrapped JSON response.
 // The monad may be a dotted path (e.g. "unbound.general") to descend through
-// nested sections. Returns NotFoundError if any path segment is missing or the
-// inner value is empty.
-func unmarshalWrapped[K any](monad string, body []byte) (*K, error) {
+// nested sections. Returns NotFoundError only for the source-backed empty-array
+// shape used by item endpoints for an absent UUID.
+func unmarshalWrapped[K any](monad string, body []byte, legacyEmptyObjectNotFound bool) (*K, error) {
 	inner := json.RawMessage(body)
 	for _, part := range strings.Split(monad, ".") {
+		if isEmptyJSONArray(inner) {
+			return nil, &NotFoundError{Message: "resource not found"}
+		}
+		if isEmptyJSONObjectOrNull(inner) {
+			if legacyEmptyObjectNotFound {
+				return nil, &NotFoundError{Message: "resource not found"}
+			}
+			return nil, fmt.Errorf("failed to parse response: empty object is not missing-object evidence")
+		}
 		var envelope map[string]json.RawMessage
 		if err := json.Unmarshal(inner, &envelope); err != nil {
 			return nil, fmt.Errorf("failed to parse response: %w", err)
 		}
 
 		next, ok := envelope[part]
-		if !ok || len(next) == 0 || string(next) == "null" || string(next) == "{}" {
+		if !ok {
+			if legacyEmptyObjectNotFound {
+				return nil, &NotFoundError{Message: "resource not found"}
+			}
+			return nil, fmt.Errorf("failed to parse response: missing monad key %q", part)
+		}
+		if isEmptyJSONArray(next) {
 			return nil, &NotFoundError{Message: "resource not found"}
 		}
 		inner = next
 	}
+	if isEmptyJSONObjectOrNull(inner) {
+		if legacyEmptyObjectNotFound {
+			return nil, &NotFoundError{Message: "resource not found"}
+		}
+		return nil, fmt.Errorf("failed to parse response: empty monad object is not missing-object evidence")
+	}
 
 	var result K
 	if err := json.Unmarshal(inner, &result); err != nil {
-		return nil, &NotFoundError{Message: fmt.Sprintf("failed to unmarshal resource: %s", err)}
+		// A present object with a malformed field is API truth that the provider
+		// cannot decode, not an absent object. Returning NotFound here causes
+		// resources to be silently removed from state instead of diagnosing the
+		// malformed response.
+		return nil, fmt.Errorf("failed to unmarshal resource: %w", err)
 	}
 
 	return &result, nil
+}
+
+func isEmptyJSONArray(value []byte) bool {
+	return bytes.Equal(bytes.TrimSpace(value), []byte("[]"))
+}
+
+func isEmptyJSONObjectOrNull(value []byte) bool {
+	trimmed := bytes.TrimSpace(value)
+	return bytes.Equal(trimmed, []byte("{}")) || bytes.Equal(trimmed, []byte("null")) || len(trimmed) == 0
 }

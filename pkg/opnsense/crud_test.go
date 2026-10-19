@@ -101,6 +101,51 @@ func TestAdd_ValidationError(t *testing.T) {
 	}
 }
 
+func TestAdd_SavedWithoutUUIDDoesNotReconfigure(t *testing.T) {
+	var reconfigureCalled atomic.Bool
+	server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasPrefix(r.URL.Path, "/api/test/addItem"):
+			_, _ = w.Write([]byte(`{"result":"saved","uuid":" "}`))
+		case strings.HasPrefix(r.URL.Path, "/api/test/service/reconfigure"):
+			reconfigureCalled.Store(true)
+		}
+	})
+	defer server.Close()
+
+	uuid, err := Add(context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), &testResource{Name: "web1"})
+	if err == nil || !strings.Contains(err.Error(), "non-empty UUID") {
+		t.Fatalf("uuid=%q err=%v, want actionable UUID error", uuid, err)
+	}
+	if reconfigureCalled.Load() {
+		t.Fatal("identity-less add called reconfigure")
+	}
+}
+
+func TestAdd_Non2xxSavedBodyDoesNotReconfigure(t *testing.T) {
+	for _, status := range []int{http.StatusBadRequest, http.StatusConflict} {
+		t.Run(fmt.Sprint(status), func(t *testing.T) {
+			var reconfigureCalled atomic.Bool
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/addItem") {
+					w.WriteHeader(status)
+					_, _ = w.Write([]byte(`{"result":"saved","uuid":"must-not-succeed"}`))
+					return
+				}
+				reconfigureCalled.Store(true)
+			})
+			defer server.Close()
+
+			if _, err := Add(context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), &testResource{}); err == nil {
+				t.Fatalf("HTTP %d saved body succeeded", status)
+			}
+			if reconfigureCalled.Load() {
+				t.Fatalf("HTTP %d saved body called reconfigure", status)
+			}
+		})
+	}
+}
+
 func TestAdd_AuthError(t *testing.T) {
 	server := newCRUDTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -189,7 +234,7 @@ func TestGet_Success(t *testing.T) {
 	}
 }
 
-func TestGet_NotFound_EmptyMonad(t *testing.T) {
+func TestGet_LegacyEmptyObjectMonadIsNotFound(t *testing.T) {
 	server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
 			w.Header().Set("Content-Type", "application/json")
@@ -204,16 +249,68 @@ func TestGet_NotFound_EmptyMonad(t *testing.T) {
 	opts := testReqOpts()
 
 	_, err := Get[testResource](context.Background(), client, opts, "uuid-gone")
-	if err == nil {
-		t.Fatal("expected NotFoundError, got nil")
-	}
 	var notFound *NotFoundError
 	if !errors.As(err, &notFound) {
-		t.Fatalf("expected NotFoundError, got: %T: %v", err, err)
+		t.Fatalf("expected legacy empty object to be not found, got %T: %v", err, err)
 	}
 }
 
-func TestGet_NotFound_MissingMonadKey(t *testing.T) {
+func TestGet_NotFound_EmptyArray(t *testing.T) {
+	tests := map[string]string{
+		"top-level": "[]",
+		"monad":     `{"item":[]}`,
+	}
+	for name, body := range tests {
+		t.Run(name, func(t *testing.T) {
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(body))
+					return
+				}
+				w.WriteHeader(http.StatusNotFound)
+			})
+			defer server.Close()
+
+			_, err := Get[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid-gone")
+			var notFound *NotFoundError
+			if !errors.As(err, &notFound) {
+				t.Fatalf("expected NotFoundError, got: %T: %v", err, err)
+			}
+		})
+	}
+}
+
+func TestGet_NonEmptyArrayIsMalformedNotNotFound(t *testing.T) {
+	tests := map[string]string{
+		"top-level": `[{"name":"present"}]`,
+		"monad":     `{"item":[{"name":"present"}]}`,
+	}
+	for name, body := range tests {
+		t.Run(name, func(t *testing.T) {
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(body))
+					return
+				}
+				w.WriteHeader(http.StatusNotFound)
+			})
+			defer server.Close()
+
+			_, err := Get[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid-present")
+			if err == nil {
+				t.Fatal("expected malformed-response error")
+			}
+			var notFound *NotFoundError
+			if errors.As(err, &notFound) {
+				t.Fatalf("non-empty array was misclassified as not found: %v", err)
+			}
+		})
+	}
+}
+
+func TestGet_LegacyMissingMonadKeyIsNotFound(t *testing.T) {
 	server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
 			w.Header().Set("Content-Type", "application/json")
@@ -228,12 +325,98 @@ func TestGet_NotFound_MissingMonadKey(t *testing.T) {
 	opts := testReqOpts()
 
 	_, err := Get[testResource](context.Background(), client, opts, "uuid-missing")
-	if err == nil {
-		t.Fatal("expected NotFoundError for missing monad key")
-	}
 	var notFound *NotFoundError
 	if !errors.As(err, &notFound) {
-		t.Fatalf("expected NotFoundError, got: %T: %v", err, err)
+		t.Fatalf("expected legacy missing monad to be not found, got %T: %v", err, err)
+	}
+}
+
+func TestGet_StrictMissingObjectResponseRejectsLegacyAbsenceShapes(t *testing.T) {
+	for name, body := range map[string]string{
+		"empty object":  `{"item":{}}`,
+		"null monad":    `{"item":null}`,
+		"missing monad": `{"other_key":{}}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
+					_, _ = w.Write([]byte(body))
+					return
+				}
+				w.WriteHeader(http.StatusNotFound)
+			})
+			defer server.Close()
+
+			opts := testReqOpts()
+			opts.StrictMissingObjectResponse = true
+			_, err := Get[testResource](context.Background(), newCRUDTestClient(t, server.URL), opts, "uuid")
+			if err == nil {
+				t.Fatal("expected malformed response error")
+			}
+			var notFound *NotFoundError
+			if errors.As(err, &notFound) {
+				t.Fatalf("strict owner treated ambiguous shape as missing: %v", err)
+			}
+		})
+	}
+}
+
+func TestGet_HTTP404IsAmbiguousNotNotFound(t *testing.T) {
+	server := newCRUDTestServer(t, func(w http.ResponseWriter, _ *http.Request) { http.NotFound(w, nil) })
+	defer server.Close()
+	_, err := Get[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid")
+	if err == nil {
+		t.Fatal("expected HTTP 404 diagnostic")
+	}
+	var notFound *NotFoundError
+	if errors.As(err, &notFound) {
+		t.Fatalf("ambiguous HTTP 404 was treated as object absence: %v", err)
+	}
+}
+
+func TestGet_Non2xxEmptyArrayIsNotObjectAbsence(t *testing.T) {
+	for _, status := range []int{http.StatusBadRequest, http.StatusConflict} {
+		t.Run(fmt.Sprint(status), func(t *testing.T) {
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(status)
+				_, _ = w.Write([]byte(`[]`))
+			})
+			defer server.Close()
+			_, err := Get[testResource](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid")
+			if err == nil {
+				t.Fatalf("HTTP %d empty array succeeded", status)
+			}
+			var notFound *NotFoundError
+			if errors.As(err, &notFound) {
+				t.Fatalf("HTTP %d empty array became object absence: %v", status, err)
+			}
+		})
+	}
+}
+
+func TestGet_MalformedPresentObjectIsDiagnosticNotNotFound(t *testing.T) {
+	type strictResponse struct {
+		Port int `json:"port"`
+	}
+	server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/test/getItem/") {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"item":{"port":"not-an-integer"}}`))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	})
+	defer server.Close()
+	_, err := Get[strictResponse](context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid-malformed")
+	if err == nil {
+		t.Fatal("expected malformed-response error")
+	}
+	var notFound *NotFoundError
+	if errors.As(err, &notFound) {
+		t.Fatalf("malformed present object was misclassified as not found: %v", err)
+	}
+	if !strings.Contains(err.Error(), "failed to unmarshal resource") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
@@ -433,6 +616,66 @@ func TestDelete_ParsesFailedResult(t *testing.T) {
 	}
 	if validErr.Fields["lagg"] != "interface is in use" {
 		t.Fatalf("expected lagg validation message, got: %#v", validErr.Fields)
+	}
+}
+
+func TestDelete_StrictResponseRejectsAmbiguousBodyWithoutReconfigure(t *testing.T) {
+	for _, body := range []string{`{}`, `{"result":""}`, `{"result":"unknown"}`, ``} {
+		t.Run(body, func(t *testing.T) {
+			var reconfigureCalled atomic.Bool
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/delItem/") {
+					_, _ = w.Write([]byte(body))
+					return
+				}
+				reconfigureCalled.Store(true)
+			})
+			defer server.Close()
+			opts := testReqOpts()
+			opts.StrictDeleteResponse = true
+			if err := Delete(context.Background(), newCRUDTestClient(t, server.URL), opts, "uuid"); err == nil {
+				t.Fatalf("ambiguous delete body accepted: %q", body)
+			}
+			if reconfigureCalled.Load() {
+				t.Fatal("ambiguous delete called reconfigure")
+			}
+		})
+	}
+}
+
+func TestDelete_Non2xxDeletedBodyDoesNotReconfigure(t *testing.T) {
+	for _, status := range []int{http.StatusBadRequest, http.StatusConflict} {
+		t.Run(fmt.Sprint(status), func(t *testing.T) {
+			var reconfigureCalled atomic.Bool
+			server := newCRUDTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasPrefix(r.URL.Path, "/api/test/delItem/") {
+					w.WriteHeader(status)
+					_, _ = w.Write([]byte(`{"result":"deleted"}`))
+					return
+				}
+				reconfigureCalled.Store(true)
+			})
+			defer server.Close()
+			if err := Delete(context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid"); err == nil {
+				t.Fatalf("HTTP %d deleted body succeeded", status)
+			}
+			if reconfigureCalled.Load() {
+				t.Fatalf("HTTP %d deleted body called reconfigure", status)
+			}
+		})
+	}
+}
+
+func TestDelete_HTTP404IsAmbiguousNotNotFound(t *testing.T) {
+	server := newCRUDTestServer(t, func(w http.ResponseWriter, _ *http.Request) { http.NotFound(w, nil) })
+	defer server.Close()
+	err := Delete(context.Background(), newCRUDTestClient(t, server.URL), testReqOpts(), "uuid")
+	if err == nil {
+		t.Fatal("expected HTTP 404 diagnostic")
+	}
+	var notFound *NotFoundError
+	if errors.As(err, &notFound) {
+		t.Fatalf("ambiguous HTTP 404 was treated as object absence: %v", err)
 	}
 }
 

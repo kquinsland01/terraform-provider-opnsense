@@ -8,6 +8,9 @@ package tfconv
 
 import (
 	"context"
+	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -24,6 +27,7 @@ func SetToCSV(ctx context.Context, s types.Set) string {
 	}
 	var elems []string
 	s.ElementsAs(ctx, &elems, false)
+	sort.Strings(elems)
 	return strings.Join(elems, ",")
 }
 
@@ -58,4 +62,17 @@ func IntOrZero(s string) int64 {
 		return v
 	}
 	return 0
+}
+
+// ParseIntInRange decodes an API integer string without hiding malformed or
+// schema-invalid remote values.
+func ParseIntInRange(field, value string, minValue, maxValue int64) (int64, error) {
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s value %q: expected an integer", field, value)
+	}
+	if parsed < minValue || parsed > maxValue {
+		return 0, fmt.Errorf("invalid %s value %q: expected a value between %d and %d", field, value, minValue, maxValue)
+	}
+	return parsed, nil
 }

@@ -16,6 +16,13 @@ type ReqOpts struct {
 	UpdateEndpoint string
 	// DeleteEndpoint is the API path for deleting a resource by UUID.
 	DeleteEndpoint string
+	// StrictDeleteResponse requires an affirmative result of "deleted" or
+	// "saved" before reconfigure. Use for endpoints with a proven contract.
+	StrictDeleteResponse bool
+	// StrictMissingObjectResponse accepts only an empty JSON array (at the top
+	// level or monad) as missing-object evidence. Legacy owners retain the
+	// historical empty object/null/missing-monad behavior.
+	StrictMissingObjectResponse bool
 	// SearchEndpoint is the API path for listing/searching resources.
 	SearchEndpoint string
 	// ReconfigureEndpoint is the standard reconfigure path called via POST after mutations

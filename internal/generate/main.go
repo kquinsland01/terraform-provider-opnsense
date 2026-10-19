@@ -23,16 +23,18 @@ import (
 
 // Field describes one attribute of a resource.
 type Field struct {
-	Name     string   `yaml:"name"`
-	TF       string   `yaml:"tf"`
-	JSON     string   `yaml:"json"`
-	Type     string   `yaml:"type"` // bool|string|selectmap|selectmaplist|csvset|int
-	Required bool     `yaml:"required"`
-	Default  string   `yaml:"default"`
-	Desc     string   `yaml:"desc"`
-	Options  []string `yaml:"options"`
-	Min      *int64   `yaml:"min"`
-	Max      *int64   `yaml:"max"`
+	Name           string   `yaml:"name"`
+	TF             string   `yaml:"tf"`
+	JSON           string   `yaml:"json"`
+	Type           string   `yaml:"type"` // bool|string|selectmap|selectmaplist|csvset|int
+	Required       bool     `yaml:"required"`
+	Default        string   `yaml:"default"`
+	StaticDefault  bool     `yaml:"static_default"`
+	Desc           string   `yaml:"desc"`
+	DataSourceDesc string   `yaml:"data_source_desc"`
+	Options        []string `yaml:"options"`
+	Min            *int64   `yaml:"min"`
+	Max            *int64   `yaml:"max"`
 	// ResponseType overrides the API response field type when OPNsense returns a
 	// different shape than the request/schema type, e.g. a string field as a
 	// selected-map object.
@@ -48,22 +50,47 @@ type Field struct {
 	// added to ImportStateVerifyIgnore in the generated test.
 	WriteOnly       bool   `yaml:"write_only"`
 	UpdateTestValue string `yaml:"update_test_value"`
+	// StrictResponse makes response decoding fail for malformed or out-of-range
+	// integer values instead of silently coercing them to zero.
+	StrictResponse bool `yaml:"strict_response"`
+	// NormalizeCIDRToAddress sends the address portion of a CIDR string to APIs
+	// whose UI accepts CIDR input but whose model validator requires an address.
+	NormalizeCIDRToAddress bool `yaml:"normalize_cidr_to_address"`
+	// PreserveEquivalentCIDR retains a configured CIDR spelling when the API
+	// echoes only its equivalent address, avoiding perpetual diffs.
+	PreserveEquivalentCIDR bool `yaml:"preserve_equivalent_cidr"`
+	// OmitUnknown uses a pointer request field so null/unknown is omitted while
+	// a known empty string remains an intentional clear.
+	OmitUnknown bool `yaml:"omit_unknown"`
 }
 
 // Resource describes a single generated resource.
 type Resource struct {
-	Name         string            `yaml:"name"`
-	GoType       string            `yaml:"go_type"`
-	TypeName     string            `yaml:"type_name"`
-	Title        string            `yaml:"title"`
-	Kind         string            `yaml:"kind"` // item|singleton
-	ID           string            `yaml:"id"`
-	Reconfigure  string            `yaml:"reconfigure"`
-	Monad        string            `yaml:"monad"`
-	TestPrereq   string            `yaml:"test_prereq"`
-	TestPreCheck string            `yaml:"test_precheck"`
-	Endpoints    map[string]string `yaml:"endpoints"`
-	Fields       []Field           `yaml:"fields"`
+	Name              string `yaml:"name"`
+	GoType            string `yaml:"go_type"`
+	TypeName          string `yaml:"type_name"`
+	Title             string `yaml:"title"`
+	Kind              string `yaml:"kind"` // item|singleton
+	ID                string `yaml:"id"`
+	Reconfigure       string `yaml:"reconfigure"`
+	Monad             string `yaml:"monad"`
+	TestPrereq        string `yaml:"test_prereq"`
+	TestPreCheck      string `yaml:"test_precheck"`
+	RecoverCreate     bool   `yaml:"recover_create"`
+	PendingActivation bool   `yaml:"pending_activation"`
+	StrictDelete      bool   `yaml:"strict_delete_response"`
+	StrictMissing     bool   `yaml:"strict_missing_object_response"`
+	CompositeDestroy  string `yaml:"composite_destroy"`
+	MinimumVersion    string `yaml:"minimum_version"`
+	// ResourceFromAPI selects a resource-only response mapping method. Data
+	// sources continue to use fromAPI so they expose the API's exact value.
+	ResourceFromAPI string `yaml:"resource_from_api"`
+	// ResponseValidator is a Go expression returning error, emitted at the end
+	// of fromAPI for resource-specific relational response validation.
+	ResponseValidator string            `yaml:"response_validator"`
+	UniqueTest        bool              `yaml:"unique_test"`
+	Endpoints         map[string]string `yaml:"endpoints"`
+	Fields            []Field           `yaml:"fields"`
 }
 
 // Schema is one YAML schema file.
@@ -205,13 +232,27 @@ func hasInt(r *Resource) bool {
 	return false
 }
 
+func hasStrictResponse(r *Resource) bool {
+	if r.ResponseValidator != "" {
+		return true
+	}
+	for _, f := range r.Fields {
+		if f.StrictResponse {
+			return true
+		}
+	}
+	return false
+}
+
 // usesOpnsense reports whether the model code references the opnsense package
 // (bool conversions, or Int64ToString for a required int). Other types use
 // tfconv or builtins, so importing opnsense unconditionally would be unused.
 func usesOpnsense(r *Resource) bool {
 	for _, f := range r.Fields {
 		switch {
-		case f.Type == "bool", f.Type == "selectmap", f.Type == "selectmaplist", f.Type == "csvset":
+		case f.Type == "bool", f.Type == "selectmaplist", f.Type == "csvset":
+			return true
+		case f.Type == "selectmap" && f.ResponseType != "strict_selectmap":
 			return true
 		case f.Type == "int" && f.Required:
 			return true
@@ -248,6 +289,9 @@ func schemaImports(r *Resource) string {
 				add[`"github.com/hashicorp/terraform-plugin-framework/schema/validator"`] = true
 			}
 		case "string", "selectmap":
+			if f.StaticDefault {
+				add[`"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"`] = true
+			}
 			if len(f.Options) > 0 {
 				add[`"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"`] = true
 				add[`"github.com/hashicorp/terraform-plugin-framework/schema/validator"`] = true
@@ -266,19 +310,23 @@ func resourceImports(r *Resource) string {
 		`"github.com/hashicorp/terraform-plugin-framework/path"`,
 		`"github.com/hashicorp/terraform-plugin-framework/resource"`,
 	}
-	if r.Kind == "singleton" {
+	if r.Kind == "singleton" || r.RecoverCreate {
 		fw = append(fw, pkgTypes)
 	}
 	return renderImports(std, fw, []string{pkgOpnsense})
 }
 
 func testImports(r *Resource) string {
+	stdlib := []string{`"testing"`}
+	if r.UniqueTest {
+		stdlib = append(stdlib, `"fmt"`, `"os"`)
+	}
 	local := []string{`"github.com/matthew-on-git/terraform-provider-opnsense/internal/acctest"`}
-	if r.Kind == "item" {
+	if r.Kind == "item" && r.CompositeDestroy == "" {
 		local = append(local, pkgOpnsense)
 	}
 	return renderImports(
-		[]string{`"testing"`},
+		stdlib,
 		[]string{`"github.com/hashicorp/terraform-plugin-testing/helper/resource"`},
 		local,
 	)
@@ -331,21 +379,31 @@ func hasUpdateTest(r *Resource) bool {
 // --- template helpers ---
 
 var funcs = template.FuncMap{
-	"camel":            camelName,
-	"goType":           goType,
-	"respType":         respType,
-	"toAPI":            toAPILine,
-	"fromAPI":          fromAPILine,
-	"schemaAttr":       schemaAttr,
-	"dataSourceAttr":   dataSourceAttr,
-	"importIgnore":     importIgnore,
-	"isItem":           func(r *Resource) bool { return r.Kind == "item" },
-	"isSingleton":      func(r *Resource) bool { return r.Kind == "singleton" },
-	"hasSet":           hasSet,
-	"hasUpdateTest":    hasUpdateTest,
-	"testFields":       testFieldsHCL,
-	"testUpdateFields": testUpdateFieldsHCL,
-	"reqTag":           reqTag,
+	"camel":             camelName,
+	"goType":            goType,
+	"respType":          respType,
+	"toAPI":             toAPILine,
+	"fromAPI":           fromAPILine,
+	"schemaAttr":        schemaAttr,
+	"dataSourceAttr":    dataSourceAttr,
+	"importIgnore":      importIgnore,
+	"isItem":            func(r *Resource) bool { return r.Kind == "item" },
+	"isSingleton":       func(r *Resource) bool { return r.Kind == "singleton" },
+	"hasSet":            hasSet,
+	"hasUpdateTest":     hasUpdateTest,
+	"hasStrictResponse": hasStrictResponse,
+	"resourceFromAPI":   resourceFromAPI,
+	"testFields":        testFieldsHCL,
+	"testUpdateFields":  testUpdateFieldsHCL,
+	"reqTag":            reqTag,
+	"reqType":           reqType,
+}
+
+func resourceFromAPI(r *Resource) string {
+	if r.ResourceFromAPI != "" {
+		return r.ResourceFromAPI
+	}
+	return "fromAPI"
 }
 
 // reqTag builds the request struct json tag. Optional, non-bool fields get
@@ -358,6 +416,13 @@ func reqTag(f Field) string {
 		return fmt.Sprintf("`json:%q`", f.JSON+",omitempty")
 	}
 	return fmt.Sprintf("`json:%q`", f.JSON)
+}
+
+func reqType(f Field) string {
+	if f.OmitUnknown {
+		return "*string"
+	}
+	return "string"
 }
 
 func hasSet(r *Resource) bool {
@@ -387,6 +452,8 @@ func respType(f Field) string {
 		switch f.ResponseType {
 		case "selectmap":
 			return "opnsense.SelectedMap"
+		case "strict_selectmap":
+			return "strictSelectedMap"
 		case "selectmaplist":
 			return "opnsense.SelectedMapList"
 		}
@@ -402,6 +469,12 @@ func respType(f Field) string {
 }
 
 func toAPILine(f Field) string {
+	if f.OmitUnknown {
+		return fmt.Sprintf("knownString(m.%s)", f.Name)
+	}
+	if f.NormalizeCIDRToAddress {
+		return fmt.Sprintf("normalizeCIDRToAddress(m.%s.ValueString())", f.Name)
+	}
 	switch f.Type {
 	case "bool":
 		return fmt.Sprintf("opnsense.BoolToString(m.%s.ValueBool())", f.Name)
@@ -427,13 +500,30 @@ func fromAPILine(f Field) string {
 	if f.ResponseType == "selectmap" {
 		return fmt.Sprintf("m.%s = types.StringValue(string(a.%s))", f.Name, f.Name)
 	}
+	if f.ResponseType == "strict_selectmap" {
+		return fmt.Sprintf("m.%s = types.StringValue(string(a.%s))", f.Name, f.Name)
+	}
 	if f.ResponseType == "selectmaplist" {
 		return fmt.Sprintf("m.%s = tfconv.SliceToSet(a.%s)", f.Name, f.Name)
+	}
+	if f.PreserveEquivalentCIDR {
+		return fmt.Sprintf("m.%s = types.StringValue(preserveEquivalentCIDR(m.%s, a.%s))", f.Name, f.Name, f.Name)
 	}
 	switch f.Type {
 	case "bool":
 		return fmt.Sprintf("m.%s = types.BoolValue(opnsense.StringToBool(a.%s))", f.Name, f.Name)
 	case "int":
+		if f.StrictResponse {
+			minValue, maxValue := int64(-9223372036854775808), int64(9223372036854775807)
+			if f.Min != nil {
+				minValue = *f.Min
+			}
+			if f.Max != nil {
+				maxValue = *f.Max
+			}
+			variable := strings.ToLower(f.Name[:1]) + f.Name[1:]
+			return fmt.Sprintf("%s, err := tfconv.ParseIntInRange(%q, a.%s, %d, %d)\n\tif err != nil { return err }\n\tm.%s = types.Int64Value(%s)", variable, f.JSON, f.Name, minValue, maxValue, f.Name, variable)
+		}
 		return fmt.Sprintf("m.%s = types.Int64Value(tfconv.IntOrZero(a.%s))", f.Name, f.Name)
 	case "selectmap":
 		return fmt.Sprintf("m.%s = types.StringValue(string(a.%s))", f.Name, f.Name)
@@ -473,9 +563,12 @@ func schemaAttr(f Field) string {
 			fmt.Fprintf(&b, "%q: schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: %q%s},", f.TF, f.Desc, validatorText)
 		}
 	default:
-		if f.Required {
+		switch {
+		case f.Required:
 			fmt.Fprintf(&b, "%q: schema.StringAttribute{Required: true, MarkdownDescription: %q", f.TF, f.Desc)
-		} else {
+		case f.StaticDefault:
+			fmt.Fprintf(&b, "%q: schema.StringAttribute{Optional: true, Computed: true, Default: stringdefault.StaticString(%q), MarkdownDescription: %q", f.TF, f.Default, f.Desc)
+		default:
 			fmt.Fprintf(&b, "%q: schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: %q, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}", f.TF, f.Desc)
 		}
 		if len(f.Options) > 0 {
@@ -526,15 +619,19 @@ func intRangeValidator(f Field) string {
 // are read-only outputs in a data source; the id is the Required lookup key and
 // is emitted separately by the template).
 func dataSourceAttr(f Field) string {
+	description := f.DataSourceDesc
+	if description == "" {
+		description = f.Desc
+	}
 	switch f.Type {
 	case "bool":
-		return fmt.Sprintf("%q: dsschema.BoolAttribute{Computed: true, MarkdownDescription: %q},", f.TF, f.Desc)
+		return fmt.Sprintf("%q: dsschema.BoolAttribute{Computed: true, MarkdownDescription: %q},", f.TF, description)
 	case "int":
-		return fmt.Sprintf("%q: dsschema.Int64Attribute{Computed: true, MarkdownDescription: %q},", f.TF, f.Desc)
+		return fmt.Sprintf("%q: dsschema.Int64Attribute{Computed: true, MarkdownDescription: %q},", f.TF, description)
 	case "selectmaplist", "csvset":
-		return fmt.Sprintf("%q: dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: %q},", f.TF, f.Desc)
+		return fmt.Sprintf("%q: dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: %q},", f.TF, description)
 	default:
-		return fmt.Sprintf("%q: dsschema.StringAttribute{Computed: true, MarkdownDescription: %q},", f.TF, f.Desc)
+		return fmt.Sprintf("%q: dsschema.StringAttribute{Computed: true, MarkdownDescription: %q},", f.TF, description)
 	}
 }
 

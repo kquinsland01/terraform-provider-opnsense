@@ -1,0 +1,1 @@
+terraform import opnsense_kea_dhcpv6_pd_pool.clients 12345678-1234-1234-1234-123456789012

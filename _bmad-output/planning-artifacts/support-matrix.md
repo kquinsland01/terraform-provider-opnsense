@@ -19,11 +19,11 @@ This matrix is the current source of truth for release positioning. It reconcile
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 106 | Supported |
-| Data sources | 90 | Supported |
-| Resource docs | 106 | Supported |
-| Data source docs | 90 | Supported |
-| Remaining field/surface gaps | 10 audit-derived P0/P1 story groups plus separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Resources | 108 | Supported |
+| Data sources | 92 | Supported |
+| Resource docs | 108 | Supported |
+| Data source docs | 92 | Supported |
+| Remaining field/surface gaps | 8 audit-derived P0/P1 story groups (Stories 31.0c-31.0j) plus separate research/upstream blockers | Coming, needs research, or upstream-blocked |
 | Remaining resource-matching data-source gaps | 17 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
@@ -42,7 +42,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | HAProxy | ACL, action, backend, frontend, health check, map file, server |
 | Interfaces | assignment/IP settings, bridge, GIF, GRE, LAGG, loopback, neighbor, VXLAN |
 | IPsec | child, connection, key pair, local, manual SPD, pool, PSK, remote, VTI |
-| Kea | control agent, DHCPv6 reservation, DHCPv6 settings, DHCPv6 subnet, HA peer |
+| Kea | control agent, DHCPv4 reservation/settings/subnet, DHCPv6 peer/PD pool/reservation/settings/subnet, HA peer |
 | Monit | alert, service, test |
 | OpenVPN | client overwrite, instance, static key |
 | Quagga / FRR | BGP AS path, BGP community list, BGP global, BGP neighbor, BGP peer group, BGP redistribution, general, OSPF area/general/interface/neighbor/network/prefix list/redistribution/route map, OSPFv3 general/interface/network/prefix list/redistribution/route map, prefix list, RIP, route map, static general, static route |
@@ -67,7 +67,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | HAProxy | ACL, action, backend, frontend, health check, map file, server |
 | Interfaces | bridge, GIF, GRE, LAGG, loopback, neighbor, VXLAN |
 | IPsec | child, connection, local, manual SPD, pool, remote, VTI |
-| Kea | DHCPv6 reservation, DHCPv6 subnet, HA peer |
+| Kea | DHCPv4 reservation/subnet, DHCPv6 peer/PD pool/reservation/subnet, HA peer |
 | Monit | alert, service, test |
 | Quagga / FRR | BGP AS path, BGP community list, BGP neighbor, BGP peer group, BGP redistribution, OSPF area/interface/neighbor/network/prefix list/redistribution/route map, OSPFv3 interface/network/prefix list/redistribution/route map, prefix list, route map, static route |
 | Syslog | destination |
@@ -85,7 +85,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Data-source parity | Add read-only data sources for the 17 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Audited field/surface parity | Complete Stories 31.0a–31.0j for firewall/NAT, Kea, OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Audited field/surface parity | Complete Stories 31.0c–31.0j for OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
 | Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research

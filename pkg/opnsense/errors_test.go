@@ -170,6 +170,28 @@ func TestParseMutationResponse_Success(t *testing.T) {
 	}
 }
 
+func TestParseAddResponse_SavedRequiresNonEmptyUUID(t *testing.T) {
+	for _, body := range []string{`{"result":"saved"}`, `{"result":"saved","uuid":""}`, `{"result":"saved","uuid":"  "}`} {
+		uuid, err := ParseAddResponse([]byte(body))
+		if err == nil || !strings.Contains(err.Error(), "non-empty UUID") {
+			t.Fatalf("body %s: uuid=%q err=%v", body, uuid, err)
+		}
+	}
+}
+
+func TestParseStrictDeleteResponseRequiresAffirmativeResult(t *testing.T) {
+	for _, body := range []string{`{"result":"deleted"}`, `{"result":"saved"}`} {
+		if err := ParseStrictDeleteResponse([]byte(body)); err != nil {
+			t.Fatalf("body %s: %v", body, err)
+		}
+	}
+	for _, body := range []string{`{}`, `{"result":""}`, `{"result":"unknown"}`, ``} {
+		if err := ParseStrictDeleteResponse([]byte(body)); err == nil {
+			t.Fatalf("ambiguous delete response accepted: %q", body)
+		}
+	}
+}
+
 func TestParseMutationResponse_ValidationError(t *testing.T) {
 	body := []byte(`{"result":"failed","validations":{"port":"value must be between 1 and 65535"}}`)
 	uuid, err := ParseMutationResponse(body)
@@ -215,10 +237,21 @@ func TestParseMutationResponse_InvalidJSON(t *testing.T) {
 
 // --- CheckHTTPError tests ---
 
-func TestCheckHTTPError_200ReturnsNil(t *testing.T) {
-	err := CheckHTTPError(http.StatusOK, "/api/test")
-	if err != nil {
-		t.Errorf("expected nil for 200, got: %v", err)
+func TestCheckHTTPError_2xxReturnsNil(t *testing.T) {
+	for _, status := range []int{http.StatusOK, http.StatusCreated, http.StatusNoContent, 299} {
+		if err := CheckHTTPError(status, "/api/test"); err != nil {
+			t.Errorf("status %d: expected nil, got: %v", status, err)
+		}
+	}
+}
+
+func TestCheckHTTPError_OtherStatusesReturnServerError(t *testing.T) {
+	for _, status := range []int{http.StatusBadRequest, http.StatusConflict, http.StatusInternalServerError, 199, 300} {
+		err := CheckHTTPError(status, "/api/test")
+		var serverErr *ServerError
+		if !errors.As(err, &serverErr) {
+			t.Errorf("status %d: expected ServerError, got %T: %v", status, err, err)
+		}
 	}
 }
 

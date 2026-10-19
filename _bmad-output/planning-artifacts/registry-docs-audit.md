@@ -17,15 +17,15 @@ inputs:
 
 ## Summary
 
-The local Registry documentation source is internally consistent after Epic 25B:
+The local Registry documentation source is internally consistent at the current Story 31.0b inventory:
 
 | Check | Result |
 |---|---:|
-| Resource docs | 90 |
-| Data-source docs | 76 |
-| Data-source templates | 43 |
-| Data-source examples | 43 |
-| Remaining resource-matching data-source gaps | 15 |
+| Resource docs | 108 |
+| Data-source docs | 92 |
+| Data-source templates | 55 |
+| Data-source examples | 55 |
+| Remaining resource-matching data-source gaps | 17 |
 
 The Terraform Registry web application is JavaScript-rendered and was not
 machine-readable through the available fetch path, so this audit uses local
@@ -33,19 +33,19 @@ Registry source files under `docs/`, `templates/`, and `examples/` as the source
 of truth. No browser-rendered Registry review was recorded in this story; that
 remains a post-release human verification item after the next published update.
 
-The 15 remaining resource-matching data-source gaps are provider capabilities
+The 17 remaining resource-matching data-source gaps are provider capabilities
 that do not yet have safe read-only lookup counterparts. They are separate from
-the 33 generated-only data-source docs that exist but lack custom template polish.
+the 37 generated-only data-source docs that exist but lack custom template polish.
 
 ## Findings and Fixes
 
 | Finding | Severity | Action |
 |---|---|---|
-| Provider index counts are current at 90 resources, 76 data sources, 90 resource docs, and 76 data-source docs. | Info | No fix required. |
+| Provider index counts are current at 108 resources, 92 data sources, 108 resource docs, and 92 data-source docs. | Info | No fix required. |
 | Import guidance now correctly distinguishes UUID-backed resources from singleton/settings-style resources. | Info | No fix required. |
 | Story 26.2 still referenced the original v0.1.0 baseline of 34 data sources. | Medium | Updated Story 26.2 to require 76 supported data sources after Epic 25B completion. |
-| Generated-only docs are schema-accurate but sparse. 33 data-source docs lack custom templates/examples. | Medium | Recorded as follow-up for Registry docs hardening. |
-| 59 resource docs lack custom import guidance/templates. | Medium | Recorded as follow-up for migration/import docs work. |
+| Generated-only docs are schema-accurate but sparse. 37 data-source docs lack custom templates/examples. | Medium | Recorded as follow-up for Registry docs hardening. |
+| 60 resource docs lack custom import guidance/templates. | Medium | Recorded as follow-up for migration/import docs work. |
 
 ## Representative Spot Checks
 

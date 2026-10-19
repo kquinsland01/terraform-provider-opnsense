@@ -24,10 +24,10 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 106 | Supported |
-| Data sources | 90 | Supported |
-| Resource docs | 106 | Supported |
-| Data source docs | 90 | Supported |
+| Resources | 108 | Supported |
+| Data sources | 92 | Supported |
+| Resource docs | 108 | Supported |
+| Data source docs | 92 | Supported |
 | Resource-matching data-source backlog | 17 | Coming |
 | Verified provider-owned resource candidates | 0 plus research follow-ups | Needs research |
 
@@ -182,7 +182,7 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 
 ## Release Matrix
 
-- **Supported:** 106 resources and 90 data sources listed in `support-matrix.md` and generated docs.
+- **Supported:** 108 resources and 92 data sources listed in `support-matrix.md` and generated docs.
 - **Coming:** data-source parity for singleton and sensitive special cases.
 - **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
 - **Upstream-blocked:** gateway group and system general settings.

@@ -16,11 +16,11 @@ strategy: Ship incrementally to the registry; drive the 3 blocked domains upstre
 
 ## Where we are
 
-- **102 resources + 88 data sources are implemented and documented** in the repository.
+- **108 resources + 92 data sources are implemented and documented** in the repository.
 - The implementation is ahead of the original PRD and the first roadmap snapshot. Wave A and most Wave B resource work are already built.
-- The largest remaining provider-owned gap is **data-source parity**: 15 singleton or sensitive special-case resources do not yet have matching data sources.
+- The largest remaining provider-owned gap is **data-source parity**: 17 singleton or sensitive special-case resources do not yet have matching data sources.
 - No verified current-target provider-owned resource gap remains after system tunables/sysctl shipped. Interface LAGG, Source NAT, Unbound forward, Dnsmasq item resources, OSPF area, and system tunables are already supported. HASync configuration exists on `stable/25.7` but needs `syncitems` model-shape research; Kea DHCPv4 option/DDNS are present in OPNsense `master` but absent from `stable/25.7` as of the 2026-06-18 source recheck.
-- **Two domains remain upstream-blocked**: gateway group and system general settings. Interface base assignment/IP configuration moved to buildable provider work after Story 30.1 found the complete expanded API in released OPNsense `26.7.6`; provider implementation and acceptance proof remain pending, and PPPoE remains unverified. Story 5.6 revalidated gateway-group status on 2026-06-14: OPNsense `master` has model-only `GatewayGroups` evidence, but no published endpoint/API controller was found and checked `stable/26.1` model paths returned 404. Story 5.7 created the system general settings revalidation gate on 2026-06-14: no durable target-release settings API was found; `core/system` is action/status-only and `core/initial_setup` is wizard-only.
+- **Two domains remain upstream-blocked**: gateway group and system general settings. Base interface assignment/IP configuration is supported by `opnsense_interface_assignment` on OPNsense `26.7.6+` after Story 30.2 lifecycle, drift, repair, and restoration proof; PPPoE remains unverified. Story 5.6 revalidated gateway-group status on 2026-06-14: OPNsense `master` has model-only `GatewayGroups` evidence, but no published endpoint/API controller was found and checked `stable/26.1` model paths returned 404. Story 5.7 created the system general settings revalidation gate on 2026-06-14: no durable target-release settings API was found; `core/system` is action/status-only and `core/initial_setup` is wizard-only.
 
 ## PRD expansion applied / still required
 
@@ -63,7 +63,7 @@ Status: done. CA and certificate resources are implemented.
 Status: done. User and group resources plus data sources are implemented.
 
 ### Epic 17: Interface Types
-Status: done for durable target-release APIs. Bridge, GRE, GIF, VXLAN, loopback, neighbor, and LAGG are implemented; base assignment/IP config/PPPoE remains upstream-blocked outside this epic.
+Status: done for durable target-release APIs. Base assignment/IP, bridge, GRE, GIF, VXLAN, loopback, neighbor, and LAGG are implemented; only PPPoE semantics remain outside the supported assignment surface.
 
 ### Epic 18: Firewall Completion
 Status: done. One-to-one NAT is implemented. Source NAT is already shipped as `opnsense_firewall_nat_outbound`.
@@ -79,7 +79,7 @@ Status: substantially done. FRR general, BGP global/sub-resources, OSPF area/sub
 Status: done. Local, remote, pool, VTI, manual SPD, and key pair resources are implemented.
 
 ### Epic 21: DHCP Completion (Kea)
-Status: partial. DHCPv6 settings/subnet/reservation, HA peer, and control agent are implemented. DHCPv4 option and Kea DDNS need live endpoint recheck before implementation.
+Status: partial. DHCPv6 settings/subnet/reservation, HA peer, peer, prefix-delegation pool, and control agent resources are implemented; item data sources include DHCPv6 subnet/reservation, HA peer, peer, and prefix-delegation pool. DHCPv4 option and Kea DDNS need live endpoint recheck before implementation.
 
 ### Epic 22: DNS Completion
 Status: done. Unbound general, host alias, DNSBL/blocklist, Unbound forward, Dnsmasq settings, and Dnsmasq host/domain/range/option/tag/boot item resources are implemented.
@@ -95,7 +95,7 @@ Status: done. Cron job, Monit service/test/alert, and syslog destination resourc
 ## Wave C — release runway (extends Epic 12; runs in parallel)
 
 ### Epic 25: Data Sources, Docs & Registry Release
-- 88 data sources are implemented, including standalone `system_info`; 15 singleton or sensitive special-case resource-matching data sources remain.
+- 92 data sources are implemented, including standalone `system_info`; 17 singleton or sensitive special-case resource-matching data sources remain.
 - Provider index, tfplugindocs output, examples, GoReleaser, signed checksum workflow, Registry manifest, and changelog exist.
 - Support matrix now lives in `support-matrix.md` and should be mirrored in Registry-facing docs.
 - First release can proceed once release workflow dry-run/secrets are confirmed and the support matrix is accepted.
@@ -106,7 +106,7 @@ Status: done. Cron job, Monit service/test/alert, and syslog destination resourc
 
 | Domain | Upstream item | Action | Unblocks |
 |---|---|---|---|
-| Interface base assignment / IP config / PPPoE | Complete assignment/IP API released in OPNsense `26.7.6`; provider implementation and acceptance proof pending; PPPoE semantics unverified | implement and test assignment/IP settings against a disposable `26.7.6+` appliance; keep PPPoE outside initial scope | `opnsense_interface_assignment` or `opnsense_interface_settings` for assignment/IP settings after Story 30.2 lifecycle proof |
+| Interface base assignment / IP config / PPPoE | Base assignment/IP is implemented as `opnsense_interface_assignment` for OPNsense `26.7.6+` with disposable 26.7.7 lifecycle proof; PPPoE semantics remain unverified | retain the release gate and acceptance coverage; keep PPPoE outside the supported scope until separately validated | `opnsense_interface_assignment` for supported base settings; PPPoE remains research-only |
 | Gateway group | `master` model-only `GatewayGroups` evidence; no target-release API/controller | track target release, generated API docs, API controllers, ACL/menu coverage, and tier/member semantics; author fresh MVC API if absent | `opnsense_system_gateway_group` |
 | System general settings | roadmap: System Settings -> MVC; current `core/initial_setup` evidence is wizard-only, not a day-2 singleton API | watch release notes (CE 26.x), generated API docs, controllers/models, ACL/menu entries, and stable target-release get/set semantics | `opnsense_system_general` |
 

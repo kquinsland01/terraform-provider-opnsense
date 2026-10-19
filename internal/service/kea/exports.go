@@ -20,6 +20,8 @@ func Resources() []func() resource.Resource {
 		newDHCPv6SubnetResource,
 		newDHCPv6ReservationResource,
 		newHAPeerResource,
+		newDHCPv6PeerResource,
+		newDHCPv6PDPoolResource,
 	}
 }
 
@@ -31,5 +33,7 @@ func DataSources() []func() datasource.DataSource {
 		newDHCPv6SubnetDataSource,
 		newDHCPv6ReservationDataSource,
 		newHAPeerDataSource,
+		newDHCPv6PeerDataSource,
+		newDHCPv6PDPoolDataSource,
 	}
 }

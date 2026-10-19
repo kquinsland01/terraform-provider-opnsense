@@ -1,0 +1,75 @@
+{
+  "story": "31.0b",
+  "run_id": "20261018T233224Z",
+  "evidence_status": "final-pass6-patch-pass",
+  "final_live_proof": true,
+  "baseline_revision": "4c9bd5f51a5e8a8da085bd7652b298ed5a49c5e9",
+  "attestation": {
+    "algorithm": "sha256",
+    "command": "test/scripts/story-31-0b-code-digest.sh",
+    "scope": "Sorted paths and contents for Story 31.0b generator source, Kea implementation/generated owners/tests, tfconv helper, shared CRUD/reconfigure implementation/tests, the acceptance runner, and the digest script itself; independent of HEAD, index, and dirty-worktree state",
+    "pre_live_digest": "2db677cf3ca78f0ff680ca738ed75973c0635fde5c5159abff2802db3cc3d19f",
+    "post_live_digest": "2db677cf3ca78f0ff680ca738ed75973c0635fde5c5159abff2802db3cc3d19f",
+    "sanitized_non_cached_output": "_bmad-output/implementation-artifacts/31-0b-live-output.txt"
+  },
+  "target": {
+    "product": "OPNsense",
+    "version": "26.7.7",
+    "disposable": true,
+    "test_interface": "opt1",
+    "kea_dhcpv4_enabled": false,
+    "kea_dhcpv4_ha_enabled": false,
+    "kea_dhcpv6_enabled": false,
+    "kea_dhcpv6_ha_enabled": false
+  },
+  "command": "TF_ACC=1 go test -v -run 'TestAcc(KeaFieldAndSurfaceParity|DHCPv6(Peer|PDPool)_basic)' -count=1 -p 1 -timeout 45m ./internal/service/kea",
+  "result": {
+    "status": "pass",
+    "skipped": false,
+    "tests": {
+      "TestAccDHCPv6PDPool_basic": "pass",
+      "TestAccDHCPv6Peer_basic": "pass",
+      "TestAccKeaFieldAndSurfaceParity": "pass"
+    },
+    "parity_steps_passed": 20,
+    "parity_steps_total": 20,
+    "coverage": [
+      "resource and data-source parity",
+      "create/read/import/update/delete",
+      "stable plans",
+      "out-of-band drift detection and repair",
+      "populated-to-explicit-empty updates",
+      "CIDR resource stability with address-only API data-source truth",
+      "generated delegated-prefix-pool lifecycle and import",
+      "generated DHCPv6 peer lifecycle and import",
+      "runtime OPNsense 26.7.7 compatibility gating",
+      "dependency-ordered cleanup"
+    ]
+  },
+  "cleanup": {
+    "fixture_marker": "e1383f9d7ae63f19",
+    "searches": [
+      {
+        "endpoint": "/api/kea/dhcpv6/search_pd_pool",
+        "query": "Story31b-e1383f9d7ae63f19",
+        "matches": 0
+      },
+      {
+        "endpoint": "/api/kea/dhcpv6/search_subnet",
+        "query": "fd31:39::/48",
+        "matches": 0
+      },
+      {
+        "endpoint": "/api/kea/dhcpv6/search_peer",
+        "query": "story31b-e1383f9d7ae63f19",
+        "matches": 0
+      },
+      {
+        "endpoint": "/api/kea/dhcpv4/search_subnet",
+        "query": "198.18.57.0/24",
+        "matches": 0
+      }
+    ]
+  },
+  "secrets_retained": false
+}

@@ -120,15 +120,15 @@ Current provider baseline:
 
 | Capability | Count |
 |------------|------:|
-| Resources | 102 |
-| Data sources | 88 |
-| Resource docs | 102 |
-| Data source docs | 88 |
-| Remaining data-source gaps | 15 |
+| Resources | 108 |
+| Data sources | 92 |
+| Resource docs | 108 |
+| Data source docs | 92 |
+| Remaining data-source gaps | 17 |
 
 | Supported today | Coming / provider-owned follow-up | Needs research | Upstream-blocked / OPNsense dependency |
 |-----------------|------------------------------------|----------------|----------------------------------------|
-| Firewall, HAProxy, ACME, DNS/Dnsmasq, DHCP/Kea, Dynamic DNS, VPN, FRR/Quagga, interfaces including LAGG, system tunables, auth, trust, syslog, Monit, cron, and traffic shaping resources. | Interface assignment/IP settings for OPNsense `26.7.6` or newer now that the expanded `interfaces/assignment` API is released; data-source parity for singleton or sensitive special-case resources. | Kea DHCPv4 option/DDNS are present in OPNsense `master` but absent from checked stable targets; HASync configuration `syncitems` model shape; HASync status/actions; PPPoE semantics for future interface settings. | Gateway groups and system general settings until OPNsense exposes stable target-release APIs; gateway groups currently have only `master` model evidence, and system general settings currently have only action/status plus setup-wizard evidence, not durable target-release API/controller support. |
+| Firewall, HAProxy, ACME, DNS/Dnsmasq, DHCP/Kea, Dynamic DNS, VPN, FRR/Quagga, interface assignment/IP on OPNsense `26.7.6+` plus LAGG and other interface types, system tunables, auth, trust, syslog, Monit, cron, and traffic shaping resources. | Data-source parity for singleton or sensitive special-case resources. | Kea DHCPv4 option/DDNS are present in OPNsense `master` but absent from checked stable targets; HASync configuration `syncitems` model shape; HASync status/actions; PPPoE semantics for future interface settings. | Gateway groups and system general settings until OPNsense exposes stable target-release APIs; gateway groups currently have only `master` model evidence, and system general settings currently have only action/status plus setup-wizard evidence, not durable target-release API/controller support. |
 
 The full current Supported / Coming / Needs research / Upstream-blocked matrix is maintained in
 the repository at
