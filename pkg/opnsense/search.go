@@ -35,6 +35,16 @@ type searchResponse[K any] struct {
 	Current  int `json:"current"`
 }
 
+// strictSearchResponse preserves presence information for authoritative
+// pagination metadata. OPNsense reports rowCount as the number of rows in the
+// current response page, not the requested page size.
+type strictSearchResponse struct {
+	Rows     json.RawMessage `json:"rows"`
+	RowCount *int            `json:"rowCount"`
+	Total    *int            `json:"total"`
+	Current  *int            `json:"current"`
+}
+
 // Search queries an OPNsense search endpoint and transparently iterates all
 // pages to return the complete result set. Search is a read-only operation
 // that acquires the read semaphore per page request.
@@ -46,6 +56,7 @@ func Search[K any](ctx context.Context, c *Client, opts ReqOpts, params SearchPa
 
 	var allResults []K
 	page := 1
+	expectedTotal := -1
 
 	for {
 		// Check context cancellation between pages.
@@ -57,11 +68,26 @@ func Search[K any](ctx context.Context, c *Client, opts ReqOpts, params SearchPa
 		if err != nil {
 			return nil, err
 		}
+		if total < 0 {
+			return nil, fmt.Errorf("search %s: page %d reported negative total %d", opts.SearchEndpoint, page, total)
+		}
+		if expectedTotal == -1 {
+			expectedTotal = total
+		} else if total != expectedTotal {
+			return nil, fmt.Errorf("search %s: page %d changed total from %d to %d", opts.SearchEndpoint, page, expectedTotal, total)
+		}
+		if len(allResults)+len(pageResults) > expectedTotal {
+			return nil, fmt.Errorf("search %s: page %d would exceed declared total %d", opts.SearchEndpoint, page, expectedTotal)
+		}
 
 		allResults = append(allResults, pageResults...)
 
-		// Stop if we've collected all results or page was empty (safety).
-		if len(allResults) >= total || len(pageResults) == 0 {
+		if len(pageResults) == 0 && len(allResults) < expectedTotal {
+			return nil, fmt.Errorf("search %s: page %d was empty after collecting %d of %d declared results", opts.SearchEndpoint, page, len(allResults), expectedTotal)
+		}
+
+		// Stop only after the declared total has been collected.
+		if len(allResults) == expectedTotal {
 			break
 		}
 
@@ -117,10 +143,29 @@ func searchPage[K any](ctx context.Context, c *Client, opts ReqOpts, rowCount in
 		return nil, 0, fmt.Errorf("search %s: failed to read response: %w", opts.SearchEndpoint, err)
 	}
 
-	var result searchResponse[K]
+	var result strictSearchResponse
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		return nil, 0, fmt.Errorf("search %s: failed to parse response: %w", opts.SearchEndpoint, err)
 	}
+	if len(result.Rows) == 0 || bytes.Equal(bytes.TrimSpace(result.Rows), []byte("null")) {
+		return nil, 0, fmt.Errorf("search %s: page %d response is missing rows", opts.SearchEndpoint, page)
+	}
+	if result.RowCount == nil || result.Total == nil || result.Current == nil {
+		return nil, 0, fmt.Errorf("search %s: page %d response is missing pagination metadata", opts.SearchEndpoint, page)
+	}
+	var rows []K
+	if err := json.Unmarshal(result.Rows, &rows); err != nil {
+		return nil, 0, fmt.Errorf("search %s: page %d rows are invalid: %w", opts.SearchEndpoint, page, err)
+	}
+	if rows == nil {
+		return nil, 0, fmt.Errorf("search %s: page %d rows must be an array", opts.SearchEndpoint, page)
+	}
+	if *result.Current != page {
+		return nil, 0, fmt.Errorf("search %s: requested page %d but response reported page %d", opts.SearchEndpoint, page, *result.Current)
+	}
+	if *result.RowCount < 0 || *result.RowCount != len(rows) {
+		return nil, 0, fmt.Errorf("search %s: page %d rowCount %d does not match %d rows", opts.SearchEndpoint, page, *result.RowCount, len(rows))
+	}
 
-	return result.Rows, result.Total, nil
+	return rows, *result.Total, nil
 }

@@ -42,22 +42,40 @@ func TestReconfigure_StandardEndpointSuccess(t *testing.T) {
 	}
 }
 
-func TestReconfigure_KeaRequiresAffirmativeStatusOK(t *testing.T) {
-	for _, body := range []string{"", `{}`, `{"status":"unknown"}`, `{"result":"ok"}`} {
-		t.Run(body, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, body) }))
+func TestReconfigure_StrictServicesRequireAffirmativeStatusOK(t *testing.T) {
+	for _, test := range []struct {
+		endpoint string
+		strict   bool
+	}{{"/api/kea/service/reconfigure", false}, {"/api/unbound/service/reconfigure", true}, {"/api/unbound/service/reconfigure_general", true}} {
+		endpoint := test.endpoint
+		t.Run(endpoint, func(t *testing.T) {
+			for _, body := range []string{"", `{}`, `{"status":"unknown"}`, `{"result":"ok"}`} {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, body) }))
+				client := newReconfigureTestClient(t, server.URL)
+				err := Reconfigure(context.Background(), client, ReqOpts{ReconfigureEndpoint: endpoint, StrictReconfigureResponse: test.strict})
+				server.Close()
+				if err == nil {
+					t.Fatalf("ambiguous strict response accepted: %q", body)
+				}
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, `{"status":"ok"}`) }))
 			defer server.Close()
-			client := newReconfigureTestClient(t, server.URL)
-			err := Reconfigure(context.Background(), client, ReqOpts{ReconfigureEndpoint: "/api/kea/service/reconfigure"})
-			if err == nil {
-				t.Fatalf("ambiguous Kea response accepted: %q", body)
+			if err := Reconfigure(context.Background(), newReconfigureTestClient(t, server.URL), ReqOpts{ReconfigureEndpoint: endpoint, StrictReconfigureResponse: test.strict}); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, `{"status":"ok"}`) }))
+}
+
+func TestReconfigure_SharedUnboundEndpointIsStrictOnlyWhenOwnerOptsIn(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 	defer server.Close()
-	if err := Reconfigure(context.Background(), newReconfigureTestClient(t, server.URL), ReqOpts{ReconfigureEndpoint: "/api/kea/service/reconfigure"}); err != nil {
-		t.Fatal(err)
+	client := newReconfigureTestClient(t, server.URL)
+	if err := Reconfigure(context.Background(), client, ReqOpts{ReconfigureEndpoint: "/api/unbound/service/reconfigure"}); err != nil {
+		t.Fatalf("legacy Unbound caller unexpectedly made strict: %v", err)
+	}
+	if err := Reconfigure(context.Background(), client, ReqOpts{ReconfigureEndpoint: "/api/unbound/service/reconfigure", StrictReconfigureResponse: true}); err == nil {
+		t.Fatal("strict Story 31.0d owner accepted empty response")
 	}
 }
 

@@ -7,11 +7,15 @@ package unbound
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -24,24 +28,64 @@ func (r *generalResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Resource identifier.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"enabled":                 schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true), MarkdownDescription: "Enable the Unbound DNS resolver."},
-			"port":                    schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Port the resolver listens on.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"stats":                   schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Collect query statistics."},
-			"active_interface":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Interfaces the resolver listens on (empty = all)."},
-			"dnssec":                  schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true), MarkdownDescription: "Enable DNSSEC validation."},
-			"dns64":                   schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Enable DNS64 synthesis."},
-			"dns64_prefix":            schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "DNS64 prefix (empty = well-known 64:ff9b::/96).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"no_aaaa_records":         schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Strip AAAA records from responses."},
-			"register_dhcp":           schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Register DHCP leases in the resolver."},
-			"register_dhcp_domain":    schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Domain appended to registered DHCP names.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"register_dhcp_static":    schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Register static DHCP mappings in the resolver."},
-			"no_register_link_local6": schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Do not register IPv6 link-local addresses."},
-			"no_register_records":     schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Do not register system A/AAAA records."},
-			"txt_support":             schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Serve TXT records for registered hosts."},
-			"cache_flush":             schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Flush the DNS cache on reconfigure."},
-			"local_zone_type":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Local zone type (transparent, always_nxdomain, always_refuse, always_transparent, deny).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"outgoing_interface":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Interfaces used for outgoing queries (empty = all)."},
-			"enable_wpad":             schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Serve WPAD records for proxy auto-discovery."},
+			"enabled":                               schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true), MarkdownDescription: "Enable the Unbound DNS resolver."},
+			"port":                                  schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Port the resolver listens on.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"stats":                                 schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Collect query statistics."},
+			"active_interface":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Interfaces the resolver listens on (empty = all)."},
+			"dnssec":                                schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true), MarkdownDescription: "Enable DNSSEC validation."},
+			"dns64":                                 schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Enable DNS64 synthesis."},
+			"dns64_prefix":                          schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "DNS64 prefix (empty = well-known 64:ff9b::/96).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"no_aaaa_records":                       schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Remove A records from responses (legacy attribute name; upstream control is `noarecords`)."},
+			"register_dhcp":                         schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Register DHCP leases in the resolver."},
+			"register_dhcp_domain":                  schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Domain appended to registered DHCP names.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"register_dhcp_static":                  schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Register static DHCP mappings in the resolver."},
+			"no_register_link_local6":               schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Do not register IPv6 link-local addresses."},
+			"no_register_records":                   schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Do not register system A/AAAA records."},
+			"txt_support":                           schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Serve TXT records for registered hosts."},
+			"cache_flush":                           schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Flush the DNS cache on reconfigure."},
+			"local_zone_type":                       schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Local zone type (transparent, always_nxdomain, always_refuse, always_transparent, deny).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"outgoing_interface":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Interfaces used for outgoing queries (empty = all)."},
+			"enable_wpad":                           schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: "Serve WPAD records for proxy auto-discovery."},
+			"hide_identity":                         schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Refuse id.server and hostname.bind queries."},
+			"hide_version":                          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Refuse version.server and version.bind queries."},
+			"enable_prefetch_key":                   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Prefetch DNSKEY records during validation."},
+			"dnssec_stripped":                       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Harden against DNSSEC-stripped responses."},
+			"aggressive_nsec":                       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Use aggressive NSEC caching."},
+			"qname_min_strict":                      schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Use strict QNAME minimisation."},
+			"outgoing_num_tcp":                      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum outgoing TCP buffers per thread.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"incoming_num_tcp":                      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum incoming TCP buffers per thread.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"num_queries_per_thread":                schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum simultaneous queries per thread.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"outgoing_range":                        schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Number of ports available to outgoing queries.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"jostle_timeout":                        schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Timeout in milliseconds for jostled queries.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"discard_timeout":                       schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Timeout in milliseconds before discarding queries.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"private_domains":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Domains allowed to contain private addresses."},
+			"private_addresses":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Private address ranges protected from rebinding."},
+			"insecure_domains":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Domains excluded from DNSSEC validation."},
+			"enable_prefetch":                       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Prefetch cache entries before expiry."},
+			"unwanted_reply_threshold":              schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Threshold for unwanted replies before defensive action.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"msg_cache_size":                        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Message cache size.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"rrset_cache_size":                      schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "RRset cache size.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"max_ttl":                               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum cache TTL.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"max_negative_ttl":                      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum negative cache TTL.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"min_ttl":                               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Minimum cache TTL.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"host_ttl":                              schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Infrastructure host cache TTL.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"keep_probing_hosts":                    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Keep probing hosts that are down."},
+			"num_hosts":                             schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Infrastructure host cache size.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 9223372036854775807)}},
+			"extended_statistics":                   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Collect extended statistics."},
+			"log_queries":                           schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Log queries."},
+			"log_replies":                           schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Log replies."},
+			"tag_query_reply":                       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Tag query and reply log lines."},
+			"log_local_actions":                     schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Log local-zone actions."},
+			"log_servfail":                          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Log SERVFAIL responses."},
+			"verbosity_level":                       schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Unbound log verbosity level.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 5)}},
+			"validation_level":                      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "DNSSEC validation log level.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}, Validators: []validator.Int64{int64validator.Between(0, 2)}},
+			"serve_expired_enabled":                 schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Serve expired records while refreshing."},
+			"serve_expired_record_reply_ttl":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "TTL returned for expired records.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"serve_expired_ttl":                     schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Maximum time to serve expired records.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"serve_expired_reset_ttl":               schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Reset an expired record's TTL after reply."},
+			"serve_expired_client_response_timeout": schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Client response timeout before serving expired data.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"acl_default_action":                    schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Default action for clients not matched by an ACL.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}, Validators: []validator.String{stringvalidator.OneOf("allow", "deny", "refuse")}},
+			"forwarding_enabled":                    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable query forwarding."},
 		},
 	}
 }

@@ -43,7 +43,7 @@ resources:
 | `string`        | types.String  | string            | direct |
 | `selectmap`     | types.String  | SelectedMap       | string(x); supports `options` for OneOf validation |
 | `selectmaplist` | types.Set     | SelectedMapList   | sliceToSet / setToCSV |
-| `csvset`        | types.Set     | string (CSV)      | CSVToSlice→sliceToSet / setToCSV |
+| `csvset`        | types.Set     | CSVSelectedMapList | selected-map or CSV→sliceToSet / setToCSV |
 
 `required: true` omits the default and marks the attribute Required; otherwise
 `default` supplies the schema default. The target package must provide the

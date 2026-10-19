@@ -28,6 +28,10 @@ type ReqOpts struct {
 	// ReconfigureEndpoint is the standard reconfigure path called via POST after mutations
 	// (e.g., "/haproxy/service/reconfigure"). Mutually exclusive with ReconfigureFunc.
 	ReconfigureEndpoint string
+	// StrictReconfigureResponse requires a non-empty JSON response whose status
+	// is exactly "ok". Enable this only for owners whose endpoint contract has
+	// been proven; sharing an endpoint does not make the response contract global.
+	StrictReconfigureResponse bool
 	// ReconfigureFunc overrides the standard reconfigure endpoint with a custom function.
 	// Used by firewall filter resources for the savepoint/apply/cancelRollback flow.
 	// Mutually exclusive with ReconfigureEndpoint.

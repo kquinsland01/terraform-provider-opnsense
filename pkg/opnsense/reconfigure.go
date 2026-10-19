@@ -44,9 +44,12 @@ func Reconfigure(ctx context.Context, client *Client, opts ReqOpts) error {
 	if err != nil {
 		return fmt.Errorf("reconfigure %s: failed to read response: %w", opts.ReconfigureEndpoint, err)
 	}
-	requireKeaStatus := opts.ReconfigureEndpoint == "/api/kea/service/reconfigure"
+	// Kea predates the owner-selective flag and already has a provider-wide
+	// proven strict contract. Other shared endpoints opt in per owner.
+	requireOKStatus := opts.StrictReconfigureResponse ||
+		opts.ReconfigureEndpoint == "/api/kea/service/reconfigure"
 	if strings.TrimSpace(string(body)) == "" {
-		if requireKeaStatus {
+		if requireOKStatus {
 			return fmt.Errorf("reconfigure %s: empty response; expected status ok", opts.ReconfigureEndpoint)
 		}
 		return nil
@@ -58,10 +61,10 @@ func Reconfigure(ctx context.Context, client *Client, opts ReqOpts) error {
 	if err := json.Unmarshal(body, &result); err != nil {
 		return fmt.Errorf("reconfigure %s: failed to parse response: %w", opts.ReconfigureEndpoint, err)
 	}
-	if requireKeaStatus && result.Status != "ok" {
+	if requireOKStatus && result.Status != "ok" {
 		return fmt.Errorf("reconfigure %s: unexpected status %q; expected ok", opts.ReconfigureEndpoint, result.Status)
 	}
-	if !requireKeaStatus && (result.Status == "failed" || result.Result == "failed") {
+	if !requireOKStatus && (result.Status == "failed" || result.Result == "failed") {
 		return fmt.Errorf("reconfigure %s: failed", opts.ReconfigureEndpoint)
 	}
 

@@ -11,9 +11,9 @@
   },
   "local_inventory": {
     "resource_count": 108,
-    "data_source_count": 93,
+    "data_source_count": 94,
     "resource_doc_count": 108,
-    "data_source_doc_count": 93,
+    "data_source_doc_count": 94,
     "ephemeral_resource_count": 1,
     "ephemeral_resource_doc_count": 1,
     "resource_only_data_source_gaps": [
@@ -35,7 +35,8 @@
       "unbound_general"
     ],
     "data_source_only": [
-      "system_info"
+      "system_info",
+      "unbound_settings"
     ]
   },
   "allowed_classifications": [
@@ -1442,7 +1443,7 @@
       "kind": "resource",
       "name": "unbound_forward",
       "domain": "Unbound",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "unbound_domain_override"
       ],
@@ -1457,16 +1458,16 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping",
-        "local_only": "none material",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "description",
+        "lifecycle": "digest-bound OPNsense 26.7.7 acceptance proves distinct query and DNS-over-TLS create/read/import/update/delete lifecycles, bidirectional type transitions, authoritative readback, drift repair, and non-mutating zero-object proof after Terraform destroy",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_forward.md",
-        "docs/resources/unbound_domain_override.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+        "docs/resources/unbound_domain_override.md",
+        "_bmad-output/implementation-artifacts/31-0d-live-evidence.json"
+      ]
     },
     {
       "kind": "resource",
@@ -1531,7 +1532,7 @@
       "kind": "resource",
       "name": "unbound_settings",
       "domain": "Unbound",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "unbound_general",
         "unbound_dnsbl"
@@ -1546,17 +1547,17 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons",
+        "baseline_only": "none material after semantic name/type normalization",
         "local_only": "none material",
-        "lifecycle": "import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings",
+        "lifecycle": "digest-bound OPNsense 26.7.7 acceptance proves import-first general and DNSBL ownership, independent general/advanced/ACL-default/forwarding updates, Terraform DNSBL update and drift repair, state-only singleton destroy, complete aggregate equality, and exact settings restoration",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_settings.md",
         "docs/resources/unbound_general.md",
-        "docs/resources/unbound_dnsbl.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+        "docs/resources/unbound_dnsbl.md",
+        "_bmad-output/implementation-artifacts/31-0d-live-evidence.json"
+      ]
     },
     {
       "kind": "resource",
@@ -2940,7 +2941,7 @@
       "kind": "data-source",
       "name": "unbound_forward",
       "domain": "Unbound",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "unbound_domain_override"
       ],
@@ -2955,16 +2956,16 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "baseline_only": "none material after semantic name/type normalization",
+        "local_only": "description",
+        "lifecycle": "digest-bound OPNsense 26.7.7 acceptance proves authoritative query and DNS-over-TLS reads with complete server_port, type, verify_cn, and existing-field parity across independent lifecycle and import boundaries",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_forward.md",
-        "docs/data-sources/unbound_domain_override.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+        "docs/data-sources/unbound_domain_override.md",
+        "_bmad-output/implementation-artifacts/31-0d-live-evidence.json"
+      ]
     },
     {
       "kind": "data-source",
@@ -3029,8 +3030,10 @@
       "kind": "data-source",
       "name": "unbound_settings",
       "domain": "Unbound",
-      "classification": "missing-buildable",
-      "local_equivalents": [],
+      "classification": "covered",
+      "local_equivalents": [
+        "unbound_settings"
+      ],
       "baseline_fields": [
         "acls",
         "advanced",
@@ -3041,17 +3044,17 @@
       ],
       "field_evidence": {
         "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons",
+        "baseline_only": "none material after semantic name/type normalization",
         "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "lifecycle": "digest-bound OPNsense 26.7.7 acceptance proves complete authoritative general, advanced, ACL-default, forwarding, and every DNSBL item field plus canonical dnsbl_json equality before exact settings restoration",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_settings.md",
         "docs/resources/unbound_general.md",
-        "docs/resources/unbound_dnsbl.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md"
+        "docs/resources/unbound_dnsbl.md",
+        "_bmad-output/implementation-artifacts/31-0d-live-evidence.json"
+      ]
     },
     {
       "kind": "data-source",

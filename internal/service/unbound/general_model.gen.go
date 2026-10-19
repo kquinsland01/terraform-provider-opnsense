@@ -15,89 +15,249 @@ import (
 
 // GeneralResourceModel is the Terraform state model for opnsense_unbound_general.
 type GeneralResourceModel struct {
-	ID                   types.String `tfsdk:"id"`
-	Enabled              types.Bool   `tfsdk:"enabled"`
-	Port                 types.String `tfsdk:"port"`
-	Stats                types.Bool   `tfsdk:"stats"`
-	ActiveInterface      types.Set    `tfsdk:"active_interface"`
-	DNSSEC               types.Bool   `tfsdk:"dnssec"`
-	DNS64                types.Bool   `tfsdk:"dns64"`
-	DNS64Prefix          types.String `tfsdk:"dns64_prefix"`
-	NoAAAARecords        types.Bool   `tfsdk:"no_aaaa_records"`
-	RegisterDHCP         types.Bool   `tfsdk:"register_dhcp"`
-	RegisterDHCPDomain   types.String `tfsdk:"register_dhcp_domain"`
-	RegisterDHCPStatic   types.Bool   `tfsdk:"register_dhcp_static"`
-	NoRegisterLinkLocal6 types.Bool   `tfsdk:"no_register_link_local6"`
-	NoRegisterRecords    types.Bool   `tfsdk:"no_register_records"`
-	TXTSupport           types.Bool   `tfsdk:"txt_support"`
-	CacheFlush           types.Bool   `tfsdk:"cache_flush"`
-	LocalZoneType        types.String `tfsdk:"local_zone_type"`
-	OutgoingInterface    types.Set    `tfsdk:"outgoing_interface"`
-	EnableWPAD           types.Bool   `tfsdk:"enable_wpad"`
+	ID                                types.String `tfsdk:"id"`
+	Enabled                           types.Bool   `tfsdk:"enabled"`
+	Port                              types.String `tfsdk:"port"`
+	Stats                             types.Bool   `tfsdk:"stats"`
+	ActiveInterface                   types.Set    `tfsdk:"active_interface"`
+	DNSSEC                            types.Bool   `tfsdk:"dnssec"`
+	DNS64                             types.Bool   `tfsdk:"dns64"`
+	DNS64Prefix                       types.String `tfsdk:"dns64_prefix"`
+	NoAAAARecords                     types.Bool   `tfsdk:"no_aaaa_records"`
+	RegisterDHCP                      types.Bool   `tfsdk:"register_dhcp"`
+	RegisterDHCPDomain                types.String `tfsdk:"register_dhcp_domain"`
+	RegisterDHCPStatic                types.Bool   `tfsdk:"register_dhcp_static"`
+	NoRegisterLinkLocal6              types.Bool   `tfsdk:"no_register_link_local6"`
+	NoRegisterRecords                 types.Bool   `tfsdk:"no_register_records"`
+	TXTSupport                        types.Bool   `tfsdk:"txt_support"`
+	CacheFlush                        types.Bool   `tfsdk:"cache_flush"`
+	LocalZoneType                     types.String `tfsdk:"local_zone_type"`
+	OutgoingInterface                 types.Set    `tfsdk:"outgoing_interface"`
+	EnableWPAD                        types.Bool   `tfsdk:"enable_wpad"`
+	HideIdentity                      types.Bool   `tfsdk:"hide_identity"`
+	HideVersion                       types.Bool   `tfsdk:"hide_version"`
+	EnablePrefetchKey                 types.Bool   `tfsdk:"enable_prefetch_key"`
+	DNSSECStripped                    types.Bool   `tfsdk:"dnssec_stripped"`
+	AggressiveNSEC                    types.Bool   `tfsdk:"aggressive_nsec"`
+	QnameMinStrict                    types.Bool   `tfsdk:"qname_min_strict"`
+	OutgoingNumTCP                    types.Int64  `tfsdk:"outgoing_num_tcp"`
+	IncomingNumTCP                    types.Int64  `tfsdk:"incoming_num_tcp"`
+	NumQueriesPerThread               types.Int64  `tfsdk:"num_queries_per_thread"`
+	OutgoingRange                     types.Int64  `tfsdk:"outgoing_range"`
+	JostleTimeout                     types.Int64  `tfsdk:"jostle_timeout"`
+	DiscardTimeout                    types.Int64  `tfsdk:"discard_timeout"`
+	PrivateDomains                    types.Set    `tfsdk:"private_domains"`
+	PrivateAddresses                  types.Set    `tfsdk:"private_addresses"`
+	InsecureDomains                   types.Set    `tfsdk:"insecure_domains"`
+	EnablePrefetch                    types.Bool   `tfsdk:"enable_prefetch"`
+	UnwantedReplyThreshold            types.Int64  `tfsdk:"unwanted_reply_threshold"`
+	MsgCacheSize                      types.String `tfsdk:"msg_cache_size"`
+	RRSetCacheSize                    types.String `tfsdk:"rrset_cache_size"`
+	MaxTTL                            types.Int64  `tfsdk:"max_ttl"`
+	MaxNegativeTTL                    types.Int64  `tfsdk:"max_negative_ttl"`
+	MinTTL                            types.Int64  `tfsdk:"min_ttl"`
+	HostTTL                           types.Int64  `tfsdk:"host_ttl"`
+	KeepProbingHosts                  types.Bool   `tfsdk:"keep_probing_hosts"`
+	NumHosts                          types.Int64  `tfsdk:"num_hosts"`
+	ExtendedStatistics                types.Bool   `tfsdk:"extended_statistics"`
+	LogQueries                        types.Bool   `tfsdk:"log_queries"`
+	LogReplies                        types.Bool   `tfsdk:"log_replies"`
+	TagQueryReply                     types.Bool   `tfsdk:"tag_query_reply"`
+	LogLocalActions                   types.Bool   `tfsdk:"log_local_actions"`
+	LogServfail                       types.Bool   `tfsdk:"log_servfail"`
+	VerbosityLevel                    types.Int64  `tfsdk:"verbosity_level"`
+	ValidationLevel                   types.Int64  `tfsdk:"validation_level"`
+	ServeExpiredEnabled               types.Bool   `tfsdk:"serve_expired_enabled"`
+	ServeExpiredRecordReplyTTL        types.String `tfsdk:"serve_expired_record_reply_ttl"`
+	ServeExpiredTTL                   types.String `tfsdk:"serve_expired_ttl"`
+	ServeExpiredResetTTL              types.Bool   `tfsdk:"serve_expired_reset_ttl"`
+	ServeExpiredClientResponseTimeout types.String `tfsdk:"serve_expired_client_response_timeout"`
+	ACLDefaultAction                  types.String `tfsdk:"acl_default_action"`
+	ForwardingEnabled                 types.Bool   `tfsdk:"forwarding_enabled"`
 }
 
 type generalAPIResponse struct {
-	Enabled              string                   `json:"enabled"`
-	Port                 string                   `json:"port"`
-	Stats                string                   `json:"stats"`
-	ActiveInterface      opnsense.SelectedMapList `json:"active_interface"`
-	DNSSEC               string                   `json:"dnssec"`
-	DNS64                string                   `json:"dns64"`
-	DNS64Prefix          string                   `json:"dns64prefix"`
-	NoAAAARecords        string                   `json:"noarecords"`
-	RegisterDHCP         string                   `json:"regdhcp"`
-	RegisterDHCPDomain   string                   `json:"regdhcpdomain"`
-	RegisterDHCPStatic   string                   `json:"regdhcpstatic"`
-	NoRegisterLinkLocal6 string                   `json:"noreglladdr6"`
-	NoRegisterRecords    string                   `json:"noregrecords"`
-	TXTSupport           string                   `json:"txtsupport"`
-	CacheFlush           string                   `json:"cacheflush"`
-	LocalZoneType        opnsense.SelectedMap     `json:"local_zone_type"`
-	OutgoingInterface    opnsense.SelectedMapList `json:"outgoing_interface"`
-	EnableWPAD           string                   `json:"enable_wpad"`
+	Enabled                           string                      `json:"enabled"`
+	Port                              string                      `json:"port"`
+	Stats                             string                      `json:"stats"`
+	ActiveInterface                   opnsense.SelectedMapList    `json:"active_interface"`
+	DNSSEC                            string                      `json:"dnssec"`
+	DNS64                             string                      `json:"dns64"`
+	DNS64Prefix                       string                      `json:"dns64prefix"`
+	NoAAAARecords                     string                      `json:"noarecords"`
+	RegisterDHCP                      string                      `json:"regdhcp"`
+	RegisterDHCPDomain                string                      `json:"regdhcpdomain"`
+	RegisterDHCPStatic                string                      `json:"regdhcpstatic"`
+	NoRegisterLinkLocal6              string                      `json:"noreglladdr6"`
+	NoRegisterRecords                 string                      `json:"noregrecords"`
+	TXTSupport                        string                      `json:"txtsupport"`
+	CacheFlush                        string                      `json:"cacheflush"`
+	LocalZoneType                     opnsense.SelectedMap        `json:"local_zone_type"`
+	OutgoingInterface                 opnsense.SelectedMapList    `json:"outgoing_interface"`
+	EnableWPAD                        string                      `json:"enable_wpad"`
+	HideIdentity                      string                      `json:"hideidentity"`
+	HideVersion                       string                      `json:"hideversion"`
+	EnablePrefetchKey                 string                      `json:"prefetchkey"`
+	DNSSECStripped                    string                      `json:"dnssecstripped"`
+	AggressiveNSEC                    string                      `json:"aggressivensec"`
+	QnameMinStrict                    string                      `json:"qnameminstrict"`
+	OutgoingNumTCP                    string                      `json:"outgoingnumtcp"`
+	IncomingNumTCP                    string                      `json:"incomingnumtcp"`
+	NumQueriesPerThread               string                      `json:"numqueriesperthread"`
+	OutgoingRange                     string                      `json:"outgoingrange"`
+	JostleTimeout                     string                      `json:"jostletimeout"`
+	DiscardTimeout                    string                      `json:"discardtimeout"`
+	PrivateDomains                    opnsense.CSVSelectedMapList `json:"privatedomain"`
+	PrivateAddresses                  opnsense.CSVSelectedMapList `json:"privateaddress"`
+	InsecureDomains                   opnsense.CSVSelectedMapList `json:"insecuredomain"`
+	EnablePrefetch                    string                      `json:"prefetch"`
+	UnwantedReplyThreshold            string                      `json:"unwantedreplythreshold"`
+	MsgCacheSize                      string                      `json:"msgcachesize"`
+	RRSetCacheSize                    string                      `json:"rrsetcachesize"`
+	MaxTTL                            string                      `json:"cachemaxttl"`
+	MaxNegativeTTL                    string                      `json:"cachemaxnegativettl"`
+	MinTTL                            string                      `json:"cacheminttl"`
+	HostTTL                           string                      `json:"infrahostttl"`
+	KeepProbingHosts                  string                      `json:"infrakeepprobing"`
+	NumHosts                          string                      `json:"infracachenumhosts"`
+	ExtendedStatistics                string                      `json:"extendedstatistics"`
+	LogQueries                        string                      `json:"logqueries"`
+	LogReplies                        string                      `json:"logreplies"`
+	TagQueryReply                     string                      `json:"logtagqueryreply"`
+	LogLocalActions                   string                      `json:"loglocalactions"`
+	LogServfail                       string                      `json:"logservfail"`
+	VerbosityLevel                    string                      `json:"logverbosity"`
+	ValidationLevel                   string                      `json:"valloglevel"`
+	ServeExpiredEnabled               string                      `json:"serveexpired"`
+	ServeExpiredRecordReplyTTL        string                      `json:"serveexpiredreplyttl"`
+	ServeExpiredTTL                   string                      `json:"serveexpiredttl"`
+	ServeExpiredResetTTL              string                      `json:"serveexpiredttlreset"`
+	ServeExpiredClientResponseTimeout string                      `json:"serveexpiredclienttimeout"`
+	ACLDefaultAction                  opnsense.SelectedMap        `json:"default_action"`
+	ForwardingEnabled                 string                      `json:"forwarding_enabled"`
 }
 
 type generalAPIRequest struct {
-	Enabled              string `json:"enabled"`
-	Port                 string `json:"port,omitempty"`
-	Stats                string `json:"stats"`
-	ActiveInterface      string `json:"active_interface,omitempty"`
-	DNSSEC               string `json:"dnssec"`
-	DNS64                string `json:"dns64"`
-	DNS64Prefix          string `json:"dns64prefix,omitempty"`
-	NoAAAARecords        string `json:"noarecords"`
-	RegisterDHCP         string `json:"regdhcp"`
-	RegisterDHCPDomain   string `json:"regdhcpdomain,omitempty"`
-	RegisterDHCPStatic   string `json:"regdhcpstatic"`
-	NoRegisterLinkLocal6 string `json:"noreglladdr6"`
-	NoRegisterRecords    string `json:"noregrecords"`
-	TXTSupport           string `json:"txtsupport"`
-	CacheFlush           string `json:"cacheflush"`
-	LocalZoneType        string `json:"local_zone_type,omitempty"`
-	OutgoingInterface    string `json:"outgoing_interface,omitempty"`
-	EnableWPAD           string `json:"enable_wpad"`
+	Enabled                           string `json:"enabled"`
+	Port                              string `json:"port,omitempty"`
+	Stats                             string `json:"stats"`
+	ActiveInterface                   string `json:"active_interface,omitempty"`
+	DNSSEC                            string `json:"dnssec"`
+	DNS64                             string `json:"dns64"`
+	DNS64Prefix                       string `json:"dns64prefix,omitempty"`
+	NoAAAARecords                     string `json:"noarecords"`
+	RegisterDHCP                      string `json:"regdhcp"`
+	RegisterDHCPDomain                string `json:"regdhcpdomain,omitempty"`
+	RegisterDHCPStatic                string `json:"regdhcpstatic"`
+	NoRegisterLinkLocal6              string `json:"noreglladdr6"`
+	NoRegisterRecords                 string `json:"noregrecords"`
+	TXTSupport                        string `json:"txtsupport"`
+	CacheFlush                        string `json:"cacheflush"`
+	LocalZoneType                     string `json:"local_zone_type,omitempty"`
+	OutgoingInterface                 string `json:"outgoing_interface,omitempty"`
+	EnableWPAD                        string `json:"enable_wpad"`
+	HideIdentity                      string `json:"hideidentity"`
+	HideVersion                       string `json:"hideversion"`
+	EnablePrefetchKey                 string `json:"prefetchkey"`
+	DNSSECStripped                    string `json:"dnssecstripped"`
+	AggressiveNSEC                    string `json:"aggressivensec"`
+	QnameMinStrict                    string `json:"qnameminstrict"`
+	OutgoingNumTCP                    string `json:"outgoingnumtcp,omitempty"`
+	IncomingNumTCP                    string `json:"incomingnumtcp,omitempty"`
+	NumQueriesPerThread               string `json:"numqueriesperthread,omitempty"`
+	OutgoingRange                     string `json:"outgoingrange,omitempty"`
+	JostleTimeout                     string `json:"jostletimeout,omitempty"`
+	DiscardTimeout                    string `json:"discardtimeout,omitempty"`
+	PrivateDomains                    string `json:"privatedomain,omitempty"`
+	PrivateAddresses                  string `json:"privateaddress,omitempty"`
+	InsecureDomains                   string `json:"insecuredomain,omitempty"`
+	EnablePrefetch                    string `json:"prefetch"`
+	UnwantedReplyThreshold            string `json:"unwantedreplythreshold,omitempty"`
+	MsgCacheSize                      string `json:"msgcachesize,omitempty"`
+	RRSetCacheSize                    string `json:"rrsetcachesize,omitempty"`
+	MaxTTL                            string `json:"cachemaxttl,omitempty"`
+	MaxNegativeTTL                    string `json:"cachemaxnegativettl,omitempty"`
+	MinTTL                            string `json:"cacheminttl,omitempty"`
+	HostTTL                           string `json:"infrahostttl,omitempty"`
+	KeepProbingHosts                  string `json:"infrakeepprobing"`
+	NumHosts                          string `json:"infracachenumhosts,omitempty"`
+	ExtendedStatistics                string `json:"extendedstatistics"`
+	LogQueries                        string `json:"logqueries"`
+	LogReplies                        string `json:"logreplies"`
+	TagQueryReply                     string `json:"logtagqueryreply"`
+	LogLocalActions                   string `json:"loglocalactions"`
+	LogServfail                       string `json:"logservfail"`
+	VerbosityLevel                    string `json:"logverbosity,omitempty"`
+	ValidationLevel                   string `json:"valloglevel,omitempty"`
+	ServeExpiredEnabled               string `json:"serveexpired"`
+	ServeExpiredRecordReplyTTL        string `json:"serveexpiredreplyttl,omitempty"`
+	ServeExpiredTTL                   string `json:"serveexpiredttl,omitempty"`
+	ServeExpiredResetTTL              string `json:"serveexpiredttlreset"`
+	ServeExpiredClientResponseTimeout string `json:"serveexpiredclienttimeout,omitempty"`
+	ACLDefaultAction                  string `json:"default_action,omitempty"`
+	ForwardingEnabled                 string `json:"forwarding_enabled"`
 }
 
 func (m *GeneralResourceModel) toAPI(ctx context.Context) *generalAPIRequest {
 	return &generalAPIRequest{
-		Enabled:              opnsense.BoolToString(m.Enabled.ValueBool()),
-		Port:                 m.Port.ValueString(),
-		Stats:                opnsense.BoolToString(m.Stats.ValueBool()),
-		ActiveInterface:      tfconv.SetToCSV(ctx, m.ActiveInterface),
-		DNSSEC:               opnsense.BoolToString(m.DNSSEC.ValueBool()),
-		DNS64:                opnsense.BoolToString(m.DNS64.ValueBool()),
-		DNS64Prefix:          m.DNS64Prefix.ValueString(),
-		NoAAAARecords:        opnsense.BoolToString(m.NoAAAARecords.ValueBool()),
-		RegisterDHCP:         opnsense.BoolToString(m.RegisterDHCP.ValueBool()),
-		RegisterDHCPDomain:   m.RegisterDHCPDomain.ValueString(),
-		RegisterDHCPStatic:   opnsense.BoolToString(m.RegisterDHCPStatic.ValueBool()),
-		NoRegisterLinkLocal6: opnsense.BoolToString(m.NoRegisterLinkLocal6.ValueBool()),
-		NoRegisterRecords:    opnsense.BoolToString(m.NoRegisterRecords.ValueBool()),
-		TXTSupport:           opnsense.BoolToString(m.TXTSupport.ValueBool()),
-		CacheFlush:           opnsense.BoolToString(m.CacheFlush.ValueBool()),
-		LocalZoneType:        m.LocalZoneType.ValueString(),
-		OutgoingInterface:    tfconv.SetToCSV(ctx, m.OutgoingInterface),
-		EnableWPAD:           opnsense.BoolToString(m.EnableWPAD.ValueBool()),
+		Enabled:                           opnsense.BoolToString(m.Enabled.ValueBool()),
+		Port:                              m.Port.ValueString(),
+		Stats:                             opnsense.BoolToString(m.Stats.ValueBool()),
+		ActiveInterface:                   tfconv.SetToCSV(ctx, m.ActiveInterface),
+		DNSSEC:                            opnsense.BoolToString(m.DNSSEC.ValueBool()),
+		DNS64:                             opnsense.BoolToString(m.DNS64.ValueBool()),
+		DNS64Prefix:                       m.DNS64Prefix.ValueString(),
+		NoAAAARecords:                     opnsense.BoolToString(m.NoAAAARecords.ValueBool()),
+		RegisterDHCP:                      opnsense.BoolToString(m.RegisterDHCP.ValueBool()),
+		RegisterDHCPDomain:                m.RegisterDHCPDomain.ValueString(),
+		RegisterDHCPStatic:                opnsense.BoolToString(m.RegisterDHCPStatic.ValueBool()),
+		NoRegisterLinkLocal6:              opnsense.BoolToString(m.NoRegisterLinkLocal6.ValueBool()),
+		NoRegisterRecords:                 opnsense.BoolToString(m.NoRegisterRecords.ValueBool()),
+		TXTSupport:                        opnsense.BoolToString(m.TXTSupport.ValueBool()),
+		CacheFlush:                        opnsense.BoolToString(m.CacheFlush.ValueBool()),
+		LocalZoneType:                     m.LocalZoneType.ValueString(),
+		OutgoingInterface:                 tfconv.SetToCSV(ctx, m.OutgoingInterface),
+		EnableWPAD:                        opnsense.BoolToString(m.EnableWPAD.ValueBool()),
+		HideIdentity:                      opnsense.BoolToString(m.HideIdentity.ValueBool()),
+		HideVersion:                       opnsense.BoolToString(m.HideVersion.ValueBool()),
+		EnablePrefetchKey:                 opnsense.BoolToString(m.EnablePrefetchKey.ValueBool()),
+		DNSSECStripped:                    opnsense.BoolToString(m.DNSSECStripped.ValueBool()),
+		AggressiveNSEC:                    opnsense.BoolToString(m.AggressiveNSEC.ValueBool()),
+		QnameMinStrict:                    opnsense.BoolToString(m.QnameMinStrict.ValueBool()),
+		OutgoingNumTCP:                    tfconv.IntOrEmpty(m.OutgoingNumTCP.ValueInt64()),
+		IncomingNumTCP:                    tfconv.IntOrEmpty(m.IncomingNumTCP.ValueInt64()),
+		NumQueriesPerThread:               tfconv.IntOrEmpty(m.NumQueriesPerThread.ValueInt64()),
+		OutgoingRange:                     tfconv.IntOrEmpty(m.OutgoingRange.ValueInt64()),
+		JostleTimeout:                     tfconv.IntOrEmpty(m.JostleTimeout.ValueInt64()),
+		DiscardTimeout:                    tfconv.IntOrEmpty(m.DiscardTimeout.ValueInt64()),
+		PrivateDomains:                    tfconv.SetToCSV(ctx, m.PrivateDomains),
+		PrivateAddresses:                  tfconv.SetToCSV(ctx, m.PrivateAddresses),
+		InsecureDomains:                   tfconv.SetToCSV(ctx, m.InsecureDomains),
+		EnablePrefetch:                    opnsense.BoolToString(m.EnablePrefetch.ValueBool()),
+		UnwantedReplyThreshold:            tfconv.IntOrEmpty(m.UnwantedReplyThreshold.ValueInt64()),
+		MsgCacheSize:                      m.MsgCacheSize.ValueString(),
+		RRSetCacheSize:                    m.RRSetCacheSize.ValueString(),
+		MaxTTL:                            tfconv.IntOrEmpty(m.MaxTTL.ValueInt64()),
+		MaxNegativeTTL:                    tfconv.IntOrEmpty(m.MaxNegativeTTL.ValueInt64()),
+		MinTTL:                            tfconv.IntOrEmpty(m.MinTTL.ValueInt64()),
+		HostTTL:                           tfconv.IntOrEmpty(m.HostTTL.ValueInt64()),
+		KeepProbingHosts:                  opnsense.BoolToString(m.KeepProbingHosts.ValueBool()),
+		NumHosts:                          tfconv.IntOrEmpty(m.NumHosts.ValueInt64()),
+		ExtendedStatistics:                opnsense.BoolToString(m.ExtendedStatistics.ValueBool()),
+		LogQueries:                        opnsense.BoolToString(m.LogQueries.ValueBool()),
+		LogReplies:                        opnsense.BoolToString(m.LogReplies.ValueBool()),
+		TagQueryReply:                     opnsense.BoolToString(m.TagQueryReply.ValueBool()),
+		LogLocalActions:                   opnsense.BoolToString(m.LogLocalActions.ValueBool()),
+		LogServfail:                       opnsense.BoolToString(m.LogServfail.ValueBool()),
+		VerbosityLevel:                    tfconv.IntOrEmpty(m.VerbosityLevel.ValueInt64()),
+		ValidationLevel:                   tfconv.IntOrEmpty(m.ValidationLevel.ValueInt64()),
+		ServeExpiredEnabled:               opnsense.BoolToString(m.ServeExpiredEnabled.ValueBool()),
+		ServeExpiredRecordReplyTTL:        m.ServeExpiredRecordReplyTTL.ValueString(),
+		ServeExpiredTTL:                   m.ServeExpiredTTL.ValueString(),
+		ServeExpiredResetTTL:              opnsense.BoolToString(m.ServeExpiredResetTTL.ValueBool()),
+		ServeExpiredClientResponseTimeout: m.ServeExpiredClientResponseTimeout.ValueString(),
+		ACLDefaultAction:                  m.ACLDefaultAction.ValueString(),
+		ForwardingEnabled:                 opnsense.BoolToString(m.ForwardingEnabled.ValueBool()),
 	}
 }
 
@@ -121,4 +281,44 @@ func (m *GeneralResourceModel) fromAPI(_ context.Context, a *generalAPIResponse,
 	m.LocalZoneType = types.StringValue(string(a.LocalZoneType))
 	m.OutgoingInterface = tfconv.SliceToSet(a.OutgoingInterface)
 	m.EnableWPAD = types.BoolValue(opnsense.StringToBool(a.EnableWPAD))
+	m.HideIdentity = types.BoolValue(opnsense.StringToBool(a.HideIdentity))
+	m.HideVersion = types.BoolValue(opnsense.StringToBool(a.HideVersion))
+	m.EnablePrefetchKey = types.BoolValue(opnsense.StringToBool(a.EnablePrefetchKey))
+	m.DNSSECStripped = types.BoolValue(opnsense.StringToBool(a.DNSSECStripped))
+	m.AggressiveNSEC = types.BoolValue(opnsense.StringToBool(a.AggressiveNSEC))
+	m.QnameMinStrict = types.BoolValue(opnsense.StringToBool(a.QnameMinStrict))
+	m.OutgoingNumTCP = types.Int64Value(tfconv.IntOrZero(a.OutgoingNumTCP))
+	m.IncomingNumTCP = types.Int64Value(tfconv.IntOrZero(a.IncomingNumTCP))
+	m.NumQueriesPerThread = types.Int64Value(tfconv.IntOrZero(a.NumQueriesPerThread))
+	m.OutgoingRange = types.Int64Value(tfconv.IntOrZero(a.OutgoingRange))
+	m.JostleTimeout = types.Int64Value(tfconv.IntOrZero(a.JostleTimeout))
+	m.DiscardTimeout = types.Int64Value(tfconv.IntOrZero(a.DiscardTimeout))
+	m.PrivateDomains = tfconv.SliceToSet(a.PrivateDomains)
+	m.PrivateAddresses = tfconv.SliceToSet(a.PrivateAddresses)
+	m.InsecureDomains = tfconv.SliceToSet(a.InsecureDomains)
+	m.EnablePrefetch = types.BoolValue(opnsense.StringToBool(a.EnablePrefetch))
+	m.UnwantedReplyThreshold = types.Int64Value(tfconv.IntOrZero(a.UnwantedReplyThreshold))
+	m.MsgCacheSize = types.StringValue(a.MsgCacheSize)
+	m.RRSetCacheSize = types.StringValue(a.RRSetCacheSize)
+	m.MaxTTL = types.Int64Value(tfconv.IntOrZero(a.MaxTTL))
+	m.MaxNegativeTTL = types.Int64Value(tfconv.IntOrZero(a.MaxNegativeTTL))
+	m.MinTTL = types.Int64Value(tfconv.IntOrZero(a.MinTTL))
+	m.HostTTL = types.Int64Value(tfconv.IntOrZero(a.HostTTL))
+	m.KeepProbingHosts = types.BoolValue(opnsense.StringToBool(a.KeepProbingHosts))
+	m.NumHosts = types.Int64Value(tfconv.IntOrZero(a.NumHosts))
+	m.ExtendedStatistics = types.BoolValue(opnsense.StringToBool(a.ExtendedStatistics))
+	m.LogQueries = types.BoolValue(opnsense.StringToBool(a.LogQueries))
+	m.LogReplies = types.BoolValue(opnsense.StringToBool(a.LogReplies))
+	m.TagQueryReply = types.BoolValue(opnsense.StringToBool(a.TagQueryReply))
+	m.LogLocalActions = types.BoolValue(opnsense.StringToBool(a.LogLocalActions))
+	m.LogServfail = types.BoolValue(opnsense.StringToBool(a.LogServfail))
+	m.VerbosityLevel = types.Int64Value(tfconv.IntOrZero(a.VerbosityLevel))
+	m.ValidationLevel = types.Int64Value(tfconv.IntOrZero(a.ValidationLevel))
+	m.ServeExpiredEnabled = types.BoolValue(opnsense.StringToBool(a.ServeExpiredEnabled))
+	m.ServeExpiredRecordReplyTTL = types.StringValue(a.ServeExpiredRecordReplyTTL)
+	m.ServeExpiredTTL = types.StringValue(a.ServeExpiredTTL)
+	m.ServeExpiredResetTTL = types.BoolValue(opnsense.StringToBool(a.ServeExpiredResetTTL))
+	m.ServeExpiredClientResponseTimeout = types.StringValue(a.ServeExpiredClientResponseTimeout)
+	m.ACLDefaultAction = types.StringValue(string(a.ACLDefaultAction))
+	m.ForwardingEnabled = types.BoolValue(opnsense.StringToBool(a.ForwardingEnabled))
 }

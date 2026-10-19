@@ -1,0 +1,46 @@
+{
+  "story": "31.0d",
+  "run_id": "20261019-repair7-final",
+  "evidence_status": "final-live-pass",
+  "final_live_proof": true,
+  "attestation": {
+    "algorithm": "sha256",
+    "command": "test/scripts/story-31-0d-code-digest.sh",
+    "scope": "Sorted paths and contents for provider registration, Unbound generator source, implementation, models, schemas, tests including shared pkg/opnsense tests, shared mutation/reconfigure behavior, acceptance runners, audit/status claim inputs, and the digest script itself; independent of HEAD, index, and dirty-worktree state",
+    "pre_live_digest": "59fd887bcb2538327e63eeef4feb465425d91eafb42345fa9b0bba3296862fad",
+    "post_live_digest": "59fd887bcb2538327e63eeef4feb465425d91eafb42345fa9b0bba3296862fad",
+    "sanitized_non_cached_output": "_bmad-output/implementation-artifacts/31-0d-live-output.txt"
+  },
+  "target": {
+    "product": "OPNsense",
+    "version": "26.7.7",
+    "disposable": true,
+    "vm_name": "opnsense-acceptance-102",
+    "vm_uuid": "7298f552-694f-409a-baa8-b98c23bb581a"
+  },
+  "command": "test/scripts/run-story-31-0d-acceptance.sh",
+  "result": {
+    "status": "pass",
+    "skipped": false,
+    "tests": {"TestAccUnboundParity": "pass"},
+    "coverage": [
+      "API-created pre-existing DNSBL item import followed by Terraform update, authoritative readback, injected drift detection, and repair",
+      "general, advanced, ACL-default, and forwarding branch-scoped updates with full resource-to-data-source equality",
+      "complete typed DNSBL item and canonical dnsbl_json equality",
+      "query and DNS-over-TLS authoritative reads, imports, no-diff plans, drift repair, and bidirectional type transitions",
+      "distinct query and DNS-over-TLS Terraform addresses exercise both endpoint-family create and delete paths",
+      "non-mutating post-destroy searches prove Terraform provider deletion left zero query and zero DNS-over-TLS forwards before rollback cleanup",
+      "state-only singleton destroy without appliance mutation",
+      "request-shaped settings restoration followed by exact complete-tree equality",
+      "owner-specific zero-match rollback cleanup for DNSBL, query forwards, and DNS-over-TLS forwards"
+    ]
+  },
+  "cleanup": {
+    "fixture_marker": "tf-story31d-dm95ncv1l4e5",
+    "terraform_destroy": {"forward": 0, "dot": 0},
+    "owners": {"dnsbl": 0, "forward": 0, "dot": 0},
+    "singleton_destroy_unchanged": true,
+    "settings_restore_equal": true
+  },
+  "secrets_retained": false
+}

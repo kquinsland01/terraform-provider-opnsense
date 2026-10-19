@@ -23,12 +23,15 @@ import (
 
 // Field describes one attribute of a resource.
 type Field struct {
-	Name           string   `yaml:"name"`
-	TF             string   `yaml:"tf"`
-	JSON           string   `yaml:"json"`
-	Type           string   `yaml:"type"` // bool|string|selectmap|selectmaplist|csvset|int
-	Required       bool     `yaml:"required"`
-	Default        string   `yaml:"default"`
+	Name     string `yaml:"name"`
+	TF       string `yaml:"tf"`
+	JSON     string `yaml:"json"`
+	Type     string `yaml:"type"` // bool|string|selectmap|selectmaplist|csvset|int
+	Required bool   `yaml:"required"`
+	Default  string `yaml:"default"`
+	// NoDefault keeps an Optional+Computed field unknown when omitted so an
+	// import/read adopts appliance truth instead of planning a fallback value.
+	NoDefault      bool     `yaml:"no_default"`
 	StaticDefault  bool     `yaml:"static_default"`
 	Desc           string   `yaml:"desc"`
 	DataSourceDesc string   `yaml:"data_source_desc"`
@@ -78,10 +81,14 @@ type Resource struct {
 	TestPreCheck      string `yaml:"test_precheck"`
 	RecoverCreate     bool   `yaml:"recover_create"`
 	PendingActivation bool   `yaml:"pending_activation"`
-	StrictDelete      bool   `yaml:"strict_delete_response"`
-	StrictMissing     bool   `yaml:"strict_missing_object_response"`
-	CompositeDestroy  string `yaml:"composite_destroy"`
-	MinimumVersion    string `yaml:"minimum_version"`
+	// CustomResource keeps generated model/schema/test files while allowing a
+	// handwritten lifecycle for resources whose API contract spans multiple
+	// independently owned branches.
+	CustomResource   bool   `yaml:"custom_resource"`
+	StrictDelete     bool   `yaml:"strict_delete_response"`
+	StrictMissing    bool   `yaml:"strict_missing_object_response"`
+	CompositeDestroy string `yaml:"composite_destroy"`
+	MinimumVersion   string `yaml:"minimum_version"`
 	// ResourceFromAPI selects a resource-only response mapping method. Data
 	// sources continue to use fromAPI so they expose the API's exact value.
 	ResourceFromAPI string `yaml:"resource_from_api"`
@@ -151,8 +158,14 @@ func generateResource(pkg string, r *Resource) error {
 	}{
 		{"model", modelTmpl, modelImports(r)},
 		{"schema", schemaTmpl, schemaImports(r)},
-		{"resource", resourceTmpl, resourceImports(r)},
 		{"resource_test", testTmpl, testImports(r)},
+	}
+	if !r.CustomResource {
+		files = append(files, struct {
+			kind    string
+			tmpl    *template.Template
+			imports string
+		}{"resource", resourceTmpl, resourceImports(r)})
 	}
 	// Item resources also get a read-only data source (lookup by UUID). Singletons
 	// are looked up without an id, so they don't get a generated data source.
@@ -463,6 +476,8 @@ func respType(f Field) string {
 		return "opnsense.SelectedMap"
 	case "selectmaplist":
 		return "opnsense.SelectedMapList"
+	case "csvset":
+		return "opnsense.CSVSelectedMapList"
 	default:
 		return "string"
 	}
@@ -530,7 +545,7 @@ func fromAPILine(f Field) string {
 	case "selectmaplist":
 		return fmt.Sprintf("m.%s = tfconv.SliceToSet(a.%s)", f.Name, f.Name)
 	case "csvset":
-		return fmt.Sprintf("m.%s = tfconv.SliceToSet(opnsense.CSVToSlice(a.%s))", f.Name, f.Name)
+		return fmt.Sprintf("m.%s = tfconv.SliceToSet(a.%s)", f.Name, f.Name)
 	default:
 		return fmt.Sprintf("m.%s = types.StringValue(a.%s)", f.Name, f.Name)
 	}
@@ -540,6 +555,10 @@ func schemaAttr(f Field) string {
 	var b strings.Builder
 	switch f.Type {
 	case "bool":
+		if f.NoDefault {
+			fmt.Fprintf(&b, "%q: schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: %q},", f.TF, f.Desc)
+			break
+		}
 		def := "false"
 		if f.Default == "true" {
 			def = "true"

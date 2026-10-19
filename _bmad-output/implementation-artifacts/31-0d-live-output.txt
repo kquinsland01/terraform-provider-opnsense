@@ -1,0 +1,12 @@
+=== RUN   TestAccUnboundParity
+    unbound_parity_acceptance_test.go:237: UNBOUND_SINGLETON_DESTROY unchanged=true
+    unbound_parity_acceptance_test.go:531: UNBOUND_TERRAFORM_DESTROY namespace=forward marker=tf-story31d-dm95ncv1l4e5 total=0
+    unbound_parity_acceptance_test.go:531: UNBOUND_TERRAFORM_DESTROY namespace=dot marker=tf-story31d-dm95ncv1l4e5 total=0
+    unbound_parity_acceptance_test.go:566: UNBOUND_PARITY_CLEANUP namespace=dnsbl marker=tf-story31d-dm95ncv1l4e5 total=0
+    unbound_parity_acceptance_test.go:580: UNBOUND_PARITY_CLEANUP namespace=forward marker=tf-story31d-dm95ncv1l4e5 total=0
+    unbound_parity_acceptance_test.go:580: UNBOUND_PARITY_CLEANUP namespace=dot marker=tf-story31d-dm95ncv1l4e5 total=0
+    unbound_parity_acceptance_test.go:600: UNBOUND_SETTINGS_RESTORE equal=true
+--- PASS: TestAccUnboundParity (34.43s)
+PASS
+ok  github.com/matthew-on-git/terraform-provider-opnsense/internal/service/unbound  34.432s
+UNBOUND_PARITY_EVIDENCE digest=59fd887bcb2538327e63eeef4feb465425d91eafb42345fa9b0bba3296862fad vm_name=opnsense-acceptance-102 vm_uuid=7298f552-694f-409a-baa8-b98c23bb581a version=26.7.7 tests=1 singleton_destroy_unchanged=true restore_equal=true cleanup_dnsbl=0 cleanup_forward=0 cleanup_dot=0

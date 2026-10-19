@@ -30,7 +30,10 @@ func (d *domainOverrideDataSource) Schema(_ context.Context, _ datasource.Schema
 			"id":          dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
 			"enabled":     dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this domain override is enabled."},
 			"domain":      dsschema.StringAttribute{Computed: true, MarkdownDescription: "Domain to override."},
+			"type":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "Forward type (`query` or `dot`)."},
 			"server":      dsschema.StringAttribute{Computed: true, MarkdownDescription: "Destination DNS server."},
+			"server_port": dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Destination DNS server port."},
+			"verify_cn":   dsschema.StringAttribute{Computed: true, MarkdownDescription: "TLS certificate name, which may be blank."},
 			"description": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the domain override."},
 		},
 	}
@@ -55,11 +58,14 @@ func (d *domainOverrideDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 	id := config.ID.ValueString()
-	result, err := opnsense.Get[domainOverrideAPIResponse](ctx, d.client, domainOverrideReqOpts, id)
+	result, err := getDomainOverride(ctx, d.client, id)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading Unbound domain override", fmt.Sprintf("Could not read Unbound domain override %s: %s", id, err))
 		return
 	}
-	config.fromAPI(ctx, result, id)
+	if err := config.fromAPI(ctx, result, id); err != nil {
+		resp.Diagnostics.AddError("Error decoding Unbound domain override", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

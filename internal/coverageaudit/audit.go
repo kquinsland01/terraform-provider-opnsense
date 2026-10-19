@@ -422,7 +422,7 @@ func (m *Manifest) Render() []byte {
 	fmt.Fprintln(&b, "# Provider Ecosystem Coverage Audit")
 	fmt.Fprintln(&b)
 	fmt.Fprintf(&b, "Pinned baseline: `%s` v%s at `%s` (%d resources, %d data sources, %d ephemeral resource, and provider retry configuration).\n\n", m.Baseline.Source, m.Baseline.Version, m.Baseline.Commit, m.Baseline.ResourceCount, m.Baseline.DataSourceCount, m.Baseline.EphemeralCount)
-	fmt.Fprintf(&b, "Current local inventory: **%d resources and %d data sources**, with %d/%d generated docs. There are **%d resource-only same-name data-source gaps** and `system_info` is data-only.\n\n", m.LocalInventory.ResourceCount, m.LocalInventory.DataSourceCount, m.LocalInventory.ResourceDocCount, m.LocalInventory.DataSourceDocCount, len(m.LocalInventory.ResourceOnly))
+	fmt.Fprintf(&b, "Current local inventory: **%d resources and %d data sources**, with %d/%d generated docs. There are **%d resource-only same-name data-source gaps** and the data-only surfaces are `%s`.\n\n", m.LocalInventory.ResourceCount, m.LocalInventory.DataSourceCount, m.LocalInventory.ResourceDocCount, m.LocalInventory.DataSourceDocCount, len(m.LocalInventory.ResourceOnly), strings.Join(m.LocalInventory.DataSourceOnly, "`, `"))
 	fmt.Fprintln(&b, "## Ownership Direction")
 	fmt.Fprintln(&b)
 	fmt.Fprintln(&b, m.OwnershipDirection)

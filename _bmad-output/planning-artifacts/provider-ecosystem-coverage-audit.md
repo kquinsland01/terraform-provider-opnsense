@@ -2,7 +2,7 @@
 
 Pinned baseline: `browningluke/opnsense` v0.26.0 at `33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba` (47 resources, 45 data sources, 1 ephemeral resource, and provider retry configuration).
 
-Current local inventory: **108 resources and 93 data sources**, with 108/93 generated docs. There are **16 resource-only same-name data-source gaps** and `system_info` is data-only.
+Current local inventory: **108 resources and 94 data sources**, with 108/94 generated docs. There are **16 resource-only same-name data-source gaps** and the data-only surfaces are `system_info`, `unbound_settings`.
 
 ## Ownership Direction
 
@@ -10,10 +10,10 @@ Use one provider per appliance and object domain in steady state. Never configur
 
 ## Classification Summary
 
-- `covered`: 45
+- `covered`: 49
 - `covered-different-name`: 14
 - `covered-broader`: 2
-- `missing-buildable`: 27
+- `missing-buildable`: 23
 - `missing-upstream-blocked`: 0
 - `intentionally-different`: 6
 - `needs-field-audit`: 0
@@ -31,7 +31,7 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Quagga/BGP:** 10 surfaces (`covered`=4, `covered-different-name`=2, `missing-buildable`=4)
 - **Routing:** 2 surfaces (`covered-different-name`=2)
 - **Trust:** 6 surfaces (`missing-buildable`=6)
-- **Unbound:** 12 surfaces (`covered`=8, `missing-buildable`=4)
+- **Unbound:** 12 surfaces (`covered`=12)
 - **WireGuard:** 6 surfaces (`missing-buildable`=6)
 
 ## Surface Audit
@@ -499,17 +499,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_domain_override.md; docs/resources/unbound_domain_override.md
 
-#### `resource:unbound_forward` — missing-buildable
+#### `resource:unbound_forward` — covered
 
 - **Domain / local mapping:** Unbound / `unbound_domain_override`
 - **Baseline fields:** domain, enabled, id, server_ip, server_port, type, verify_cn
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping
-- **Local-only:** none material
-- **Lifecycle:** UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** description
+- **Lifecycle:** digest-bound OPNsense 26.7.7 acceptance proves distinct query and DNS-over-TLS create/read/import/update/delete lifecycles, bidirectional type transitions, authoritative readback, drift repair, and non-mutating zero-object proof after Terraform destroy
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_forward.md; docs/resources/unbound_domain_override.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_forward.md; docs/resources/unbound_domain_override.md; _bmad-output/implementation-artifacts/31-0d-live-evidence.json
 
 #### `resource:unbound_host_alias` — covered
 
@@ -533,17 +532,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_host_override.md; docs/resources/unbound_host_override.md
 
-#### `resource:unbound_settings` — missing-buildable
+#### `resource:unbound_settings` — covered
 
 - **Domain / local mapping:** Unbound / `unbound_general`, `unbound_dnsbl`
 - **Baseline fields:** acls, advanced, dnsbl, forwarding, general, id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons
+- **Baseline-only:** none material after semantic name/type normalization
 - **Local-only:** none material
-- **Lifecycle:** import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings
+- **Lifecycle:** digest-bound OPNsense 26.7.7 acceptance proves import-first general and DNSBL ownership, independent general/advanced/ACL-default/forwarding updates, Terraform DNSBL update and drift repair, state-only singleton destroy, complete aggregate equality, and exact settings restoration
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_settings.md; docs/resources/unbound_general.md; docs/resources/unbound_dnsbl.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/unbound_settings.md; docs/resources/unbound_general.md; docs/resources/unbound_dnsbl.md; _bmad-output/implementation-artifacts/31-0d-live-evidence.json
 
 #### `resource:wireguard_client` — missing-buildable
 
@@ -1010,17 +1008,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_domain_override.md; docs/data-sources/unbound_domain_override.md
 
-#### `data-source:unbound_forward` — missing-buildable
+#### `data-source:unbound_forward` — covered
 
 - **Domain / local mapping:** Unbound / `unbound_domain_override`
 - **Baseline fields:** domain, enabled, id, server_ip, server_port, type, verify_cn
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** DNS-over-TLS type, server_port, and verify_cn are absent from the local domain-override mapping
-- **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Baseline-only:** none material after semantic name/type normalization
+- **Local-only:** description
+- **Lifecycle:** digest-bound OPNsense 26.7.7 acceptance proves authoritative query and DNS-over-TLS reads with complete server_port, type, verify_cn, and existing-field parity across independent lifecycle and import boundaries
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_forward.md; docs/data-sources/unbound_domain_override.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_forward.md; docs/data-sources/unbound_domain_override.md; _bmad-output/implementation-artifacts/31-0d-live-evidence.json
 
 #### `data-source:unbound_host_alias` — covered
 
@@ -1044,17 +1041,16 @@ Use one provider per appliance and object domain in steady state. Never configur
 - **Sensitive/write-only:** none
 - **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_host_override.md; docs/data-sources/unbound_host_override.md
 
-#### `data-source:unbound_settings` — missing-buildable
+#### `data-source:unbound_settings` — covered
 
-- **Domain / local mapping:** Unbound / none
+- **Domain / local mapping:** Unbound / `unbound_settings`
 - **Baseline fields:** acls, advanced, dnsbl, forwarding, general, id
 - **Shared semantics:** same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema
-- **Baseline-only:** advanced cache/logging/privacy/serve-expired controls, default ACL action, forwarding toggle, and several general settings are absent across the local general and DNSBL singletons
+- **Baseline-only:** none material after semantic name/type normalization
 - **Local-only:** none material
-- **Lifecycle:** read-only API lookup; operational interface rows read live state rather than durable configuration
+- **Lifecycle:** digest-bound OPNsense 26.7.7 acceptance proves complete authoritative general, advanced, ACL-default, forwarding, and every DNSBL item field plus canonical dnsbl_json equality before exact settings restoration
 - **Sensitive/write-only:** none
-- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_settings.md; docs/resources/unbound_general.md; docs/resources/unbound_dnsbl.md
-- **Follow-up:** `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md`
+- **Sources:** https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/unbound_settings.md; docs/resources/unbound_general.md; docs/resources/unbound_dnsbl.md; _bmad-output/implementation-artifacts/31-0d-live-evidence.json
 
 #### `data-source:wireguard_client` — missing-buildable
 
@@ -1109,4 +1105,4 @@ Use one provider per appliance and object domain in steady state. Never configur
 
 Resource-only same-name data-source gaps (16): `dnsmasq_settings`, `interface_assignment`, `ipsec_key_pair`, `ipsec_psk`, `kea_ctrl_agent`, `kea_dhcpv4_settings`, `kea_dhcpv6_settings`, `quagga_bgp_global`, `quagga_general`, `quagga_ospf6_general`, `quagga_ospf_general`, `quagga_rip`, `quagga_static`, `trust_cert`, `unbound_dnsbl`, `unbound_general`.
 
-Data-only: `system_info`.
+Data-only: `system_info`, `unbound_settings`.

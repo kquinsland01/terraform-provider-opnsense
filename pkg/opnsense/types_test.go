@@ -279,6 +279,17 @@ func TestCSVSelectedMapListSplitsSelectorScalars(t *testing.T) {
 	}
 }
 
+func TestCSVSelectedMapListDecodesSelectedMap(t *testing.T) {
+	var got CSVSelectedMapList
+	if err := json.Unmarshal([]byte(`{"example.net":{"value":"example.net","selected":1},"ignored.net":{"value":"ignored.net","selected":0}}`), &got); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"example.net"}
+	if !reflect.DeepEqual([]string(got), want) {
+		t.Fatalf("got %v want %v", got, want)
+	}
+}
+
 func TestOrderedSelectedMapList_PreservesJSONOrder(t *testing.T) {
 	data := []byte(`{"action-z":{"value":"Z","selected":1},"action-a":{"value":"A","selected":1},"action-m":{"value":"M","selected":0}}`)
 	var selected OrderedSelectedMapList

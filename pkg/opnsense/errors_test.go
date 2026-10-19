@@ -235,6 +235,19 @@ func TestParseMutationResponse_InvalidJSON(t *testing.T) {
 	}
 }
 
+func TestParseMutationResponse_AmbiguousResultIsNotValidationError(t *testing.T) {
+	for _, body := range []string{`{}`, `{"result":""}`, `{"result":"unknown"}`} {
+		_, err := ParseMutationResponse([]byte(body))
+		if err == nil || !strings.Contains(err.Error(), "ambiguous mutation response") {
+			t.Fatalf("body %s: expected ambiguous mutation error, got %v", body, err)
+		}
+		var validErr *ValidationError
+		if errors.As(err, &validErr) {
+			t.Fatalf("body %s: ambiguous response was classified as ValidationError", body)
+		}
+	}
+}
+
 // --- CheckHTTPError tests ---
 
 func TestCheckHTTPError_2xxReturnsNil(t *testing.T) {
