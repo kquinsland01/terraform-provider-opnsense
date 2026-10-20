@@ -13,8 +13,11 @@ This register lists provider gaps that cannot be implemented safely until OPNsen
 
 | Domain | Provider impact | Current upstream status | Maintenance action |
 |---|---|---|---|
-| Gateway group | Blocks a gateway-group resource for multi-WAN failover/load-balancing groups. Existing provider resources cover individual gateways and static routes. | No stable OPNsense API in the current target release (`stable/26.1`). As of 2026-06-14, published API docs list only individual gateway and static route endpoints. OPNsense `master` contains `GatewayGroups` model evidence with tier fields (`item` through `item5`), trigger, pool options, and description, but no published API endpoint or matching API controller was found, and the checked `stable/26.1` model paths returned 404. | Recheck published API docs, `stable/*` branch availability, API controllers, ACL/menu entries, model shape, and related release notes after each major release; if still absent and user demand remains, consider authoring an upstream MVC API contribution. |
 | System general settings | Blocks provider management of legacy general system settings that are not yet exposed through a stable MVC API. | No stable OPNsense API in the current target release (`stable/26.1`). As of 2026-06-14, published core API docs list no durable system general settings endpoint; `core/system` is action/status-only; `Core/Api/SettingsController.php`, `Core/System.xml`, and `Core/Settings.xml` were not found; `core/initial_setup` exists but is wizard-only, memory-mounted, and has broad side effects, so it is unsafe for day-2 Terraform management. | Watch OPNsense release notes and System Settings MVC progress. Adopt only after stable get/set semantics and durable configuration fields are available. |
+
+## Stable API Available; Provider Validation Pending
+
+As of 2026-10-20, gateway groups are **Coming**, not upstream-blocked, for OPNsense 26.7.7. The tagged [GroupSettingsController](https://github.com/opnsense/core/blob/26.7.7/src/opnsense/mvc/app/controllers/OPNsense/Routing/Api/GroupSettingsController.php) implements `/api/routing/group_settings/{get,add,set,del,search,reconfigure}` with wrapper `gateway_group`; reconfigure invokes `interface routes configure`, and deletion rejects in-use groups. This does not add provider support or establish availability on 26.1. Story 31.0k owns payload/default/tier validation, dependency-safe lifecycle proof and the implementation handoff before support claims.
 
 ## Not Upstream-Blocked Yet
 
@@ -26,7 +29,7 @@ Some gaps have published or suspected API evidence but still need payload, lifec
 | System tunables / sysctl | Current OPNsense docs/source expose persistent `core/tunables` item CRUD/search and `reconfigure`; `opnsense_system_tunable` shipped in v0.3.0 and remains listed here only as an example of a former research item that moved out of this register. |
 | HASync configuration | `core/hasync` endpoints exist, but `syncitems` uses a dynamic `JsonKeyValueStoreField`; request/response shape needs verification before a safe resource can be designed. |
 | HASync status/actions | Endpoints appear operational/status-oriented rather than durable configuration. Data source or action semantics need a separate product decision. |
-| Kea DHCPv4 option / Kea DDNS | Present in OPNsense `master` source but absent from `stable/25.7` as of the 2026-06-18 source recheck. Re-probe the next supported target release before implementation. |
+| Kea DHCPv4 option / Kea DDNS | Stable OPNsense 26.7.7 contains DHCPv4 option CRUD/search and `kea/ddns/get` plus the inherited mutable controller surface. Payload/set/reconfigure/lifecycle semantics for dedicated option/DDNS owners remain unproven. Completed Story 31.0b already covers subnet PXE/TFTP fields, peers and delegated-prefix pools; do not repeat that implementation or equate it with generic option/DDNS support. Story 31.0l owns the remaining validation. |
 
 ## Maintenance Workflow
 

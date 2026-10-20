@@ -84,6 +84,8 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Domain | Work |
 |---|---|
 | Data-source parity | Add read-only data sources for the 16 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
+| Gateway groups | Stable 26.7.7 source gate cleared; Story 31.0k validates CRUD/import/drift/reconfigure/tier/deletion semantics before provider implementation and support. |
+| FRR 2.0 compatibility | Story 31.0h prioritizes plugin-aware family/state/policy migration and auto-rule verification; no blanket 2.0 support claim from core version alone. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
 | Audited field/surface parity | Complete Stories 31.0e–31.0j for WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
@@ -93,7 +95,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 
 | Domain | Research needed |
 |---|---|
-| Kea | DHCPv4 option and Kea DDNS are present in OPNsense `master` source but absent from `stable/25.7` as of the 2026-06-18 source recheck; move to Coming only after live re-probe confirms target-release availability. |
+| Kea | Stable OPNsense 26.7.7 contains DHCPv4 option CRUD/search and `kea/ddns/get` plus the inherited mutable controller surface. Payload/set/reconfigure/lifecycle semantics for dedicated option/DDNS owners remain unproven. Completed Story 31.0b already covers subnet PXE/TFTP fields, peers and delegated-prefix pools; do not repeat that implementation or equate it with generic option/DDNS support. Story 31.0l owns the remaining validation. |
 | System / HA | HASync configuration needs request/response shape research because current `Hasync.xml` uses dynamic `JsonKeyValueStoreField` `syncitems`; HASync status `services`/`version` are data-source candidates after live validation, while service operations are action candidates only after product/framework decision. |
 | Interfaces | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable 26.7.7 lifecycle/drift/restoration proof. PPPoE semantics remain separate research. |
 
@@ -105,7 +107,6 @@ Confirmed blockers and the maintenance workflow are documented publicly in [`doc
 
 | Resource/domain | Reason | Action |
 |---|---|---|
-| Gateway group | No stable target-release gateway-group API; `master` has model-only `GatewayGroups` evidence, but published docs list no endpoint, no API controller was found, and checked `stable/26.1` model paths returned 404. | Track generated API docs, `stable/*` branch availability, API controllers, ACL/menu entries, and model semantics; candidate upstream MVC API contribution if absent. |
 | System general settings | No stable target-release durable settings API; `core/system` is action/status-only and `core/initial_setup` is wizard-only with broad side effects. | Watch OPNsense System Settings MVC roadmap, generated API docs, controllers/models, ACL/menu entries, and stable get/set semantics. |
 
 ## Release Readiness Snapshot

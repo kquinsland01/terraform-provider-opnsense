@@ -6,6 +6,10 @@ baseline_commit: fbaf085e8287ae4f00f786484cd1ab622d77716a
 
 Status: done
 
+## Superseding release evidence — 2026-10-20
+
+The June findings below are historical, not the current 26.7.7 blocker. Tagged `Routing/Api/GroupSettingsController.php` now supplies gateway-group CRUD/search/reconfigure with wrapper `gateway_group`. Story 31.0k owns disposable-appliance validation and the implementation handoff. Source availability does not establish a supported resource, 26.1 availability or published provider support.
+
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
 ## Story

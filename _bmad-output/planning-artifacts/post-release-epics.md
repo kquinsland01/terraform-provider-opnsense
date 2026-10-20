@@ -74,7 +74,7 @@ Goal: close the specific gaps that block migrating a real multi-domain OPNsense 
 - 29.1 / 29.2 / 29.3 were deferred in Story 4.2 ("What NOT to Build") to a Story 4.3 that only shipped ACLs — the action, map file, and frontend cert-binding were never created.
 - 29.4 corrects Story 8.2: despite being titled "...with Issuance" and marked done, `certificate_resource.go` is plain CRUD (no `/sign`, no status poll, no refid output).
 - 29.5 supersedes the wrongly-cancelled Story 9.5 — daemon settings (`enabled`/`daemon_delay`/`backend`/...) are a distinct `/dyndns/settings` object, not the account-level `service` field.
-- **Out of scope (still blocked):** DHCP PXE/TFTP options remain in Stories 11.3 / 21.4 pending live Kea `dhcpv4 *_option` endpoint verification; a full appliance cutover keeps DHCP on Ansible until then.
+- **Ownership gate (not an absent-API blocker):** Completed Story 31.0b implements subnet PXE/TFTP fields; Stories 11.3 / 21.4 must reconcile that coverage rather than repeat it. Generic option/DDNS lifecycle remains a separate Story 31.0l validation gate; do not transfer production DHCP ownership without a reviewed site-specific cutover.
 
 **Recommended build order:** 29.1 → 29.2 → 29.4 → 29.3 → 29.5 (independent) → 29.6 (capstone). 29.3 wants 29.4's `cert_ref_id`; 29.6 depends on 29.1–29.4.
 
@@ -98,13 +98,15 @@ Goal: make this provider complete enough to be the default provider choice for a
 | 31.0a Firewall and NAT Field Parity | done | `_bmad-output/implementation-artifacts/31-0a-firewall-nat-field-parity.md` |
 | 31.0b Kea Field and Surface Parity | done | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
 | 31.0c OpenVPN Field and Key Parity | done (repair 2 proved) | `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md` |
-| 31.0d Unbound Settings and Forward Parity | review | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
+| 31.0d Unbound Settings and Forward Parity | done | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
 | 31.0e WireGuard Field and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
 | 31.0f Trust Lifecycle and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md` |
 | 31.0g IPsec Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md` |
 | 31.0h Quagga/BGP Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |
 | 31.0i Live Interface Data Sources | backlog | `_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md` |
 | 31.0j Provider Retry Settings | backlog | `_bmad-output/implementation-artifacts/31-0j-provider-retry-settings.md` |
+| 31.0k Gateway Group Stable API Validation | backlog | `_bmad-output/implementation-artifacts/31-0k-gateway-group-stable-api-validation.md` |
+| 31.0l Kea Option and DDNS Stable API Validation | backlog | `_bmad-output/implementation-artifacts/31-0l-kea-option-ddns-stable-api-validation.md` |
 | 31.1 Complete Provider Positioning README and Registry Pass | backlog | `_bmad-output/implementation-artifacts/31-1-complete-provider-positioning-docs.md` |
 | 31.2 Existing Provider Migration Guide | backlog | `_bmad-output/implementation-artifacts/31-2-existing-provider-migration-guide.md` |
 | 31.3 Example Stacks for Adoption | backlog | `_bmad-output/implementation-artifacts/31-3-example-stacks-for-adoption.md` |
@@ -123,6 +125,6 @@ Goal: make releases feel intentionally tested, versioned, and ready for producti
 
 1. Treat Epics 25B through 29 as completed or historical unless a regression appears.
 2. Keep completed Epic 30's weekly probe baseline current; assignment/IP support requires OPNsense 26.7.6+ and has disposable-appliance lifecycle proof.
-3. Complete audit-derived Stories 31.0a–31.0j before migration-positioning work so product gaps are not buried in docs.
+3. Finish active P0 WireGuard Story 31.0e first; prioritize Story 31.0h's FRR 2.0 compatibility subgate before BGP adoption. Complete remaining parity (31.0f–31.0j), gateway-group validation (31.0k) and generic Kea option/DDNS validation (31.0l) before positioning. Stable API presence, provider implementation, published release and live lifecycle proof are distinct gates. No production firmware, routing or ownership cutover is authorized by these provider stories.
 4. Follow with Stories 31.1 and 31.2 to make the Registry/README story match verified coverage.
 5. Add Story 32.1 acceptance proof before treating v1 positioning as credible.
