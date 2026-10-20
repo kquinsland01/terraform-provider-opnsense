@@ -2,7 +2,7 @@
 
 ## Status
 
-review
+done
 
 ## Priority
 
@@ -25,3 +25,7 @@ Unbound unit/schema tests, singleton and forward disposable-appliance acceptance
 ## Implementation Evidence
 
 Repair 7 passes exact-tree and promoted-digest OPNsense 26.7.7 proof, including handshake-driven serialization tests, strict null-metadata coverage, state-only singleton destroy, exact restore, and zero leftovers. Exactly four Story 31.0d audit rows are reconciled, and four-layer convergence is clean. The story is ready for review.
+
+### Merge reconciliation — 2026-10-20
+
+PR #61 merged as `f888efac1b129196847d3f836b6e1c621a4b1c1a` on 2026-10-19 after all eight checks passed. This status-only reconciliation does not rerun or replace the recorded Repair 7 lifecycle proof.
