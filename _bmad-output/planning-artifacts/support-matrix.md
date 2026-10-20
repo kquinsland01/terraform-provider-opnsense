@@ -19,12 +19,12 @@ This matrix is the current source of truth for release positioning. It reconcile
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 108 | Supported |
-| Data sources | 94 | Registered; Story 31.0d adds the digest-bound, field-complete read-only Unbound settings view |
-| Resource docs | 108 | Supported |
-| Data source docs | 94 | Generated |
+| Resources | 109 | Supported |
+| Data sources | 95 | Registered; Story 31.0e adds disposable-proved WireGuard settings alongside the existing Unbound settings view |
+| Resource docs | 109 | Supported |
+| Data source docs | 95 | Generated |
 | Ephemeral resources / docs | 1 / 1 | Terraform 1.10+ OpenVPN key generator passed final protocol/non-persistence proof; implementation in review |
-| Remaining field/surface gaps | 6 audit-derived P0/P1 story groups (Stories 31.0e-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Remaining field/surface gaps | 5 audit-derived P0/P1 story groups (Stories 31.0f-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
 | Remaining resource-matching data-source gaps | 16 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
@@ -52,7 +52,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA, certificate |
 | Unbound | ACL, DNSBL, domain override, general, host alias, host override |
-| WireGuard | peer, server |
+| WireGuard | peer, server, settings |
 
 ## Supported Data Sources
 
@@ -77,7 +77,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA |
 | Unbound | ACL, domain override, host alias, host override, settings |
-| WireGuard | peer, server |
+| WireGuard | peer, server, settings |
 
 ## Coming: Buildable Provider Work
 
@@ -88,7 +88,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | FRR 2.0 compatibility | Story 31.0h prioritizes plugin-aware family/state/policy migration and auto-rule verification; no blanket 2.0 support claim from core version alone. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Audited field/surface parity | Complete Stories 31.0e–31.0j for WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Audited field/surface parity | Complete Stories 31.0f–31.0j for trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
 | Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research
@@ -119,3 +119,5 @@ Confirmed blockers and the maintenance workflow are documented publicly in [`doc
 | Changelog | Published baseline | `CHANGELOG.md` lists 90 resources and 34 data sources for `0.1.0`; current post-release work has added more data sources. |
 | Provider index | Mostly ready | Covers auth, minimum version, permissions, and quickstart; support matrix now added to planning artifacts and should stay reflected in Registry docs. |
 | Migration/import guidance | Partial | Per-resource import examples exist; broader dependency-order migration guide remains useful follow-up. |
+
+Story 31.0e proves exactly six WireGuard audit rows on disposable OPNsense 26.7.7: typed peer/server field parity and import-first daemon settings. WireGuard is core on 24.1+; server `peers` owns associations, peer `servers` is its authoritative API backreference. PSK/private keys stay resource-only Sensitive values. The daemon remained disabled, Terraform deletes left zero tagged items, and settings restored exactly. Implementation is in review, not yet merged/released; see [digest-bound evidence](../implementation-artifacts/31-0e-wireguard-live-evidence.md). Stories 31.0k/31.0l remain separate stable-API validation work; the FRR2 compatibility gate is unchanged.

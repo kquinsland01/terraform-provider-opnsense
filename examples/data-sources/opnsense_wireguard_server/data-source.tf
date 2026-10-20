@@ -1,8 +1,3 @@
-# Look up an existing wireguard server by UUID
-data "opnsense_wireguard_server" "example" {
-  id = "12345678-1234-1234-1234-123456789012"
-}
-
-output "wireguard_server_id" {
-  value = data.opnsense_wireguard_server.example.id
+data "opnsense_wireguard_server" "this" {
+  id = "00000000-0000-0000-0000-000000000000"
 }

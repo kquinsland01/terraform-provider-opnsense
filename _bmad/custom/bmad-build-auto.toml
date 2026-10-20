@@ -1,0 +1,5 @@
+[workflow]
+
+persistent_facts = [
+  "Epic planning is split across planning-artifacts/epics.md and planning-artifacts/post-release-epics.md. When resolving an epic story, inspect both files and use the file containing the exact target epic heading. Never send an epic-context compiler a file that does not contain the requested epic. Epics 25B through 32 currently use post-release-epics.md."
+]

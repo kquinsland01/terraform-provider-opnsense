@@ -21,11 +21,11 @@ func TestDataSources_schemaIDs(t *testing.T) {
 	t.Parallel()
 
 	constructors := DataSources()
-	if len(constructors) != 2 {
-		t.Fatalf("expected 2 WireGuard data sources, got %d", len(constructors))
+	if len(constructors) != 3 {
+		t.Fatalf("expected 3 WireGuard data sources, got %d", len(constructors))
 	}
 
-	for _, constructor := range constructors {
+	for _, constructor := range constructors[:2] {
 		assertRequiredID(t, constructor())
 	}
 }
@@ -62,14 +62,14 @@ func TestServerDataSource_read(t *testing.T) {
 		if r.Method != http.MethodGet || r.URL.Path != serverReqOpts.GetEndpoint+"/"+id {
 			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
 		}
-		_, _ = w.Write([]byte(`{"server":{"enabled":"1","name":"wg0","port":"51820","tunnel_address":"10.10.0.1/24","description":"vpn","private_key":"secret"}}`))
+		_, _ = w.Write([]byte(`{"server":{"enabled":"1","name":"wg0","port":"51820","tunneladdress":"10.10.0.1/24","disableroutes":"0","instance":"0","pubkey":"","mtu":"","dns":[],"gateway":"","peers":[],"description":"vpn","private_key":"secret"}}`))
 	}))
 	t.Cleanup(server.Close)
 
 	ds := newServerDataSource()
 	configureDataSource(t, ds, newTestClient(t, server.URL))
 	schema := dataSourceSchema(t, ds)
-	config := serverDataSourceModel{ID: types.StringValue(id)}
+	config := serverDataSourceModel{ID: types.StringValue(id), DNS: types.SetNull(types.StringType), TunnelAddress: types.SetNull(types.StringType), Peers: types.SetNull(types.StringType)}
 	resp := datasource.ReadResponse{State: tfsdk.State{Schema: schema}}
 
 	ds.Read(context.Background(), datasource.ReadRequest{Config: modelConfig(t, schema, &config)}, &resp)
@@ -81,7 +81,7 @@ func TestServerDataSource_read(t *testing.T) {
 	if diags := resp.State.Get(context.Background(), &state); diags.HasError() {
 		t.Fatalf("state diagnostics: %v", diags)
 	}
-	if state.Name.ValueString() != "wg0" || state.Port.ValueString() != "51820" || !state.Enabled.ValueBool() {
+	if state.Name.ValueString() != "wg0" || state.Port.ValueInt64() != 51820 || !state.Enabled.ValueBool() {
 		t.Fatalf("unexpected state: %#v", state)
 	}
 }

@@ -94,8 +94,9 @@ FRR support above is not a blanket os-frr 2.0 compatibility claim. Story 31.0h n
 
 | Item | Status | Notes |
 |---|---|---|
-| WireGuard server | Supported | Resource only |
-| WireGuard peer | Supported | Resource only |
+| WireGuard server | Supported | Typed resource/data-source parity proved by Story 31.0e on disposable 26.7.7; in review |
+| WireGuard peer | Supported | Typed resource/data-source parity and resource-only PSK proved by Story 31.0e; in review |
+| WireGuard settings | Supported | Import-first resource/data source; disabled-state Update, state-only destroy, exact restore proved; in review |
 | OpenVPN instance | Supported | Resource only |
 | OpenVPN client overwrite | Supported | Resource only |
 | OpenVPN static key | Supported | Resource only |
@@ -183,7 +184,7 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 
 ## Release Matrix
 
-- **Supported:** 108 resources and 92 data sources listed in `support-matrix.md` and generated docs.
+- **Supported:** 109 resources and 95 data sources listed in `support-matrix.md` and generated docs.
 - **Coming:** data-source parity for singleton and sensitive special cases; gateway-group lifecycle validation for OPNsense 26.7.7 (Story 31.0k).
 - **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
 - **Upstream-blocked:** system general settings. Gateway groups moved to Coming for the verified 26.7.7 target; see Story 31.0k.

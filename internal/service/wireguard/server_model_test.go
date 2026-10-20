@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
 
 func TestServerResourceModelFromAPI_preservesDescriptionWhenAPIDropsIt(t *testing.T) {
@@ -19,13 +17,16 @@ func TestServerResourceModelFromAPI_preservesDescriptionWhenAPIDropsIt(t *testin
 		Description: types.StringValue("cross-site underlay"),
 	}
 
-	model.fromAPI(context.Background(), &wireguardServerAPIResponse{
-		Enabled:       "1",
+	if err := model.fromAPI(context.Background(), &wireguardServerAPIResponse{
+		Enabled:       strictBool(true),
+		Instance:      "0",
 		Name:          "wg0",
-		Port:          "51820",
-		TunnelAddress: opnsense.SelectedMap("10.10.0.1/24"),
+		Port:          strictOptionalInteger{Value: 51820, Set: true},
+		TunnelAddress: strictSelectedMapList{"10.10.0.1/24"},
 		Description:   "",
-	}, "server-uuid")
+	}, "server-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
 	if got, want := model.Description.ValueString(), "cross-site underlay"; got != want {
 		t.Fatalf("description = %q, want %q", got, want)
@@ -39,13 +40,16 @@ func TestServerResourceModelFromAPIUsesReturnedDescription(t *testing.T) {
 		Description: types.StringValue("planned description"),
 	}
 
-	model.fromAPI(context.Background(), &wireguardServerAPIResponse{
-		Enabled:       "1",
+	if err := model.fromAPI(context.Background(), &wireguardServerAPIResponse{
+		Enabled:       strictBool(true),
+		Instance:      "0",
 		Name:          "wg0",
-		Port:          "51820",
-		TunnelAddress: opnsense.SelectedMap("10.10.0.1/24"),
+		Port:          strictOptionalInteger{Value: 51820, Set: true},
+		TunnelAddress: strictSelectedMapList{"10.10.0.1/24"},
 		Description:   "api description",
-	}, "server-uuid")
+	}, "server-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
 	if got, want := model.Description.ValueString(), "api description"; got != want {
 		t.Fatalf("description = %q, want %q", got, want)
@@ -57,13 +61,16 @@ func TestServerResourceModelFromAPIInitializesMissingDescription(t *testing.T) {
 
 	var model ServerResourceModel
 
-	model.fromAPI(context.Background(), &wireguardServerAPIResponse{
-		Enabled:       "1",
+	if err := model.fromAPI(context.Background(), &wireguardServerAPIResponse{
+		Enabled:       strictBool(true),
+		Instance:      "0",
 		Name:          "wg0",
-		Port:          "51820",
-		TunnelAddress: opnsense.SelectedMap("10.10.0.1/24"),
+		Port:          strictOptionalInteger{Value: 51820, Set: true},
+		TunnelAddress: strictSelectedMapList{"10.10.0.1/24"},
 		Description:   "",
-	}, "server-uuid")
+	}, "server-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
 	if model.Description.IsNull() || model.Description.IsUnknown() {
 		t.Fatalf("description was not initialized: %#v", model.Description)

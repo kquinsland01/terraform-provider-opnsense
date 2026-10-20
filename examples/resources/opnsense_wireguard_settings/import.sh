@@ -1,0 +1,1 @@
+terraform import opnsense_wireguard_settings.this wireguard_settings

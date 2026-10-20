@@ -2,25 +2,21 @@
 page_title: "opnsense_wireguard_server Data Source - opnsense"
 subcategory: "WireGuard"
 description: |-
-  Look up an existing WireGuard server on OPNsense.
+  Reads core WireGuard server on OPNsense.
 ---
-
 # opnsense_wireguard_server (Data Source)
 
-Look up an existing WireGuard server on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
+WireGuard entered OPNsense core in **24.1**; no plugin is required. This provider contract was acceptance-validated on **26.7.7**, not on every earlier core release. Terraform Core was exercised; no OpenTofu execution is claimed by that evidence.
 
-The `private_key` resource attribute is intentionally unavailable in this data source because OPNsense does not return WireGuard private key material on read.
+Multi-value addresses and relationships use Terraform sets. Existing scalar state upgrades automatically without replacement; update configuration to set syntax. Server `peers` owns associations; peer `servers` is an API-derived backreference. Do not manage both sides independently in one configuration or through another provider.
+
+PSK and private keys are resource-only Sensitive values. OPNsense may omit them on reads; prior resource state is preserved. Imports cannot recover omitted keys. Sensitive values still reside in resource state: secure the state backend. Data sources never expose secrets.
 
 ## Example Usage
 
 ```terraform
-# Look up an existing wireguard server by UUID
-data "opnsense_wireguard_server" "example" {
-  id = "12345678-1234-1234-1234-123456789012"
-}
-
-output "wireguard_server_id" {
-  value = data.opnsense_wireguard_server.example.id
+data "opnsense_wireguard_server" "this" {
+  id = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -29,12 +25,19 @@ output "wireguard_server_id" {
 
 ### Required
 
-- `id` (String) UUID to look up.
+- `id` (String) id.
 
 ### Read-Only
 
-- `description` (String) Description of the server instance.
-- `enabled` (Boolean) Whether this server instance is enabled. Defaults to 'true'.
-- `name` (String) Name of the WireGuard server instance.
-- `port` (String) Listen port for this WireGuard instance.
-- `tunnel_address` (String) Tunnel address (e.g., '10.0.0.1/24').
+- `description` (String) description.
+- `disable_routes` (Boolean) disable routes.
+- `dns` (Set of String) dns.
+- `enabled` (Boolean) enabled.
+- `gateway` (String) gateway.
+- `instance` (String) instance.
+- `mtu` (Number) mtu.
+- `name` (String) name.
+- `peers` (Set of String) peers.
+- `port` (Number) port.
+- `public_key` (String) public key.
+- `tunnel_address` (Set of String) tunnel address.

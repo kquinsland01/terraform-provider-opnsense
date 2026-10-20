@@ -49,7 +49,7 @@ func Reconfigure(ctx context.Context, client *Client, opts ReqOpts) error {
 	requireOKStatus := opts.StrictReconfigureResponse ||
 		opts.ReconfigureEndpoint == "/api/kea/service/reconfigure"
 	if strings.TrimSpace(string(body)) == "" {
-		if requireOKStatus {
+		if requireOKStatus || opts.StrictReconfigureResult {
 			return fmt.Errorf("reconfigure %s: empty response; expected status ok", opts.ReconfigureEndpoint)
 		}
 		return nil
@@ -60,6 +60,9 @@ func Reconfigure(ctx context.Context, client *Client, opts ReqOpts) error {
 	}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return fmt.Errorf("reconfigure %s: failed to parse response: %w", opts.ReconfigureEndpoint, err)
+	}
+	if opts.StrictReconfigureResult && result.Result != "ok" {
+		return fmt.Errorf("reconfigure %s: unexpected result %q; expected ok", opts.ReconfigureEndpoint, result.Result)
 	}
 	if requireOKStatus && result.Status != "ok" {
 		return fmt.Errorf("reconfigure %s: unexpected status %q; expected ok", opts.ReconfigureEndpoint, result.Status)

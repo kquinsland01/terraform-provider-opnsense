@@ -99,7 +99,7 @@ Goal: make this provider complete enough to be the default provider choice for a
 | 31.0b Kea Field and Surface Parity | done | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
 | 31.0c OpenVPN Field and Key Parity | done (repair 2 proved) | `_bmad-output/implementation-artifacts/31-0c-openvpn-field-and-key-parity.md` |
 | 31.0d Unbound Settings and Forward Parity | done | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
-| 31.0e WireGuard Field and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
+| 31.0e WireGuard Field and Settings Parity | review | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
 | 31.0f Trust Lifecycle and Settings Parity | backlog | `_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md` |
 | 31.0g IPsec Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md` |
 | 31.0h Quagga/BGP Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |

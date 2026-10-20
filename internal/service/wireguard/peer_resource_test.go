@@ -26,7 +26,7 @@ func TestAccWireguardPeer_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("opnsense_wireguard_peer.test", "id"),
 					resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "name", "tf_test_peer"),
 					resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "public_key", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-					resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "tunnel_address", "10.0.0.2/32"),
+					resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "tunnel_address.0", "10.0.0.2/32"),
 					resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "enabled", "true"),
 				),
 			},
@@ -39,7 +39,7 @@ func TestAccWireguardPeer_basic(t *testing.T) {
 			// Step 3: Update tunnel address and verify.
 			{
 				Config: testAccWireguardPeerConfig("tf_test_peer", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", "10.0.0.3/32"),
-				Check:  resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "tunnel_address", "10.0.0.3/32"),
+				Check:  resource.TestCheckResourceAttr("opnsense_wireguard_peer.test", "tunnel_address.0", "10.0.0.3/32"),
 			},
 		},
 	})
@@ -50,7 +50,7 @@ func testAccWireguardPeerConfig(name, pubkey, tunnelAddr string) string {
 resource "opnsense_wireguard_peer" "test" {
   name           = %[1]q
   public_key     = %[2]q
-  tunnel_address = %[3]q
+  tunnel_address = [%[3]q]
   keepalive      = 25
 }
 `, name, pubkey, tunnelAddr)

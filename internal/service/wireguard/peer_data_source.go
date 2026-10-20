@@ -5,42 +5,35 @@ package wireguard
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	dsschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
 
-var _ datasource.DataSource = &peerDataSource{}
-
-type peerDataSource struct{ client *opnsense.Client }
+type (
+	peerDataSource      struct{ client *opnsense.Client }
+	peerDataSourceModel struct {
+		ID            types.String `tfsdk:"id"`
+		Enabled       types.Bool   `tfsdk:"enabled"`
+		Name          types.String `tfsdk:"name"`
+		PublicKey     types.String `tfsdk:"public_key"`
+		TunnelAddress types.Set    `tfsdk:"tunnel_address"`
+		ServerAddress types.String `tfsdk:"server_address"`
+		ServerPort    types.Int64  `tfsdk:"server_port"`
+		Keepalive     types.Int64  `tfsdk:"keepalive"`
+		Servers       types.Set    `tfsdk:"servers"`
+	}
+)
 
 func newPeerDataSource() datasource.DataSource { return &peerDataSource{} }
-
 func (d *peerDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_wireguard_peer"
 }
 
 func (d *peerDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = dsschema.Schema{
-		MarkdownDescription: "Reads an existing WireGuard peer on OPNsense by UUID.",
-		Attributes: map[string]dsschema.Attribute{
-			"id": dsschema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "UUID to look up.",
-			},
-			"enabled":        dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this peer is enabled. Defaults to 'true'."},
-			"name":           dsschema.StringAttribute{Computed: true, MarkdownDescription: "Name of the WireGuard peer."},
-			"public_key":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Public key of the WireGuard peer."},
-			"tunnel_address": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Allowed IPs / tunnel address for this peer (e.g., '10.0.0.2/32')."},
-			"server_address": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Endpoint address of the remote WireGuard server."},
-			"server_port":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Endpoint port of the remote WireGuard server."},
-			"keepalive":      dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Persistent keepalive interval in seconds. Null means disabled/unset."},
-			"servers":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "Comma-separated UUIDs of WireGuard server instances this peer is assigned to."},
-		},
-	}
+	resp.Schema = dsschema.Schema{MarkdownDescription: "Reads a core WireGuard peer by UUID on OPNsense 24.1+. Secrets are never exposed.", Attributes: map[string]dsschema.Attribute{"id": dsschema.StringAttribute{Required: true, MarkdownDescription: "id."}, "enabled": dsschema.BoolAttribute{Computed: true, MarkdownDescription: "enabled."}, "name": dsschema.StringAttribute{Computed: true, MarkdownDescription: "name."}, "public_key": dsschema.StringAttribute{Computed: true, MarkdownDescription: "public key."}, "tunnel_address": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "tunnel address."}, "server_address": dsschema.StringAttribute{Computed: true, MarkdownDescription: "server address."}, "server_port": dsschema.Int64Attribute{Computed: true, MarkdownDescription: "server port."}, "keepalive": dsschema.Int64Attribute{Computed: true, MarkdownDescription: "keepalive."}, "servers": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "servers."}}}
 }
 
 func (d *peerDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -56,17 +49,29 @@ func (d *peerDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 }
 
 func (d *peerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config PeerResourceModel
+	var config peerDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[wireguardPeerAPIResponse](ctx, d.client, peerReqOpts, id)
+	result, err := opnsense.Get[wireguardPeerAPIResponse](ctx, d.client, peerReqOpts, config.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading WireGuard peer", fmt.Sprintf("Could not read WireGuard peer %s: %s", id, err))
+		resp.Diagnostics.AddError("Error reading WireGuard peer", err.Error())
 		return
 	}
-	config.fromAPI(ctx, result, id)
+	var remote PeerResourceModel
+	if err = remote.fromAPI(ctx, result, config.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Malformed WireGuard peer", err.Error())
+		return
+	}
+	config.ID = remote.ID
+	config.Enabled = remote.Enabled
+	config.Name = remote.Name
+	config.PublicKey = remote.PublicKey
+	config.TunnelAddress = remote.TunnelAddress
+	config.ServerAddress = remote.ServerAddress
+	config.ServerPort = remote.ServerPort
+	config.Keepalive = remote.Keepalive
+	config.Servers = remote.Servers
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }
