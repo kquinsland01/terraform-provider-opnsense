@@ -4,7 +4,7 @@
 
 ## Goal
 
-Make the provider complete enough to be the default choice for managing an OPNsense appliance, then turn demonstrated completeness into user trust and adoption. Coverage claims, migration guidance, and examples must follow verified field- and surface-level parity so operators can standardize on one provider instead of splitting ownership across providers, Ansible, or the OPNsense UI.
+Make the provider complete enough to be the default choice for an OPNsense appliance, then convert demonstrated completeness into user trust and adoption. Close meaningful field, surface, and lifecycle gaps before publishing positioning, migration guidance, and adoption stacks that encourage operators to standardize on one provider.
 
 ## Stories
 
@@ -19,41 +19,41 @@ Make the provider complete enough to be the default choice for managing an OPNse
 - Story 31.0h: Quagga/BGP Field Parity
 - Story 31.0i: Live Interface Data Sources
 - Story 31.0j: Provider Retry Settings
+- Story 31.0k: Gateway Group Stable API Validation
+- Story 31.0l: Kea Option and DDNS Stable API Validation
 - Story 31.1: Complete Provider Positioning README and Registry Pass
 - Story 31.2: Existing Provider Migration Guide
 - Story 31.3: Example Stacks for Adoption
 
 ## Requirements & Constraints
 
-- Use the pinned, deterministic ecosystem audit to close field and surface gaps across firewall/NAT, Kea, OpenVPN, Unbound, WireGuard, trust, IPsec, Quagga/BGP, live interface state, and configurable retry behavior. Measure parity by usable fields and lifecycle semantics, not resource counts alone.
-- Treat the support matrix as the release-positioning source of truth. Clearly classify supported, planned, research-needed, and upstream-blocked capabilities; do not conceal gaps in documentation or claim completeness beyond the evidence.
-- Use one provider per appliance and object domain in steady state. Migration guidance must prohibit two providers from managing the same OPNsense object and must explain dependency-aware import of existing objects without manual state editing, ending in an accurate no-change plan.
-- Preserve the common resource contract across parity work: create, API read-back, in-place update where valid, delete, UUID import, drift detection, missing-object removal from state, correct service reconfigure, and recoverable partial failure. Firewall changes must retain savepoint/apply/rollback safety, and all mutations must remain serialized to protect OPNsense configuration integrity.
-- Retry settings must keep transient network, timeout, reboot, and server failures retryable while allowing operators to configure retry count and backoff. Exhausted retries must produce actionable diagnostics without corrupting state.
-- Sensitive keys and credentials must never appear in plan or logs and should not be retained in state when write-only handling is available. When an API cannot return a secret, preserve configured state rather than creating false drift.
-- Registry-facing documentation must cover configuration, authentication, minimum OPNsense versions, required permissions, the current support matrix, and a complete quickstart. Every resource continues to ship generated argument/attribute documentation, examples, and import instructions.
-- Public positioning should emphasize broad, modern core and plugin/service management, brownfield import, and release-gated API support. Avoid adversarial provider comparisons and unsupported claims of total appliance coverage.
-- Adoption examples must be realistic, runnable multi-resource compositions that demonstrate dependency links and normal plan/apply behavior. They must not require manual UI steps, external scripts, legacy-page scraping, or direct configuration-file edits.
-- All changes must retain Terraform CLI 1.0+ protocol compatibility and core OpenTofu CRUD/import/plan/apply compatibility, pass the full quality gate, and keep tests deterministic. Resource acceptance coverage remains a product requirement rather than documentation-only evidence.
+- Measure completeness through the pinned deterministic ecosystem audit: usable fields, safe lookup surfaces, import, and lifecycle behavior matter more than resource counts. Reconcile audit outputs after registration or schema changes.
+- Keep stable API availability, provider implementation, published provider release, and live lifecycle proof as separate gates. A stable controller or merged implementation alone does not establish released support or production readiness. Support claims must match the support matrix and distinguish supported, coming, research-needed, and upstream-blocked capabilities.
+- Prioritize plugin-aware FRR 2.0 compatibility before BGP adoption. Core firmware version alone cannot establish plugin compatibility. Family/state/policy migration and automatic protocol firewall-rule behavior require explicit verification; do not imply blanket FRR 2.0 support from existing BGP resources.
+- Stable 26.7.7 gateway-group APIs clear an upstream-source blocker, not provider implementation or lifecycle validation. Generic Kea option/DDNS payload, mutation, reconfigure, and lifecycle semantics remain a separate validation gate; completed subnet PXE/TFTP, peer, and delegated-prefix work is not proof of those surfaces or Foreman integration.
+- Preserve CRUD, authoritative API read-back, UUID import where applicable, drift detection, missing-object handling, service-specific reconfigure, and recoverable partial failure. CRUD success with activation failure must retain recoverable state and clearly report pending activation. Firewall mutations retain rollback protection.
+- Serialize mutations to protect shared appliance configuration; bound read concurrency. Retry transient network, server, timeout, and reboot failures with configurable retry/backoff and actionable exhaustion diagnostics without corrupting state.
+- Protect credentials and keys in output and logs; use write-only attributes where available and preserve non-readable secret state without false drift. Keep TLS verification enabled unless explicitly disabled.
+- Use stable, durable OPNsense APIs only: no legacy-page scraping, direct XML edits, or provider-managed firmware/plugin upgrades. These stories authorize no production firmware, routing, or ownership cutover.
+- Require deterministic acceptance coverage against real disposable OPNsense targets plus the full quality gate. Preserve core Terraform/OpenTofu compatibility, and document higher minimum versions for optional newer protocol features rather than implying universal feature support.
+- Generate resource documentation with arguments, attributes, imports, and realistic composition examples. README/Registry guidance must identify authentication, required permissions/plugins, minimum versions, and unsupported boundaries. Position broad modern coverage without adversarial comparisons or unsupported completeness claims.
 
 ## Technical Decisions
 
-- Stable OPNsense APIs own configuration. Version-gate newly released API surfaces; never treat an unreleased branch as supported or bypass the API with XML edits or legacy UI scraping.
-- The shared API client owns authentication, retry, pagination, OPNsense error parsing, and the global mutation lock. Service controllers define typed requests and endpoint metadata; resources and data sources preserve the established module boundaries.
-- Search operations must traverse all OPNsense result pages. Validation failures may arrive with HTTP 200 and must be recognized from response content; absent UUID records must be distinguished from blank default responses.
-- Plugin-backed capabilities require the corresponding plugin to be installed. Missing plugins, permissions, credentials, and connectivity must yield specific, actionable diagnostics.
-- Documentation remains generated through the established documentation pipeline. Narrative templates, per-resource examples, import examples, and dedicated composition examples are the maintained inputs.
-- The deterministic ecosystem audit is the parity feedback loop. Registration or schema changes must update its machine-readable and human-readable outputs so positioning is based on current results.
+- Maintain API ownership and the two-phase configuration/activation lifecycle. Interpret validation bodies even when HTTP status is successful, distinguish absent objects from blank defaults, and traverse all search-result pages.
+- Distinguish plugin availability/version from core appliance version. Missing plugins, insufficient permissions, authentication failures, endpoint absence, and connection failures must yield specific diagnostics.
+- Keep parity evidence reproducible and tied to the implementation under test. Documentation and generated audit claims must reflect verified behavior rather than simply copying another provider's schema.
+- Preserve ordered policy semantics and safe state/schema migration across upstream model changes; successful serialization alone is insufficient evidence of equivalent behavior.
 
 ## UX & Interaction Patterns
 
-- Evaluation starts with a concise support view that lets operators confirm their appliance version, required plugins, permissions, and needed domains before adoption.
-- Brownfield onboarding proceeds from provider authentication to dependency-ordered imports, configuration capture, and a no-change plan; subsequent plans must expose UI/API drift clearly before apply.
-- Examples should model the review experience users adopt in CI: readable resource relationships, predictable diffs, explicit unsupported boundaries, and no hidden post-apply steps.
+- Operators should be able to determine support, version/plugin prerequisites, and required permissions before adoption.
+- Brownfield onboarding follows authentication, dependency-aware import, configuration capture, and a no-change plan. Subsequent plans expose UI/API drift clearly; avoid competing owners for the same appliance object.
+- Adoption stacks demonstrate readable resource relationships, predictable plan/apply behavior, and explicit unsupported boundaries without hidden configuration steps.
 
 ## Cross-Story Dependencies
 
-- Story 31.0 established the pinned baseline and generated Stories 31.0a–31.0j. Stories 31.0a–31.0d have reached done or review; complete the remaining P0 work in Stories 31.0e–31.0f before P1 Stories 31.0g–31.0j, rerunning the deterministic audit after registration or schema changes.
-- Story 31.1 follows the parity work so README and Registry claims match verified coverage. Story 31.2 then publishes safe migration paths, and Story 31.3 builds adoption stacks on that verified surface.
-- Epic 30 supplies release-gated interface assignment/IP support for OPNsense 26.7.6 or newer; PPPoE remains separately unverified and must not be implied by Epic 31 positioning.
-- Epic 32 supplies broader acceptance-proof and v1-readiness evidence. Epic 31 improves completeness and adoption but does not by itself establish v1 readiness.
+- The coverage audit drives parity work and must remain current. Finish the WireGuard prerequisite before prioritizing the FRR 2.0 compatibility subgate; complete remaining parity and gateway/Kea validation before positioning. A merged prerequisite must still be distinguished from a published release.
+- Stories 31.0k and 31.0l validate newly available stable surfaces without recreating completed Kea parity. Do not reopen completed firewall, OpenVPN, Unbound, or interface work absent a regression.
+- Stories 31.1–31.3 depend on verified coverage and safe ownership/import semantics. Epic 30 supplies release-gated base assignment/IP support for OPNsense 26.7.6+ with disposable 26.7.7 proof; PPPoE remains separately unverified.
+- Epic 32 supplies broader acceptance-proof and v1-readiness work. Epic 31 does not independently establish v1 readiness or authorize appliance adoption/cutover.
