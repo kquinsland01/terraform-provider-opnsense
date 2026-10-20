@@ -123,3 +123,9 @@ After review pass2 bounded patches, the parent froze all covered source and meta
 Final patches diagnose configured unknown keys before traffic, compare recovery CSV fields as sets, validate nonblank returned secrets without echoing them, clear authoritative secret uncertainty journals, fail artifact scans closed on grep errors, and assert multiple associations. Zero/multiple exact recovery candidates diagnose without adopting a UUID. Migration docs explicitly preserve existing PSKs and show matching server public-key provisioning.
 
 The native agent-thread limit required independent reviewer reuse for some pass2 layers. Follow-up maintainer review is recommended for the Config-aware key guards, normalized recovery/cardinality and secret-journal interactions; this record does not claim four fresh reviewer contexts or an unexecuted post-patch fresh-context review. No provider release or production change occurred.
+
+## Disposable retirement and publication
+
+After final proof, root reverified the exact VM name/UUID, isolated net0 and sole VM102 disk before shutdown/destruction. Cluster inventory and local-lvm content confirm VM102/config/disk absence. The exact recorded SSH forwarding process was terminated; temporary credentials/runtime moved to private macOS Trash with mode700 preserved. Official image cache was retained. No production VM or firewall was changed.
+
+Implementation [PR63](https://github.com/matthew-on-git/terraform-provider-opnsense/pull/63) is open for maintainer review. Merge/release remain separate gates. Reconciliation with merged PR62 ancestry preserved the final verified digest exactly. This retirement/publication note is outside digest scope and does not change implementation proof.
