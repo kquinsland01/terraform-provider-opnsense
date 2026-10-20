@@ -120,3 +120,11 @@ c908164e6f08d6fb603100a8cbb450c1acef0f06:internal/service/iface/assignment_resou
 # Terraform private-state key name (not credential material); detected after the
 # Gitleaks generic-api-key rule changed while scanning the Story 31.0b commit.
 613dcdff38c7773fcb785015f263074a86d24182:internal/service/kea/pending_activation.go:generic-api-key:15
+
+# Deterministic Terraform private-state activation-marker identifiers, not keys
+# or credential material. Same model as the Kea private-state-name entry above;
+# scope is limited to these exact historical commit/file/rule/line fingerprints.
+74e1766ffcc58b39a2f1837011d5e35ccee96c1d:internal/service/unbound/domain_override_resource.go:generic-api-key:27
+74e1766ffcc58b39a2f1837011d5e35ccee96c1d:internal/service/unbound/dnsbl_resource.go:generic-api-key:28
+74e1766ffcc58b39a2f1837011d5e35ccee96c1d:internal/service/unbound/dnsbl_resource.go:generic-api-key:29
+74e1766ffcc58b39a2f1837011d5e35ccee96c1d:internal/service/unbound/general_resource.go:generic-api-key:32

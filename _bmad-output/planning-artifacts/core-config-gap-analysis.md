@@ -68,7 +68,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 |---|---|---|
 | Static route | Supported | Resource only |
 | Gateway | Supported | Resource only |
-| Gateway group | Upstream-blocked | Story 5.6 revalidated on 2026-06-14: published docs list only individual gateway/static route endpoints; OPNsense `master` has model-only `GatewayGroups` evidence with tier fields, trigger, pool options, and description, but no published endpoint/API controller was found and checked `stable/26.1` model paths returned 404. |
+| Gateway group | Coming | Stable 26.7.7 `routing/group_settings` CRUD/search/reconfigure is source-confirmed. Story 31.0k must prove tier/default/wrapper semantics, in-use dependency refusal and convergence before implementation/support. No claim for older core versions. |
 
 ### Dynamic Routing (FRR / Quagga)
 
@@ -88,12 +88,15 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | RIP | Supported | Singleton resource |
 | FRR static general + route | Supported | Resources |
 
+FRR support above is not a blanket os-frr 2.0 compatibility claim. Story 31.0h now gates address-family migration, grouped policy references and automatic protocol rules against separately identified core/plugin versions before adoption.
+
 ### VPN
 
 | Item | Status | Notes |
 |---|---|---|
-| WireGuard server | Supported | Resource only |
-| WireGuard peer | Supported | Resource only |
+| WireGuard server | Supported | Typed resource/data-source parity proved by Story 31.0e on disposable 26.7.7; in review |
+| WireGuard peer | Supported | Typed resource/data-source parity and resource-only PSK proved by Story 31.0e; in review |
+| WireGuard settings | Supported | Import-first resource/data source; disabled-state Update, state-only destroy, exact restore proved; in review |
 | OpenVPN instance | Supported | Resource only |
 | OpenVPN client overwrite | Supported | Resource only |
 | OpenVPN static key | Supported | Resource only |
@@ -118,8 +121,8 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 | Kea DHCPv6 subnet | Supported | Resource |
 | Kea DHCPv6 reservation | Supported | Resource |
 | Kea HA peer | Supported | Resource + data source |
-| DHCPv4 option | Needs research | Source recheck on 2026-06-18 found option CRUD/search actions in OPNsense `master`, but not in `stable/25.7`; earlier live build also returned endpoint-not-found. Re-probe the next supported target release before implementation. |
-| Kea DDNS | Needs research | Source recheck on 2026-06-18 found `Kea/Api/DdnsController.php` in OPNsense `master`, but not in `stable/25.7`; earlier live build also returned endpoint-not-found. Re-probe the next supported target release before implementation. |
+| DHCPv4 option | Needs research | Stable 26.7.7 `kea/dhcpv4` option CRUD/search exists. Story 31.0l validates generic options separately from completed 31.0b subnet PXE/TFTP fields; no absent-stable-API blocker remains. |
+| Kea DDNS | Needs research | Stable 26.7.7 `Kea/Api/DdnsController.php` exists. Story 31.0l must prove inherited set semantics, wrapper/default handling, reconfigure and non-destructive singleton lifecycle before implementation. |
 | Dynamic DNS account | Supported | Resource only |
 | DDNS provider | Not planned | Redundant with provider/service field on account unless a separate endpoint emerges. |
 
@@ -177,12 +180,11 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 
 | Resource/domain | Upstream item | Action |
 |---|---|---|
-| Gateway group | `master` model-only `GatewayGroups` evidence; no target-release API/controller | Track generated API docs, `stable/*` branch availability, API controllers, ACL/menu entries, and model semantics; candidate fresh MVC API contribution if absent. |
 | System general settings | OPNsense System Settings MVC roadmap; current `core/initial_setup` evidence is wizard-only, not a durable singleton API | Watch release notes, API docs, controllers/models, ACL/menu entries, and adopt only after stable target-release get/set semantics are available. |
 
 ## Release Matrix
 
-- **Supported:** 108 resources and 92 data sources listed in `support-matrix.md` and generated docs.
-- **Coming:** data-source parity for singleton and sensitive special cases.
+- **Supported:** 109 resources and 95 data sources listed in `support-matrix.md` and generated docs.
+- **Coming:** data-source parity for singleton and sensitive special cases; gateway-group lifecycle validation for OPNsense 26.7.7 (Story 31.0k).
 - **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
-- **Upstream-blocked:** gateway group and system general settings.
+- **Upstream-blocked:** system general settings. Gateway groups moved to Coming for the verified 26.7.7 target; see Story 31.0k.

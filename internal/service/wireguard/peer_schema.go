@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -14,64 +15,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Schema defines the Terraform schema for opnsense_wireguard_peer.
 func (r *peerResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a WireGuard peer (client) on OPNsense. Requires the `os-wireguard` plugin.",
+	resp.Schema = peerSchemaV1()
+}
+
+func peerSchemaV1() schema.Schema {
+	return schema.Schema{
+		Version:             1,
+		MarkdownDescription: "Manages a WireGuard peer on OPNsense. WireGuard is part of OPNsense core since 24.1; this contract is acceptance-validated on 26.7.7. `servers` is an API-derived backreference; configure associations through a server's `peers` attribute.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "UUID of the WireGuard peer in OPNsense.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"enabled": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(true),
-				MarkdownDescription: "Whether this peer is enabled. Defaults to `true`.",
-			},
-			"name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the WireGuard peer.",
-			},
-			"public_key": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Public key of the WireGuard peer.",
-			},
-			"tunnel_address": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Allowed IPs / tunnel address for this peer (e.g., `10.0.0.2/32`).",
-			},
-			"server_address": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-				MarkdownDescription: "Endpoint address of the remote WireGuard server.",
-			},
-			"server_port": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-				MarkdownDescription: "Endpoint port of the remote WireGuard server.",
-			},
-			"keepalive": schema.Int64Attribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "Persistent keepalive interval in seconds. Leave unset to disable.",
-				Validators: []validator.Int64{
-					int64validator.Between(1, 65535),
-				},
-			},
-			"servers": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-				MarkdownDescription: "Comma-separated UUIDs of WireGuard server instances this peer is assigned to.",
-			},
+			"id":             schema.StringAttribute{Computed: true, MarkdownDescription: "UUID of the WireGuard peer in OPNsense.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"enabled":        schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(true), MarkdownDescription: "Whether this peer is enabled."},
+			"name":           schema.StringAttribute{Required: true, MarkdownDescription: "Name of the WireGuard peer."},
+			"public_key":     schema.StringAttribute{Required: true, MarkdownDescription: "Base64-encoded 256-bit public key."},
+			"psk":            schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Default: stringdefault.StaticString(""), MarkdownDescription: "Write-only base64-encoded 256-bit pre-shared key. Blank disables PSK.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"tunnel_address": schema.SetAttribute{ElementType: types.StringType, Required: true, MarkdownDescription: "Allowed tunnel CIDRs.", Validators: []validator.Set{setvalidator.SizeAtLeast(1)}},
+			"server_address": schema.StringAttribute{Optional: true, Computed: true, Default: stringdefault.StaticString(""), MarkdownDescription: "Remote endpoint address."},
+			"server_port":    schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Remote endpoint port. Null means unset.", Validators: []validator.Int64{int64validator.Between(1, 65535)}},
+			"keepalive":      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Persistent keepalive interval in seconds. Null means unset.", Validators: []validator.Int64{int64validator.Between(1, 65535)}},
+			"servers":        schema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Authoritative API backreference to server UUIDs. Configure the association through server.peers."},
 		},
 	}
 }

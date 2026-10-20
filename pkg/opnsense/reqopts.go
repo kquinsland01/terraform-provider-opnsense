@@ -32,6 +32,8 @@ type ReqOpts struct {
 	// is exactly "ok". Enable this only for owners whose endpoint contract has
 	// been proven; sharing an endpoint does not make the response contract global.
 	StrictReconfigureResponse bool
+	// StrictReconfigureResult requires result=ok rather than status=ok.
+	StrictReconfigureResult bool
 	// ReconfigureFunc overrides the standard reconfigure endpoint with a custom function.
 	// Used by firewall filter resources for the savepoint/apply/cancelRollback flow.
 	// Mutually exclusive with ReconfigureEndpoint.

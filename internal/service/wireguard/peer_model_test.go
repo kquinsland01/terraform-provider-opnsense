@@ -9,58 +9,63 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
+	"github.com/matthew-on-git/terraform-provider-opnsense/internal/tfconv"
 )
 
 func TestPeerModelMapsServers(t *testing.T) {
 	model := PeerResourceModel{
 		Enabled:       types.BoolValue(true),
 		Name:          types.StringValue("cross-site-peer"),
-		PublicKey:     types.StringValue("PUBLIC_KEY"),
-		TunnelAddress: types.StringValue("169.254.155.1/32"),
+		PublicKey:     types.StringValue("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+		TunnelAddress: tfconv.SliceToSet([]string{"169.254.155.1/32"}),
 		ServerAddress: types.StringValue("edge-01.example.invalid"),
-		ServerPort:    types.StringValue("51822"),
+		ServerPort:    types.Int64Value(51822),
 		Keepalive:     types.Int64Value(25),
-		Servers:       types.StringValue("server-uuid"),
+		Servers:       tfconv.SliceToSet([]string{"00000000-0000-0000-0000-000000000001"}),
 	}
 
-	api := model.toAPI(context.Background())
-	if api.Servers != "server-uuid" {
-		t.Fatalf("toAPI servers = %q, want %q", api.Servers, "server-uuid")
+	_, err := model.toAPI(context.Background())
+	if err != nil {
+		t.Fatal(err)
 	}
+	// Peer associations are intentionally not sent: server.peers is authoritative.
 
 	var read PeerResourceModel
-	read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
-		Enabled:       "1",
+	if err := read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
+		Enabled:       strictBool(true),
 		Name:          "cross-site-peer",
-		PublicKey:     "PUBLIC_KEY",
-		TunnelAddress: opnsense.OrderedSelectedMapList{"169.254.155.1/32"},
+		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+		TunnelAddress: strictSelectedMapList{"169.254.155.1/32"},
 		ServerAddress: "edge-01.example.invalid",
-		ServerPort:    "51822",
-		Keepalive:     "25",
-		Servers:       opnsense.SelectedMapList{"server-uuid"},
-	}, "peer-uuid")
+		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
+		Keepalive:     strictOptionalInteger{Value: 25, Set: true},
+		Servers:       strictSelectedMapList{"00000000-0000-0000-0000-000000000001"},
+	}, "peer-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
-	if got := read.Servers.ValueString(); got != "server-uuid" {
-		t.Fatalf("fromAPI servers = %q, want %q", got, "server-uuid")
+	if got := tfconv.SetToCSV(context.Background(), read.Servers); got != "00000000-0000-0000-0000-000000000001" {
+		t.Fatalf("fromAPI servers = %q, want %q", got, "00000000-0000-0000-0000-000000000001")
 	}
 }
 
 func TestPeerModelMapsMultipleTunnelAddresses(t *testing.T) {
 	var read PeerResourceModel
-	read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
-		Enabled:       "1",
+	if err := read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
+		Enabled:       strictBool(true),
 		Name:          "cross-site-peer",
-		PublicKey:     "PUBLIC_KEY",
-		TunnelAddress: opnsense.OrderedSelectedMapList{"169.254.155.1/32", "10.129.0.0/24", "10.131.0.0/24"},
+		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+		TunnelAddress: strictSelectedMapList{"169.254.155.1/32", "10.129.0.0/24", "10.131.0.0/24"},
 		ServerAddress: "edge-01.example.invalid",
-		ServerPort:    "51822",
-		Keepalive:     "25",
-		Servers:       opnsense.SelectedMapList{"server-uuid"},
-	}, "peer-uuid")
+		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
+		Keepalive:     strictOptionalInteger{Value: 25, Set: true},
+		Servers:       strictSelectedMapList{"00000000-0000-0000-0000-000000000001"},
+	}, "peer-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
-	want := "169.254.155.1/32,10.129.0.0/24,10.131.0.0/24"
-	if got := read.TunnelAddress.ValueString(); got != want {
+	want := "10.129.0.0/24,10.131.0.0/24,169.254.155.1/32"
+	if got := tfconv.SetToCSV(context.Background(), read.TunnelAddress); got != want {
 		t.Fatalf("fromAPI tunnel_address = %q, want %q", got, want)
 	}
 }
@@ -69,15 +74,18 @@ func TestPeerModelOmitsUnsetKeepalive(t *testing.T) {
 	model := PeerResourceModel{
 		Enabled:       types.BoolValue(true),
 		Name:          types.StringValue("no-keepalive-peer"),
-		PublicKey:     types.StringValue("PUBLIC_KEY"),
-		TunnelAddress: types.StringValue("169.254.155.1/32"),
+		PublicKey:     types.StringValue("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+		TunnelAddress: tfconv.SliceToSet([]string{"169.254.155.1/32"}),
 		ServerAddress: types.StringValue("edge-01.example.invalid"),
-		ServerPort:    types.StringValue("51822"),
+		ServerPort:    types.Int64Value(51822),
 		Keepalive:     types.Int64Null(),
-		Servers:       types.StringValue("server-uuid"),
+		Servers:       tfconv.SliceToSet([]string{"00000000-0000-0000-0000-000000000001"}),
 	}
 
-	api := model.toAPI(context.Background())
+	api, err := model.toAPI(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if api.Keepalive != "" {
 		t.Fatalf("toAPI keepalive = %q, want empty string for unset keepalive", api.Keepalive)
 	}
@@ -85,16 +93,18 @@ func TestPeerModelOmitsUnsetKeepalive(t *testing.T) {
 
 func TestPeerModelMapsEmptyKeepaliveToNull(t *testing.T) {
 	var read PeerResourceModel
-	read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
-		Enabled:       "1",
+	if err := read.fromAPI(context.Background(), &wireguardPeerAPIResponse{
+		Enabled:       strictBool(true),
 		Name:          "no-keepalive-peer",
-		PublicKey:     "PUBLIC_KEY",
-		TunnelAddress: opnsense.OrderedSelectedMapList{"169.254.155.1/32"},
+		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+		TunnelAddress: strictSelectedMapList{"169.254.155.1/32"},
 		ServerAddress: "edge-01.example.invalid",
-		ServerPort:    "51822",
-		Keepalive:     "",
-		Servers:       opnsense.SelectedMapList{"server-uuid"},
-	}, "peer-uuid")
+		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
+		Keepalive:     strictOptionalInteger{},
+		Servers:       strictSelectedMapList{"00000000-0000-0000-0000-000000000001"},
+	}, "peer-uuid"); err != nil {
+		t.Fatal(err)
+	}
 
 	if !read.Keepalive.IsNull() {
 		t.Fatalf("fromAPI keepalive = %#v, want null for empty API keepalive", read.Keepalive)

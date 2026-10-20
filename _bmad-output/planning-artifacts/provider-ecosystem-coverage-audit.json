@@ -10,10 +10,10 @@
     "provider_config_count": 1
   },
   "local_inventory": {
-    "resource_count": 108,
-    "data_source_count": 94,
-    "resource_doc_count": 108,
-    "data_source_doc_count": 94,
+    "resource_count": 109,
+    "data_source_count": 95,
+    "resource_doc_count": 109,
+    "data_source_doc_count": 95,
     "ephemeral_resource_count": 1,
     "ephemeral_resource_doc_count": 1,
     "resource_only_data_source_gaps": [
@@ -1563,7 +1563,7 @@
       "kind": "resource",
       "name": "wireguard_client",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
+      "classification": "covered-different-name",
       "local_equivalents": [
         "wireguard_peer"
       ],
@@ -1579,23 +1579,23 @@
         "tunnel_address"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "pre-shared key support and multi-address typed sets are absent locally",
-        "local_only": "explicit servers association",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
-        "sensitive_write_only": "baseline PSK is sensitive; local schema does not expose it"
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "none within the audited field set",
+        "local_only": "API-derived servers backreference; keepalive is the local spelling of keep_alive",
+        "lifecycle": "UUID create/read/import/no-change/update/drift repair/populated-to-empty/delete; immediate Terraform-delete zero-object proof and owner-locked recovery boundaries",
+        "sensitive_write_only": "PSK is Sensitive, resource-only and prior-state-preserved on blank/omitted API reads"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_client.md",
-        "docs/resources/wireguard_peer.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "docs/resources/wireguard_peer.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "resource",
       "name": "wireguard_server",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "wireguard_server"
       ],
@@ -1615,40 +1615,43 @@
         "tunnel_address"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "route suppression/gateway, DNS, MTU, peer binding, public key, instance, and multi-address typed sets are absent locally",
-        "local_only": "description",
-        "lifecycle": "UUID-backed API create/read/update/delete with the domain reconfigure/apply action where required",
-        "sensitive_write_only": "private_key is sensitive/write-only locally; baseline also returns public_key"
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "none within the audited field set",
+        "local_only": "compatibility description state; instance is API-assigned and Computed",
+        "lifecycle": "UUID create/read/import/no-change/update/drift repair/populated-to-empty/delete; immediate Terraform-delete zero-object proof and owner-locked recovery boundaries",
+        "sensitive_write_only": "private_key is Sensitive, resource-only and prior-state-preserved on blank/omitted API reads; public_key is readable"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_server.md",
-        "docs/resources/wireguard_server.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "docs/resources/wireguard_server.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "resource",
       "name": "wireguard_settings",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
-      "local_equivalents": [],
+      "classification": "covered",
+      "local_equivalents": [
+        "wireguard_settings"
+      ],
       "baseline_fields": [
         "enabled",
         "id"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the daemon enabled singleton has no local resource or data source",
-        "local_only": "none material",
-        "lifecycle": "import-first singleton; update/reconfigure; destroy removes Terraform state without deleting upstream settings",
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "none within the audited field set",
+        "local_only": "fixed import identity wireguard_settings",
+        "lifecycle": "Import-first singleton; real Terraform Core Update while daemon stays disabled; state-only destroy and exact settings restoration proved",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/resources/wireguard_settings.md",
-        "internal/provider/provider.go"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "internal/provider/provider.go",
+        "docs/resources/wireguard_settings.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "data-source",
@@ -3060,7 +3063,7 @@
       "kind": "data-source",
       "name": "wireguard_client",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
+      "classification": "covered-different-name",
       "local_equivalents": [
         "wireguard_peer"
       ],
@@ -3076,23 +3079,23 @@
         "tunnel_address"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "pre-shared key support and multi-address typed sets are absent locally",
-        "local_only": "explicit servers association",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
-        "sensitive_write_only": "baseline PSK is sensitive; local schema does not expose it"
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "PSK intentionally remains resource-only; read-only data sources never expose write-only secrets",
+        "local_only": "API-derived servers backreference; keepalive is the local spelling of keep_alive",
+        "lifecycle": "Read-only authoritative API lookup; import/refresh/no-change state comparison proved",
+        "sensitive_write_only": "PSK is Sensitive, resource-only and prior-state-preserved on blank/omitted API reads"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_client.md",
-        "docs/data-sources/wireguard_peer.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "docs/data-sources/wireguard_peer.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "data-source",
       "name": "wireguard_server",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
+      "classification": "covered",
       "local_equivalents": [
         "wireguard_server"
       ],
@@ -3112,40 +3115,43 @@
         "tunnel_address"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "route suppression/gateway, DNS, MTU, peer binding, public key, instance, and multi-address typed sets are absent locally",
-        "local_only": "description",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
-        "sensitive_write_only": "private_key is sensitive/write-only locally; baseline also returns public_key"
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "private_key intentionally remains resource-only; read-only data sources never expose write-only secrets",
+        "local_only": "compatibility description state; instance is API-assigned and Computed",
+        "lifecycle": "Read-only authoritative API lookup; import/refresh/no-change state comparison proved",
+        "sensitive_write_only": "private_key is Sensitive, resource-only and prior-state-preserved on blank/omitted API reads; public_key is readable"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_server.md",
-        "docs/data-sources/wireguard_server.md"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "docs/data-sources/wireguard_server.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "data-source",
       "name": "wireguard_settings",
       "domain": "WireGuard",
-      "classification": "missing-buildable",
-      "local_equivalents": [],
+      "classification": "covered",
+      "local_equivalents": [
+        "wireguard_settings"
+      ],
       "baseline_fields": [
         "enabled",
         "id"
       ],
       "field_evidence": {
-        "shared": "same stable OPNsense object/endpoint family; top-level field names are enumerated above and semantic renames are recorded in the local generated schema",
-        "baseline_only": "the daemon enabled singleton has no local resource or data source",
-        "local_only": "none material",
-        "lifecycle": "read-only API lookup; operational interface rows read live state rather than durable configuration",
+        "shared": "Released core WireGuard API parity proved on disposable OPNsense 26.7.7; typed sets preserve multiple addresses and selected-map API truth.",
+        "baseline_only": "none within the audited field set",
+        "local_only": "fixed import identity wireguard_settings",
+        "lifecycle": "Read-only authoritative API lookup; import/refresh/no-change state comparison proved",
         "sensitive_write_only": "none"
       },
       "source_refs": [
         "https://github.com/browningluke/terraform-provider-opnsense/blob/33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba/docs/data-sources/wireguard_settings.md",
-        "internal/provider/provider.go"
-      ],
-      "follow_up": "_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md"
+        "internal/provider/provider.go",
+        "docs/data-sources/wireguard_settings.md",
+        "_bmad-output/implementation-artifacts/31-0e-wireguard-live-evidence.md"
+      ]
     },
     {
       "kind": "ephemeral-resource",

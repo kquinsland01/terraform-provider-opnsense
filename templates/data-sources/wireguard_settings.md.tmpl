@@ -1,0 +1,19 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "WireGuard"
+description: |-
+  Reads core WireGuard settings on OPNsense.
+---
+# {{.Name}} ({{.Type}})
+
+WireGuard entered OPNsense core in **24.1**; no plugin is required. This provider contract was acceptance-validated on **26.7.7**, not on every earlier core release. Terraform Core was exercised; no OpenTofu execution is claimed by that evidence.
+
+This singleton must be imported using `wireguard_settings` before updates. Destroy is state-only: it does not reset settings or enable/disable the daemon.
+
+PSK and private keys are resource-only Sensitive values. OPNsense may omit them on reads; prior resource state is preserved. Imports cannot recover omitted keys. Sensitive values still reside in resource state: secure the state backend. Data sources never expose secrets.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_wireguard_settings/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

@@ -2,23 +2,21 @@
 page_title: "opnsense_wireguard_peer Data Source - opnsense"
 subcategory: "WireGuard"
 description: |-
-  Look up an existing WireGuard peer on OPNsense.
+  Reads core WireGuard peer on OPNsense.
 ---
-
 # opnsense_wireguard_peer (Data Source)
 
-Look up an existing WireGuard peer on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
+WireGuard entered OPNsense core in **24.1**; no plugin is required. This provider contract was acceptance-validated on **26.7.7**, not on every earlier core release. Terraform Core was exercised; no OpenTofu execution is claimed by that evidence.
+
+Multi-value addresses and relationships use Terraform sets. Existing scalar state upgrades automatically without replacement; update configuration to set syntax. Server `peers` owns associations; peer `servers` is an API-derived backreference. Do not manage both sides independently in one configuration or through another provider.
+
+PSK and private keys are resource-only Sensitive values. OPNsense may omit them on reads; prior resource state is preserved. Imports cannot recover omitted keys. Sensitive values still reside in resource state: secure the state backend. Data sources never expose secrets.
 
 ## Example Usage
 
 ```terraform
-# Look up an existing wireguard peer by UUID
-data "opnsense_wireguard_peer" "example" {
-  id = "12345678-1234-1234-1234-123456789012"
-}
-
-output "wireguard_peer_id" {
-  value = data.opnsense_wireguard_peer.example.id
+data "opnsense_wireguard_peer" "this" {
+  id = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -27,15 +25,15 @@ output "wireguard_peer_id" {
 
 ### Required
 
-- `id` (String) UUID to look up.
+- `id` (String) id.
 
 ### Read-Only
 
-- `enabled` (Boolean) Whether this peer is enabled. Defaults to 'true'.
-- `keepalive` (Number) Persistent keepalive interval in seconds. Null means disabled/unset.
-- `name` (String) Name of the WireGuard peer.
-- `public_key` (String) Public key of the WireGuard peer.
-- `server_address` (String) Endpoint address of the remote WireGuard server.
-- `server_port` (String) Endpoint port of the remote WireGuard server.
-- `servers` (String) Comma-separated UUIDs of WireGuard server instances this peer is assigned to.
-- `tunnel_address` (String) Allowed IPs / tunnel address for this peer (e.g., '10.0.0.2/32').
+- `enabled` (Boolean) enabled.
+- `keepalive` (Number) keepalive.
+- `name` (String) name.
+- `public_key` (String) public key.
+- `server_address` (String) server address.
+- `server_port` (Number) server port.
+- `servers` (Set of String) servers.
+- `tunnel_address` (Set of String) tunnel address.

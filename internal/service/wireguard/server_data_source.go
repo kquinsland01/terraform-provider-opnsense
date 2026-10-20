@@ -5,50 +5,39 @@ package wireguard
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	dsschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/matthew-on-git/terraform-provider-opnsense/pkg/opnsense"
 )
 
-var _ datasource.DataSource = &serverDataSource{}
-
-type serverDataSource struct{ client *opnsense.Client }
-
-type serverDataSourceModel struct {
-	ID            types.String `tfsdk:"id"`
-	Enabled       types.Bool   `tfsdk:"enabled"`
-	Name          types.String `tfsdk:"name"`
-	Port          types.String `tfsdk:"port"`
-	TunnelAddress types.String `tfsdk:"tunnel_address"`
-	Description   types.String `tfsdk:"description"`
-}
+type (
+	serverDataSource      struct{ client *opnsense.Client }
+	serverDataSourceModel struct {
+		ID            types.String `tfsdk:"id"`
+		Enabled       types.Bool   `tfsdk:"enabled"`
+		Name          types.String `tfsdk:"name"`
+		Instance      types.String `tfsdk:"instance"`
+		PublicKey     types.String `tfsdk:"public_key"`
+		Port          types.Int64  `tfsdk:"port"`
+		MTU           types.Int64  `tfsdk:"mtu"`
+		DNS           types.Set    `tfsdk:"dns"`
+		TunnelAddress types.Set    `tfsdk:"tunnel_address"`
+		Peers         types.Set    `tfsdk:"peers"`
+		DisableRoutes types.Bool   `tfsdk:"disable_routes"`
+		Gateway       types.String `tfsdk:"gateway"`
+		Description   types.String `tfsdk:"description"`
+	}
+)
 
 func newServerDataSource() datasource.DataSource { return &serverDataSource{} }
-
 func (d *serverDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_wireguard_server"
 }
 
 func (d *serverDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = dsschema.Schema{
-		MarkdownDescription: "Reads an existing WireGuard server on OPNsense by UUID.",
-		Attributes: map[string]dsschema.Attribute{
-			"id": dsschema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "UUID to look up.",
-			},
-			"enabled":        dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this server instance is enabled. Defaults to 'true'."},
-			"name":           dsschema.StringAttribute{Computed: true, MarkdownDescription: "Name of the WireGuard server instance."},
-			"port":           dsschema.StringAttribute{Computed: true, MarkdownDescription: "Listen port for this WireGuard instance."},
-			"tunnel_address": dsschema.StringAttribute{Computed: true, MarkdownDescription: "Tunnel address (e.g., '10.0.0.1/24')."},
-			"description":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the server instance."},
-			// Omitted from the data source because OPNsense does not reliably return: private_key.
-		},
-	}
+	resp.Schema = dsschema.Schema{MarkdownDescription: "Reads a core WireGuard server by UUID on OPNsense 24.1+. Secrets are never exposed.", Attributes: map[string]dsschema.Attribute{"id": dsschema.StringAttribute{Required: true, MarkdownDescription: "id."}, "enabled": dsschema.BoolAttribute{Computed: true, MarkdownDescription: "enabled."}, "name": dsschema.StringAttribute{Computed: true, MarkdownDescription: "name."}, "instance": dsschema.StringAttribute{Computed: true, MarkdownDescription: "instance."}, "public_key": dsschema.StringAttribute{Computed: true, MarkdownDescription: "public key."}, "port": dsschema.Int64Attribute{Computed: true, MarkdownDescription: "port."}, "mtu": dsschema.Int64Attribute{Computed: true, MarkdownDescription: "mtu."}, "dns": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "dns."}, "tunnel_address": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "tunnel address."}, "peers": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "peers."}, "disable_routes": dsschema.BoolAttribute{Computed: true, MarkdownDescription: "disable routes."}, "gateway": dsschema.StringAttribute{Computed: true, MarkdownDescription: "gateway."}, "description": dsschema.StringAttribute{Computed: true, MarkdownDescription: "description."}}}
 }
 
 func (d *serverDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -69,17 +58,28 @@ func (d *serverDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[wireguardServerAPIResponse](ctx, d.client, serverReqOpts, id)
+	result, err := opnsense.Get[wireguardServerAPIResponse](ctx, d.client, serverReqOpts, config.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading WireGuard server", fmt.Sprintf("Could not read WireGuard server %s: %s", id, err))
+		resp.Diagnostics.AddError("Error reading WireGuard server", err.Error())
 		return
 	}
-	config.ID = types.StringValue(id)
-	config.Enabled = types.BoolValue(opnsense.StringToBool(result.Enabled))
-	config.Name = types.StringValue(result.Name)
-	config.Port = types.StringValue(result.Port)
-	config.TunnelAddress = types.StringValue(string(result.TunnelAddress))
-	config.Description = types.StringValue(result.Description)
+	var remote ServerResourceModel
+	if err = remote.fromAPI(ctx, result, config.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("Malformed WireGuard server", err.Error())
+		return
+	}
+	config.ID = remote.ID
+	config.Enabled = remote.Enabled
+	config.Name = remote.Name
+	config.Instance = remote.Instance
+	config.PublicKey = remote.PublicKey
+	config.Port = remote.Port
+	config.MTU = remote.MTU
+	config.DNS = remote.DNS
+	config.TunnelAddress = remote.TunnelAddress
+	config.Peers = remote.Peers
+	config.DisableRoutes = remote.DisableRoutes
+	config.Gateway = remote.Gateway
+	config.Description = remote.Description
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

@@ -51,7 +51,7 @@ resource "opnsense_wireguard_server" "test" {
   name           = %[1]q
   port           = %[2]q
   private_key    = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-  tunnel_address = "10.10.0.1/24"
+  tunnel_address = ["10.10.0.1/24"]
 }
 `, name, port)
 }

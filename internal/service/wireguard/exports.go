@@ -14,6 +14,7 @@ func Resources() []func() resource.Resource {
 	return []func() resource.Resource{
 		newServerResource,
 		newPeerResource,
+		newSettingsResource,
 	}
 }
 
@@ -22,5 +23,6 @@ func DataSources() []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newServerDataSource,
 		newPeerDataSource,
+		newSettingsDataSource,
 	}
 }

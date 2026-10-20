@@ -86,7 +86,7 @@ development_status:
   5-3-virtual-ip-resource: done
   5-4-static-route-resource: done
   5-5-gateway-resource: done
-  5-6-gateway-group-resource: done      # BLOCKED upstream — no target-release gateway-group MVC/API; master has model-only evidence requiring future recheck
+  5-6-gateway-group-resource: done      # historical gate; stable 26.7.7 source cleared, 31.0k owns lifecycle validation
   5-7-system-general-settings-resource: done  # BLOCKED upstream — no target-release durable system general settings MVC/API; initial_setup is wizard-only and unsafe for day-2 Terraform management
   epic-5-retrospective: optional
 
@@ -297,13 +297,15 @@ development_status:
   31-0a-firewall-nat-field-parity: done   # final reviewed 26.7.7 lifecycle passed; alias/filter/d_nat cleanup searches returned zero Story31a matches
   31-0b-kea-field-and-surface-parity: done # P0 — final live proof and convergence review passed
   31-0c-openvpn-field-and-key-parity: done # repair 2 converged; six rows promoted after digest-bound live proof and exact-tree gates
-  31-0d-unbound-settings-and-forward-parity: review # repair 7 exact-tree/live proof and four-layer convergence passed
-  31-0e-wireguard-field-and-settings-parity: backlog # P0 — audit-derived; before 31.1
+  31-0d-unbound-settings-and-forward-parity: done # PR61 merged; repair 7 exact-tree/live proof and four-layer convergence passed
+  31-0e-wireguard-field-and-settings-parity: review # P0 — six rows live-proved; independent review/PR pending
   31-0f-trust-lifecycle-and-settings-parity: backlog # P0 — audit-derived; before 31.1
   31-0g-ipsec-field-parity: backlog              # P1 — audit-derived; before 31.1
-  31-0h-quagga-bgp-field-parity: backlog         # P1 — audit-derived; before 31.1
+  31-0h-quagga-bgp-field-parity: backlog         # P0 FRR2 compatibility gate after 31.0e; remaining parity P1
   31-0i-live-interface-data-sources: backlog     # P1 — audit-derived; before 31.1
   31-0j-provider-retry-settings: backlog         # P1 — audit-derived; before 31.1
+  31-0k-gateway-group-stable-api-validation: backlog # stable 26.7.7 source cleared; live proof still required
+  31-0l-kea-option-ddns-stable-api-validation: backlog # generic option/DDNS only; do not repeat 31.0b
   31-1-complete-provider-positioning-docs: backlog
   31-2-existing-provider-migration-guide: backlog
   31-3-example-stacks-for-adoption: backlog

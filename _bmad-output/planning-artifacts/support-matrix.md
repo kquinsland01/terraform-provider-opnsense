@@ -19,12 +19,12 @@ This matrix is the current source of truth for release positioning. It reconcile
 
 | Area | Count | Status |
 |---|---:|---|
-| Resources | 108 | Supported |
-| Data sources | 94 | Registered; Story 31.0d adds the digest-bound, field-complete read-only Unbound settings view |
-| Resource docs | 108 | Supported |
-| Data source docs | 94 | Generated |
+| Resources | 109 | Supported |
+| Data sources | 95 | Registered; Story 31.0e adds disposable-proved WireGuard settings alongside the existing Unbound settings view |
+| Resource docs | 109 | Supported |
+| Data source docs | 95 | Generated |
 | Ephemeral resources / docs | 1 / 1 | Terraform 1.10+ OpenVPN key generator passed final protocol/non-persistence proof; implementation in review |
-| Remaining field/surface gaps | 6 audit-derived P0/P1 story groups (Stories 31.0e-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
+| Remaining field/surface gaps | 5 audit-derived P0/P1 story groups (Stories 31.0f-31.0j), with separate research/upstream blockers | Coming, needs research, or upstream-blocked |
 | Remaining resource-matching data-source gaps | 16 | Coming |
 
 Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity-plan.md). Remaining resource-gap verification is tracked in [resource-gap-verification.md](resource-gap-verification.md).
@@ -52,7 +52,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA, certificate |
 | Unbound | ACL, DNSBL, domain override, general, host alias, host override |
-| WireGuard | peer, server |
+| WireGuard | peer, server, settings |
 
 ## Supported Data Sources
 
@@ -77,23 +77,25 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Traffic shaper | pipe, queue, rule |
 | Trust | CA |
 | Unbound | ACL, domain override, host alias, host override, settings |
-| WireGuard | peer, server |
+| WireGuard | peer, server, settings |
 
 ## Coming: Buildable Provider Work
 
 | Domain | Work |
 |---|---|
 | Data-source parity | Add read-only data sources for the 16 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
+| Gateway groups | Stable 26.7.7 source gate cleared; Story 31.0k validates CRUD/import/drift/reconfigure/tier/deletion semantics before provider implementation and support. |
+| FRR 2.0 compatibility | Story 31.0h prioritizes plugin-aware family/state/policy migration and auto-rule verification; no blanket 2.0 support claim from core version alone. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
-| Audited field/surface parity | Complete Stories 31.0e–31.0j for WireGuard, trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
+| Audited field/surface parity | Complete Stories 31.0f–31.0j for trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |
 | Competitive positioning | Refresh README/Registry positioning and adoption examples only after the P0/P1 audit follow-ups complete. |
 
 ## Needs Research
 
 | Domain | Research needed |
 |---|---|
-| Kea | DHCPv4 option and Kea DDNS are present in OPNsense `master` source but absent from `stable/25.7` as of the 2026-06-18 source recheck; move to Coming only after live re-probe confirms target-release availability. |
+| Kea | Stable OPNsense 26.7.7 contains DHCPv4 option CRUD/search and `kea/ddns/get` plus the inherited mutable controller surface. Payload/set/reconfigure/lifecycle semantics for dedicated option/DDNS owners remain unproven. Completed Story 31.0b already covers subnet PXE/TFTP fields, peers and delegated-prefix pools; do not repeat that implementation or equate it with generic option/DDNS support. Story 31.0l owns the remaining validation. |
 | System / HA | HASync configuration needs request/response shape research because current `Hasync.xml` uses dynamic `JsonKeyValueStoreField` `syncitems`; HASync status `services`/`version` are data-source candidates after live validation, while service operations are action candidates only after product/framework decision. |
 | Interfaces | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable 26.7.7 lifecycle/drift/restoration proof. PPPoE semantics remain separate research. |
 
@@ -105,7 +107,6 @@ Confirmed blockers and the maintenance workflow are documented publicly in [`doc
 
 | Resource/domain | Reason | Action |
 |---|---|---|
-| Gateway group | No stable target-release gateway-group API; `master` has model-only `GatewayGroups` evidence, but published docs list no endpoint, no API controller was found, and checked `stable/26.1` model paths returned 404. | Track generated API docs, `stable/*` branch availability, API controllers, ACL/menu entries, and model semantics; candidate upstream MVC API contribution if absent. |
 | System general settings | No stable target-release durable settings API; `core/system` is action/status-only and `core/initial_setup` is wizard-only with broad side effects. | Watch OPNsense System Settings MVC roadmap, generated API docs, controllers/models, ACL/menu entries, and stable get/set semantics. |
 
 ## Release Readiness Snapshot
@@ -118,3 +119,5 @@ Confirmed blockers and the maintenance workflow are documented publicly in [`doc
 | Changelog | Published baseline | `CHANGELOG.md` lists 90 resources and 34 data sources for `0.1.0`; current post-release work has added more data sources. |
 | Provider index | Mostly ready | Covers auth, minimum version, permissions, and quickstart; support matrix now added to planning artifacts and should stay reflected in Registry docs. |
 | Migration/import guidance | Partial | Per-resource import examples exist; broader dependency-order migration guide remains useful follow-up. |
+
+Story 31.0e proves exactly six WireGuard audit rows on disposable OPNsense 26.7.7: typed peer/server field parity and import-first daemon settings. WireGuard is core on 24.1+; server `peers` owns associations, peer `servers` is its authoritative API backreference. PSK/private keys stay resource-only Sensitive values. The daemon remained disabled, Terraform deletes left zero tagged items, and settings restored exactly. Implementation is in review, not yet merged/released; see [digest-bound evidence](../implementation-artifacts/31-0e-wireguard-live-evidence.md). Stories 31.0k/31.0l remain separate stable-API validation work; the FRR2 compatibility gate is unchanged.
