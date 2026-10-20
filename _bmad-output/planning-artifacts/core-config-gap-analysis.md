@@ -184,6 +184,6 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 ## Release Matrix
 
 - **Supported:** 108 resources and 92 data sources listed in `support-matrix.md` and generated docs.
-- **Coming:** data-source parity for singleton and sensitive special cases.
+- **Coming:** data-source parity for singleton and sensitive special cases; gateway-group lifecycle validation for OPNsense 26.7.7 (Story 31.0k).
 - **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
 - **Upstream-blocked:** system general settings. Gateway groups moved to Coming for the verified 26.7.7 target; see Story 31.0k.

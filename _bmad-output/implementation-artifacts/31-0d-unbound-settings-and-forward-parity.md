@@ -28,4 +28,4 @@ Repair 7 passes exact-tree and promoted-digest OPNsense 26.7.7 proof, including 
 
 ### Merge reconciliation — 2026-10-20
 
-PR #61 merged as `f888efac` on 2026-10-19 after all eight checks passed. This status-only reconciliation does not rerun or replace the recorded Repair 7 lifecycle proof.
+PR #61 merged as `f888efac1b129196847d3f836b6e1c621a4b1c1a` on 2026-10-19 after all eight checks passed. This status-only reconciliation does not rerun or replace the recorded Repair 7 lifecycle proof.
