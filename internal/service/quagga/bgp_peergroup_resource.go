@@ -5,8 +5,6 @@ package quagga
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,79 +48,19 @@ func (r *bgpPeerGroupResource) Configure(_ context.Context, req resource.Configu
 }
 
 func (r *bgpPeerGroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan BGPPeerGroupResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	uuid, err := opnsense.Add(ctx, r.client, bgpPeerGroupReqOpts, plan.toAPI(ctx))
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating BGP peer group", fmt.Sprintf("%s", err))
-		return
-	}
-	result, err := opnsense.Get[bgpPeerGroupAPIResponse](ctx, r.client, bgpPeerGroupReqOpts, uuid)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP peer group after create", fmt.Sprintf("%s", err))
-		return
-	}
-	plan.fromAPI(ctx, result, uuid)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	bgpCreate[BGPPeerGroupResourceModel, bgpPeerGroupAPIResponse, bgpPeerGroupAPIRequest](ctx, r.client, bgpPeerGroupReqOpts, req, resp, func(m *BGPPeerGroupResourceModel) *bgpPeerGroupAPIRequest { return m.toAPI(ctx) }, func(m *BGPPeerGroupResourceModel, a *bgpPeerGroupAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpPeerGroupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state BGPPeerGroupResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	result, err := opnsense.Get[bgpPeerGroupAPIResponse](ctx, r.client, bgpPeerGroupReqOpts, state.ID.ValueString())
-	if err != nil {
-		var nf *opnsense.NotFoundError
-		if errors.As(err, &nf) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-		resp.Diagnostics.AddError("Error reading BGP peer group", fmt.Sprintf("%s", err))
-		return
-	}
-	state.fromAPI(ctx, result, state.ID.ValueString())
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	bgpRead[BGPPeerGroupResourceModel, bgpPeerGroupAPIResponse](ctx, r.client, bgpPeerGroupReqOpts, req, resp, func(m *BGPPeerGroupResourceModel, a *bgpPeerGroupAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpPeerGroupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state BGPPeerGroupResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	id := state.ID.ValueString()
-	if err := opnsense.Update(ctx, r.client, bgpPeerGroupReqOpts, plan.toAPI(ctx), id); err != nil {
-		resp.Diagnostics.AddError("Error updating BGP peer group", fmt.Sprintf("%s", err))
-		return
-	}
-	result, err := opnsense.Get[bgpPeerGroupAPIResponse](ctx, r.client, bgpPeerGroupReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP peer group after update", fmt.Sprintf("%s", err))
-		return
-	}
-	plan.fromAPI(ctx, result, id)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	bgpUpdate[BGPPeerGroupResourceModel, bgpPeerGroupAPIResponse, bgpPeerGroupAPIRequest](ctx, r.client, bgpPeerGroupReqOpts, req, resp, func(m *BGPPeerGroupResourceModel) *bgpPeerGroupAPIRequest { return m.toAPI(ctx) }, func(m *BGPPeerGroupResourceModel, a *bgpPeerGroupAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpPeerGroupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state BGPPeerGroupResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	if err := opnsense.Delete(ctx, r.client, bgpPeerGroupReqOpts, state.ID.ValueString()); err != nil {
-		var nf *opnsense.NotFoundError
-		if errors.As(err, &nf) {
-			return
-		}
-		resp.Diagnostics.AddError("Error deleting BGP peer group", fmt.Sprintf("%s", err))
-	}
+	bgpDelete[BGPPeerGroupResourceModel](ctx, r.client, bgpPeerGroupReqOpts, req, resp)
 }
 
 func (r *bgpPeerGroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

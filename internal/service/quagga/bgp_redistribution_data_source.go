@@ -43,12 +43,31 @@ func (d *bgpRedistributionDataSource) Read(ctx context.Context, req datasource.R
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[bgpRedistributionAPIResponse](ctx, d.client, bgpRedistributionReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP redistribution", fmt.Sprintf("Could not read BGP redistribution %s: %s", id, err))
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
 		return
 	}
+	defer bgpOwnerMu.Release(1)
+	capability, err := discoverFRR(ctx, d.client)
+	if err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	id := config.ID.ValueString()
+	result, err := opnsense.Get[bgpRedistributionAPIResponse](ctx, d.client, strictBGPOpts(bgpRedistributionReqOpts), id)
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading BGP redistribution", fmt.Sprintf("Could not read BGP redistribution %s: %s", id, frrDiagnostic(err)))
+		return
+	}
+	if err := validateBGPResponse(result, capability); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR read-back", frrDiagnostic(err))
+		return
+	}
+	prior := config
 	config.fromAPI(ctx, result, id)
+	if err := normalizeBGPRead(ctx, d.client, capability, &prior, &config); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR relation read-back", frrDiagnostic(err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

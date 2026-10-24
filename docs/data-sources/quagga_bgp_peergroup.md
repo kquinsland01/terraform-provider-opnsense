@@ -9,6 +9,12 @@ description: |-
 
 Look up an existing BGP peer group on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+The read-only compatibility gate verifies installed plugin metadata and model
+capabilities. Family values are lowercase; grouped relation UUIDs are authoritative
+canonical API representatives. A resource may retain a configured equivalent
+sibling UUID after full-membership verification, so that UUID need not equal the
+lookup's canonical representative. No state address or policy-entry UUID is replaced.
+
 ## Example Usage
 
 ```terraform
@@ -34,6 +40,10 @@ output "quagga_bgp_peergroup_id" {
 - `default_originate` (Boolean) Whether default-originate is enabled.
 - `enabled` (Boolean) Whether this peer group is enabled.
 - `family` (Set of String) Address families.
+- `linked_prefixlist_in` (Set of String) Linked linked_prefixlist_in policy entry UUIDs.
+- `linked_prefixlist_out` (Set of String) Linked linked_prefixlist_out policy entry UUIDs.
+- `linked_routemap_in` (Set of String) Linked linked_routemap_in policy entry UUIDs.
+- `linked_routemap_out` (Set of String) Linked linked_routemap_out policy entry UUIDs.
 - `name` (String) Peer group name.
 - `next_hop_self` (Boolean) Whether next-hop-self is enabled.
 - `remote_as` (Number) Remote autonomous system number.

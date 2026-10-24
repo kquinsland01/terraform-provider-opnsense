@@ -26,14 +26,16 @@ func (d *routeMapDataSource) Metadata(_ context.Context, req datasource.Metadata
 
 func (d *routeMapDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{MarkdownDescription: "Reads an existing FRR route map on OPNsense by UUID.", Attributes: map[string]dsschema.Attribute{
-		"id":           dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
-		"enabled":      dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this route map is enabled."},
-		"description":  dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the route map."},
-		"name":         dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map name."},
-		"action":       dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map action."},
-		"order":        dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Route map order."},
-		"match_prefix": dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Matched prefix lists."},
-		"set":          dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map set expression."},
+		"match_aspath":    dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked match_aspath policy entry UUIDs."},
+		"match_community": dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked match_community policy entry UUIDs."},
+		"id":              dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
+		"enabled":         dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this route map is enabled."},
+		"description":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Description of the route map."},
+		"name":            dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map name."},
+		"action":          dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map action."},
+		"order":           dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Route map order."},
+		"match_prefix":    dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Matched prefix lists."},
+		"set":             dsschema.StringAttribute{Computed: true, MarkdownDescription: "Route map set expression."},
 	}}
 }
 
@@ -47,12 +49,31 @@ func (d *routeMapDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[routeMapAPIResponse](ctx, d.client, routeMapReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading route map", fmt.Sprintf("Could not read route map %s: %s", id, err))
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
 		return
 	}
+	defer bgpOwnerMu.Release(1)
+	capability, err := discoverFRR(ctx, d.client)
+	if err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	id := config.ID.ValueString()
+	result, err := opnsense.Get[routeMapAPIResponse](ctx, d.client, strictBGPOpts(routeMapReqOpts), id)
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading route map", fmt.Sprintf("Could not read route map %s: %s", id, frrDiagnostic(err)))
+		return
+	}
+	if err := validateBGPResponse(result, capability); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR read-back", frrDiagnostic(err))
+		return
+	}
+	prior := config
 	config.fromAPI(ctx, result, id)
+	if err := normalizeBGPRead(ctx, d.client, capability, &prior, &config); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR relation read-back", frrDiagnostic(err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

@@ -9,6 +9,12 @@ description: |-
 
 Look up an existing BGP neighbor on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+The read-only compatibility gate verifies installed plugin metadata and model
+capabilities. Family values are lowercase; grouped relation UUIDs are authoritative
+canonical API representatives. A resource may retain a configured equivalent
+sibling UUID after full-membership verification, so that UUID need not equal the
+lookup's canonical representative. No state address or policy-entry UUID is replaced.
+
 ## Example Usage
 
 ```terraform
@@ -34,6 +40,7 @@ output "quagga_bgp_neighbor_id" {
 - `address` (String) Neighbor IP address.
 - `description` (String) Description of the BGP neighbor.
 - `enabled` (Boolean) Whether this BGP neighbor is enabled.
+- `family` (Set of String) Activated lowercase address families.
 - `holddown` (Number) BGP hold time.
 - `keepalive` (Number) BGP keepalive interval.
 - `linked_prefixlist_in` (Set of String) Inbound linked prefix lists.
@@ -42,5 +49,6 @@ output "quagga_bgp_neighbor_id" {
 - `linked_routemap_out` (Set of String) Outbound linked route maps.
 - `multi_protocol` (Boolean) Whether multi-protocol support is enabled.
 - `next_hop_self` (Boolean) Whether next-hop-self is enabled.
+- `peer_group` (String) Linked BGP peer-group UUID.
 - `remote_as` (Number) Remote autonomous system number.
 - `update_source` (String) Update source interface.

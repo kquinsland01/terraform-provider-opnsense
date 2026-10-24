@@ -15,6 +15,7 @@ import (
 
 // BGPNeighborResourceModel is the Terraform state model for opnsense_quagga_bgp_neighbor.
 type BGPNeighborResourceModel struct {
+	PeerGroup           types.String `tfsdk:"peer_group"`
 	ID                  types.String `tfsdk:"id"`
 	Enabled             types.Bool   `tfsdk:"enabled"`
 	Description         types.String `tfsdk:"description"`
@@ -22,6 +23,7 @@ type BGPNeighborResourceModel struct {
 	RemoteAS            types.Int64  `tfsdk:"remote_as"`
 	UpdateSource        types.String `tfsdk:"update_source"`
 	NextHopSelf         types.Bool   `tfsdk:"next_hop_self"`
+	Family              types.Set    `tfsdk:"family"`
 	MultiProtocol       types.Bool   `tfsdk:"multi_protocol"`
 	Keepalive           types.Int64  `tfsdk:"keepalive"`
 	Holddown            types.Int64  `tfsdk:"holddown"`
@@ -32,29 +34,34 @@ type BGPNeighborResourceModel struct {
 }
 
 type bgpNeighborAPIResponse struct {
-	Enabled             string                   `json:"enabled"`
-	Description         string                   `json:"description"`
-	Address             string                   `json:"address"`
-	RemoteAS            string                   `json:"remoteas"`
-	UpdateSource        opnsense.SelectedMap     `json:"updatesource"`
-	NextHopSelf         string                   `json:"nexthopself"`
-	MultiProtocol       string                   `json:"multiprotocol"`
-	Keepalive           string                   `json:"keepalive"`
-	Holddown            string                   `json:"holddown"`
-	LinkedPrefixlistIn  opnsense.SelectedMapList `json:"linkedPrefixlistIn"`
-	LinkedPrefixlistOut opnsense.SelectedMapList `json:"linkedPrefixlistOut"`
-	LinkedRoutemapIn    opnsense.SelectedMapList `json:"linkedRoutemapIn"`
-	LinkedRoutemapOut   opnsense.SelectedMapList `json:"linkedRoutemapOut"`
+	frrReadPresence     `json:"-"`
+	PeerGroup           frrSelectedMap     `json:"peergroup"`
+	Enabled             string             `json:"enabled"`
+	Description         string             `json:"description"`
+	Address             string             `json:"address"`
+	RemoteAS            string             `json:"remoteas"`
+	UpdateSource        frrSelectedMap     `json:"updatesource"`
+	NextHopSelf         string             `json:"nexthopself"`
+	Family              frrSelectedMapList `json:"family"`
+	MultiProtocol       string             `json:"multiprotocol"`
+	Keepalive           string             `json:"keepalive"`
+	Holddown            string             `json:"holddown"`
+	LinkedPrefixlistIn  frrSelectedMapList `json:"linkedPrefixlistIn"`
+	LinkedPrefixlistOut frrSelectedMapList `json:"linkedPrefixlistOut"`
+	LinkedRoutemapIn    frrSelectedMapList `json:"linkedRoutemapIn"`
+	LinkedRoutemapOut   frrSelectedMapList `json:"linkedRoutemapOut"`
 }
 
 type bgpNeighborAPIRequest struct {
+	PeerGroup           string `json:"peergroup"`
 	Enabled             string `json:"enabled"`
 	Description         string `json:"description"`
 	Address             string `json:"address"`
 	RemoteAS            string `json:"remoteas"`
 	UpdateSource        string `json:"updatesource"`
 	NextHopSelf         string `json:"nexthopself"`
-	MultiProtocol       string `json:"multiprotocol"`
+	Family              string `json:"family,omitempty"`
+	MultiProtocol       string `json:"multiprotocol,omitempty"`
 	Keepalive           string `json:"keepalive"`
 	Holddown            string `json:"holddown"`
 	LinkedPrefixlistIn  string `json:"linkedPrefixlistIn"`
@@ -82,6 +89,7 @@ func (m *BGPNeighborResourceModel) toAPI(ctx context.Context) *bgpNeighborAPIReq
 	}
 
 	return &bgpNeighborAPIRequest{
+		PeerGroup:           m.PeerGroup.ValueString(),
 		Enabled:             opnsense.BoolToString(m.Enabled.ValueBool()),
 		Description:         m.Description.ValueString(),
 		Address:             m.Address.ValueString(),
@@ -89,6 +97,7 @@ func (m *BGPNeighborResourceModel) toAPI(ctx context.Context) *bgpNeighborAPIReq
 		UpdateSource:        m.UpdateSource.ValueString(),
 		NextHopSelf:         opnsense.BoolToString(m.NextHopSelf.ValueBool()),
 		MultiProtocol:       opnsense.BoolToString(m.MultiProtocol.ValueBool()),
+		Family:              setToCSV(ctx, m.Family),
 		Keepalive:           keepaliveStr,
 		Holddown:            holddownStr,
 		LinkedPrefixlistIn:  toCSV(m.LinkedPrefixlistIn),
@@ -100,13 +109,21 @@ func (m *BGPNeighborResourceModel) toAPI(ctx context.Context) *bgpNeighborAPIReq
 
 func (m *BGPNeighborResourceModel) fromAPI(_ context.Context, a *bgpNeighborAPIResponse, uuid string) {
 	m.ID = types.StringValue(uuid)
+	m.PeerGroup = types.StringValue(string(a.PeerGroup))
 	m.Enabled = types.BoolValue(opnsense.StringToBool(a.Enabled))
 	m.Description = types.StringValue(a.Description)
 	m.Address = types.StringValue(a.Address)
 	m.UpdateSource = types.StringValue(string(a.UpdateSource))
 	m.NextHopSelf = types.BoolValue(opnsense.StringToBool(a.NextHopSelf))
 	m.MultiProtocol = types.BoolValue(opnsense.StringToBool(a.MultiProtocol))
+	if len(a.Family) > 0 {
+		m.Family = sliceToSet(a.Family)
+		m.MultiProtocol = types.BoolValue(len(a.Family) == 2)
+	} else if families, err := legacyFamilies(a.Address, m.MultiProtocol); err == nil {
+		m.Family = families
+	}
 
+	m.RemoteAS = types.Int64Null()
 	if a.RemoteAS != "" {
 		if v, err := opnsense.StringToInt64(a.RemoteAS); err == nil {
 			m.RemoteAS = types.Int64Value(v)
@@ -127,7 +144,7 @@ func (m *BGPNeighborResourceModel) fromAPI(_ context.Context, a *bgpNeighborAPIR
 		m.Holddown = types.Int64Null()
 	}
 
-	fromSML := func(sml opnsense.SelectedMapList) types.Set {
+	fromSML := func(sml frrSelectedMapList) types.Set {
 		if len(sml) == 0 {
 			return types.SetValueMust(types.StringType, []attr.Value{})
 		}

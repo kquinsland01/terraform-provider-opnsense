@@ -31,17 +31,18 @@ type BGPGlobalResourceModel struct {
 }
 
 type bgpGlobalAPIResponse struct {
-	Enabled            string                   `json:"enabled"`
-	ASNumber           string                   `json:"asnumber"`
-	RouterID           string                   `json:"routerid"`
-	Distance           string                   `json:"distance"`
-	GracefulRestart    string                   `json:"graceful"`
-	NetworkImportCheck string                   `json:"networkimportcheck"`
-	EnforceFirstAS     string                   `json:"enforce_first_as"`
-	LogNeighborChanges string                   `json:"logneighborchanges"`
-	Networks           opnsense.SelectedMapList `json:"networks"`
-	MaximumPaths       string                   `json:"maximumpaths"`
-	MaximumPathsIBGP   string                   `json:"maximumpathsibgp"`
+	frrReadPresence    `json:"-"`
+	Enabled            string             `json:"enabled"`
+	ASNumber           string             `json:"asnumber"`
+	RouterID           string             `json:"routerid"`
+	Distance           string             `json:"distance"`
+	GracefulRestart    string             `json:"graceful"`
+	NetworkImportCheck string             `json:"networkimportcheck"`
+	EnforceFirstAS     string             `json:"enforce_first_as"`
+	LogNeighborChanges string             `json:"logneighborchanges"`
+	Networks           frrSelectedMapList `json:"networks"`
+	MaximumPaths       string             `json:"maximumpaths"`
+	MaximumPathsIBGP   string             `json:"maximumpathsibgp"`
 }
 
 type bgpGlobalAPIRequest struct {

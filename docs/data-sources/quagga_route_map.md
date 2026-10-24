@@ -9,6 +9,12 @@ description: |-
 
 Look up an existing FRR route map on OPNsense. Use this data source to read attributes by UUID without importing the object into Terraform management.
 
+The read-only compatibility gate verifies installed plugin metadata and model
+capabilities. Family values are lowercase; grouped relation UUIDs are authoritative
+canonical API representatives. A resource may retain a configured equivalent
+sibling UUID after full-membership verification, so that UUID need not equal the
+lookup's canonical representative. No state address or policy-entry UUID is replaced.
+
 ## Example Usage
 
 ```terraform
@@ -34,6 +40,8 @@ output "quagga_route_map_id" {
 - `action` (String) Route map action.
 - `description` (String) Description of the route map.
 - `enabled` (Boolean) Whether this route map is enabled.
+- `match_aspath` (Set of String) Linked match_aspath policy entry UUIDs.
+- `match_community` (Set of String) Linked match_community policy entry UUIDs.
 - `match_prefix` (Set of String) Matched prefix lists.
 - `name` (String) Route map name.
 - `order` (Number) Route map order.

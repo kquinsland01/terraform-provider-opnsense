@@ -21,6 +21,8 @@ func (r *routeMapResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a BGP route map entry on OPNsense. Requires the `os-frr` plugin.",
 		Attributes: map[string]schema.Attribute{
+			"match_aspath":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked match_aspath policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
+			"match_community": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked match_community policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
 			"id": schema.StringAttribute{
 				Computed: true, MarkdownDescription: "UUID.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},

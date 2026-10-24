@@ -26,15 +26,19 @@ func (d *bgpPeerGroupDataSource) Metadata(_ context.Context, req datasource.Meta
 
 func (d *bgpPeerGroupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = dsschema.Schema{MarkdownDescription: "Reads an existing BGP peer group on OPNsense by UUID.", Attributes: map[string]dsschema.Attribute{
-		"id":                dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
-		"enabled":           dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this peer group is enabled."},
-		"name":              dsschema.StringAttribute{Computed: true, MarkdownDescription: "Peer group name."},
-		"remote_as_mode":    dsschema.StringAttribute{Computed: true, MarkdownDescription: "Remote AS mode."},
-		"remote_as":         dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Remote autonomous system number."},
-		"family":            dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Address families."},
-		"update_source":     dsschema.StringAttribute{Computed: true, MarkdownDescription: "Update source interface."},
-		"next_hop_self":     dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether next-hop-self is enabled."},
-		"default_originate": dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether default-originate is enabled."},
+		"linked_prefixlist_in":  dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked linked_prefixlist_in policy entry UUIDs."},
+		"linked_prefixlist_out": dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked linked_prefixlist_out policy entry UUIDs."},
+		"linked_routemap_in":    dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked linked_routemap_in policy entry UUIDs."},
+		"linked_routemap_out":   dsschema.SetAttribute{ElementType: types.StringType, Computed: true, MarkdownDescription: "Linked linked_routemap_out policy entry UUIDs."},
+		"id":                    dsschema.StringAttribute{Required: true, MarkdownDescription: "UUID to look up."},
+		"enabled":               dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether this peer group is enabled."},
+		"name":                  dsschema.StringAttribute{Computed: true, MarkdownDescription: "Peer group name."},
+		"remote_as_mode":        dsschema.StringAttribute{Computed: true, MarkdownDescription: "Remote AS mode."},
+		"remote_as":             dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Remote autonomous system number."},
+		"family":                dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Address families."},
+		"update_source":         dsschema.StringAttribute{Computed: true, MarkdownDescription: "Update source interface."},
+		"next_hop_self":         dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether next-hop-self is enabled."},
+		"default_originate":     dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether default-originate is enabled."},
 	}}
 }
 
@@ -48,12 +52,31 @@ func (d *bgpPeerGroupDataSource) Read(ctx context.Context, req datasource.ReadRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[bgpPeerGroupAPIResponse](ctx, d.client, bgpPeerGroupReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP peer group", fmt.Sprintf("Could not read BGP peer group %s: %s", id, err))
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
 		return
 	}
+	defer bgpOwnerMu.Release(1)
+	capability, err := discoverFRR(ctx, d.client)
+	if err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	id := config.ID.ValueString()
+	result, err := opnsense.Get[bgpPeerGroupAPIResponse](ctx, d.client, strictBGPOpts(bgpPeerGroupReqOpts), id)
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading BGP peer group", fmt.Sprintf("Could not read BGP peer group %s: %s", id, frrDiagnostic(err)))
+		return
+	}
+	if err := validateBGPResponse(result, capability); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR read-back", frrDiagnostic(err))
+		return
+	}
+	prior := config
 	config.fromAPI(ctx, result, id)
+	if err := normalizeBGPRead(ctx, d.client, capability, &prior, &config); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR relation read-back", frrDiagnostic(err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

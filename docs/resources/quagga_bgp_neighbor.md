@@ -9,6 +9,56 @@ description: |-
 
 Manages a BGP neighbor peering session on OPNsense via the FRR/Quagga plugin. Requires `os-frr`.
 
+`family` is a typed set of lowercase `ipv4` / `ipv6`. Existing boolean-only
+`multi_protocol` configuration and schema-version-0 state upgrade in place:
+`true` selects both families; `false` selects the transport family (including
+IPv6-only transport). Explicit family may differ from transport on FRR 2.0;
+legacy plugins reject that single cross-family intent. An explicitly configured
+legacy alias must agree with explicit family. Omitted aliases are not conflicts,
+and unknown configured intent is never treated as false or empty. Import reads
+the actual API family. With both aliases omitted, changing transport between IPv4
+and IPv6 updates a previously transport-derived single family; imported cross-family
+API truth and dual-stack state remain unchanged. Unknown transport-dependent alias
+comparisons are deferred until apply, where unresolved/conflicting intent rejects writes.
+
+## Plugin compatibility and activation boundary
+
+BGP owners discover the **installed `os-frr` package** with read-only
+`/api/core/firmware/info` and cross-check the neighbor model. The core firmware
+version does not select the wire format. The compatibility gate accepts stable
+legacy 1.46–1.55 package metadata or 2.0 / 2.0_1; an absent plugin, unknown future
+version/revision, contradictory model, permission failure or unresolved configured
+intent rejects writes. Grant read access to firmware package information as well
+as the BGP API. Legacy live acceptance remains unverified; mocks are not appliance
+version proof. Owner-lock waiting respects caller cancellation/deadlines and has no
+separate fixed timeout. After acquisition, each read-only metadata/model request
+has its own 30-second limit, including retries/read-slot waiting, capped by any
+earlier caller deadline. A timeout rejects writes; check the appliance
+firmware/package/configd backend before retrying.
+
+On FRR 2.0, linked policies select **one logical group**, not an arbitrary entry
+from multiple differently named groups. Existing entry UUID resources are retained.
+A configured same-group sibling UUID is kept in state only after authoritative
+full-membership verification; fresh imports/data sources expose the API's canonical
+representative. Stale UUIDs and selected mixed-family prefix groups diagnose before
+writes. Route-map `order` remains the sequence number, distinct from the UUID.
+
+FRR service reconfigure is a **soft reload**, not a daemon-set restart or a PF
+filter reload. On a fresh disabled appliance, configure BGP before enabling FRR;
+changing the enabled daemon set on an already running appliance can require an
+explicit reviewed service restart. Automatic BGP firewall rules are broad inet46
+TCP/179 to/from self when general `enabled` + `firewall_rules` and BGP are enabled;
+they are independent of neighbor family. A separate filter activation is required
+for effective PF changes. The disposable acceptance runner records its explicit
+lab filter activation separately and never claims it was performed by the provider.
+
+If a confirmed save succeeds but activation/read-back fails, the UUID and private
+pending-activation state are retained. Refresh retries activation without creating
+another object. Resolve unsupported configuration/capabilities before retrying;
+reconcile an ambiguous create with no uniquely proven identity rather than blindly
+re-applying. The provider does not install or upgrade plugins, manage unexposed BGP
+credentials, or make production adoption/full advanced-field-parity claims.
+
 ## Example Usage
 
 ```terraform
@@ -16,6 +66,7 @@ Manages a BGP neighbor peering session on OPNsense via the FRR/Quagga plugin. Re
 resource "opnsense_quagga_bgp_neighbor" "metallb" {
   address       = "10.0.0.2"
   remote_as     = 65001
+  family        = ["ipv4"]
   next_hop_self = true
   description   = "MetalLB speaker"
 }
@@ -33,14 +84,16 @@ resource "opnsense_quagga_bgp_neighbor" "metallb" {
 
 - `description` (String) Description.
 - `enabled` (Boolean) Whether this neighbor is enabled.
+- `family` (Set of String) Activated address families: lowercase `ipv4`, `ipv6`, or both. Omission preserves legacy multi_protocol/transport behavior. Explicit family may differ from transport only on os-frr 2.0.
 - `holddown` (Number) Hold-down timer in seconds (3-3000).
 - `keepalive` (Number) Keepalive interval in seconds (1-1000).
 - `linked_prefixlist_in` (Set of String) Inbound prefix list UUIDs.
 - `linked_prefixlist_out` (Set of String) Outbound prefix list UUIDs.
 - `linked_routemap_in` (Set of String) Inbound route map UUIDs.
 - `linked_routemap_out` (Set of String) Outbound route map UUIDs.
-- `multi_protocol` (Boolean) Enable multi-protocol BGP (IPv4+IPv6).
+- `multi_protocol` (Boolean) Legacy alias: true activates ipv4 and ipv6; false selects the transport family. Prefer family.
 - `next_hop_self` (Boolean) Set next-hop to self for advertised routes.
+- `peer_group` (String) Existing BGP peer-group UUID. Its policies are activated per selected address family on FRR 2.0.
 - `update_source` (String) Interface or IP to use as update source.
 
 ### Read-Only

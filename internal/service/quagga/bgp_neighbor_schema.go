@@ -19,6 +19,7 @@ import (
 
 func (r *bgpNeighborResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a BGP neighbor on OPNsense. Requires the `os-frr` plugin.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -48,9 +49,11 @@ func (r *bgpNeighborResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Optional: true, Computed: true, Default: booldefault.StaticBool(false),
 				MarkdownDescription: "Set next-hop to self for advertised routes.",
 			},
+			"peer_group": schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Existing BGP peer-group UUID. Its policies are activated per selected address family on FRR 2.0."},
+			"family":     familyAttribute(),
 			"multi_protocol": schema.BoolAttribute{
 				Optional: true, Computed: true, Default: booldefault.StaticBool(false),
-				MarkdownDescription: "Enable multi-protocol BGP (IPv4+IPv6).",
+				MarkdownDescription: "Legacy alias: true activates ipv4 and ipv6; false selects the transport family. Prefer family.",
 			},
 			"keepalive": schema.Int64Attribute{
 				Optional: true, Computed: true, MarkdownDescription: "Keepalive interval in seconds (1-1000).",

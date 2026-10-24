@@ -5,8 +5,6 @@ package quagga
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,79 +48,19 @@ func (r *bgpASPathResource) Configure(_ context.Context, req resource.ConfigureR
 }
 
 func (r *bgpASPathResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan BGPASPathResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	uuid, err := opnsense.Add(ctx, r.client, bgpASPathReqOpts, plan.toAPI(ctx))
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating BGP AS-path", fmt.Sprintf("%s", err))
-		return
-	}
-	result, err := opnsense.Get[bgpASPathAPIResponse](ctx, r.client, bgpASPathReqOpts, uuid)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP AS-path after create", fmt.Sprintf("%s", err))
-		return
-	}
-	plan.fromAPI(ctx, result, uuid)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	bgpCreate[BGPASPathResourceModel, bgpASPathAPIResponse, bgpASPathAPIRequest](ctx, r.client, bgpASPathReqOpts, req, resp, func(m *BGPASPathResourceModel) *bgpASPathAPIRequest { return m.toAPI(ctx) }, func(m *BGPASPathResourceModel, a *bgpASPathAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpASPathResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state BGPASPathResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	result, err := opnsense.Get[bgpASPathAPIResponse](ctx, r.client, bgpASPathReqOpts, state.ID.ValueString())
-	if err != nil {
-		var nf *opnsense.NotFoundError
-		if errors.As(err, &nf) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-		resp.Diagnostics.AddError("Error reading BGP AS-path", fmt.Sprintf("%s", err))
-		return
-	}
-	state.fromAPI(ctx, result, state.ID.ValueString())
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	bgpRead[BGPASPathResourceModel, bgpASPathAPIResponse](ctx, r.client, bgpASPathReqOpts, req, resp, func(m *BGPASPathResourceModel, a *bgpASPathAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpASPathResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state BGPASPathResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	id := state.ID.ValueString()
-	if err := opnsense.Update(ctx, r.client, bgpASPathReqOpts, plan.toAPI(ctx), id); err != nil {
-		resp.Diagnostics.AddError("Error updating BGP AS-path", fmt.Sprintf("%s", err))
-		return
-	}
-	result, err := opnsense.Get[bgpASPathAPIResponse](ctx, r.client, bgpASPathReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP AS-path after update", fmt.Sprintf("%s", err))
-		return
-	}
-	plan.fromAPI(ctx, result, id)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	bgpUpdate[BGPASPathResourceModel, bgpASPathAPIResponse, bgpASPathAPIRequest](ctx, r.client, bgpASPathReqOpts, req, resp, func(m *BGPASPathResourceModel) *bgpASPathAPIRequest { return m.toAPI(ctx) }, func(m *BGPASPathResourceModel, a *bgpASPathAPIResponse, id string) { m.fromAPI(ctx, a, id) })
 }
 
 func (r *bgpASPathResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state BGPASPathResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	if err := opnsense.Delete(ctx, r.client, bgpASPathReqOpts, state.ID.ValueString()); err != nil {
-		var nf *opnsense.NotFoundError
-		if errors.As(err, &nf) {
-			return
-		}
-		resp.Diagnostics.AddError("Error deleting BGP AS-path", fmt.Sprintf("%s", err))
-	}
+	bgpDelete[BGPASPathResourceModel](ctx, r.client, bgpASPathReqOpts, req, resp)
 }
 
 func (r *bgpASPathResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

@@ -20,7 +20,7 @@ import (
 
 func (r *bgpGlobalResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages BGP global configuration on OPNsense (FRR). Singleton resource — one BGP config per appliance; `terraform destroy` only removes it from state. Requires the `os-frr` plugin and an enabled `opnsense_quagga_general`.",
+		MarkdownDescription: "Manages BGP global configuration on OPNsense (FRR). Singleton resource — one BGP config per appliance; `terraform destroy` only removes it from state. Requires installed-plugin/model compatibility discovery permissions. On a fresh appliance configure BGP before enabling `opnsense_quagga_general`; FRR soft reload does not start a newly added daemon on an already running service. A separately reviewed restart can be required.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true, MarkdownDescription: "Synthetic identifier for this singleton (always `bgp`).",

@@ -21,10 +21,11 @@ type BGPRedistributionResourceModel struct {
 }
 
 type bgpRedistributionAPIResponse struct {
-	Enabled      string               `json:"enabled"`
-	Description  string               `json:"description"`
-	Redistribute opnsense.SelectedMap `json:"redistribute"`
-	RouteMap     opnsense.SelectedMap `json:"linkedRoutemap"`
+	frrReadPresence `json:"-"`
+	Enabled         string         `json:"enabled"`
+	Description     string         `json:"description"`
+	Redistribute    frrSelectedMap `json:"redistribute"`
+	RouteMap        frrSelectedMap `json:"linkedRoutemap"`
 }
 
 type bgpRedistributionAPIRequest struct {

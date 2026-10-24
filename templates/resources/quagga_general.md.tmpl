@@ -1,0 +1,30 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Quagga / FRR"
+description: |-
+  Manages FRR general settings on OPNsense.
+---
+
+# {{.Name}} ({{.Type}})
+
+This existing singleton retains its state address and does not delete appliance
+settings on destroy. The compatibility gate requires read permission for installed
+package metadata (`/api/core/firmware/info`) and the BGP neighbor model, in addition
+to the general settings/service APIs. Accepted installed metadata is legacy os-frr
+1.46–1.55 or 2.0 / 2.0_1 with a coherent read-only model; legacy live validation is
+unverified. No core-firmware inference or provider-managed plugin upgrade is used.
+
+On a fresh disabled appliance, configure BGP before enabling General so watchfrr
+starts the intended daemon set. Changing the enabled daemon set on an already
+running service can require a separately reviewed restart; reconfigure is a soft
+reload. `firewall_rules` controls automatic routing-protocol rule generation, but
+FRR reconfigure does not activate PF. On FRR 2.0, enabled General+BGP with this flag
+creates broad inet46 TCP/179 rules to/from self, independent of neighbor family.
+Review and activate firewall changes separately. The isolated test's explicit PF
+activation and disabled template restoration are lab operations, not provider behavior.
+
+Confirmed saves retain state and private pending activation on reload/read failure;
+refresh retries activation. No broader field parity, release, OpenTofu or production
+adoption is established by this compatibility subgate.
+
+{{ .SchemaMarkdown | trimspace }}
