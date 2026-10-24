@@ -20,6 +20,10 @@ func (r *bgpPeerGroupResource) Schema(_ context.Context, _ resource.SchemaReques
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a BGP peer group on OPNsense (FRR). Requires the `os-frr` plugin.",
 		Attributes: map[string]schema.Attribute{
+			"linked_prefixlist_in":  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked linked_prefixlist_in policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
+			"linked_prefixlist_out": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked linked_prefixlist_out policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
+			"linked_routemap_in":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked linked_routemap_in policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
+			"linked_routemap_out":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, MarkdownDescription: "Linked linked_routemap_out policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes."},
 			"id": schema.StringAttribute{
 				Computed: true, MarkdownDescription: "UUID.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
@@ -41,7 +45,7 @@ func (r *bgpPeerGroupResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"family": schema.SetAttribute{
 				ElementType: types.StringType, Optional: true, Computed: true,
-				MarkdownDescription: "Address families: `IPv4`, `IPv6`.",
+				MarkdownDescription: "Address families: lowercase `ipv4`, `ipv6`.",
 			},
 			"update_source": schema.StringAttribute{
 				Optional: true, Computed: true, Default: stringdefault.StaticString(""),

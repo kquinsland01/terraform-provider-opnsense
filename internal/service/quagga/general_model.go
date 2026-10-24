@@ -25,13 +25,14 @@ type GeneralResourceModel struct {
 }
 
 type generalAPIResponse struct {
-	Enabled       string               `json:"enabled"`
-	Profile       opnsense.SelectedMap `json:"profile"`
-	EnableCARP    string               `json:"enablecarp"`
-	EnableSyslog  string               `json:"enablesyslog"`
-	EnableSNMP    string               `json:"enablesnmp"`
-	SyslogLevel   opnsense.SelectedMap `json:"sysloglevel"`
-	FirewallRules string               `json:"fwrules"`
+	frrReadPresence `json:"-"`
+	Enabled         string         `json:"enabled"`
+	Profile         frrSelectedMap `json:"profile"`
+	EnableCARP      string         `json:"enablecarp"`
+	EnableSyslog    string         `json:"enablesyslog"`
+	EnableSNMP      string         `json:"enablesnmp"`
+	SyslogLevel     frrSelectedMap `json:"sysloglevel"`
+	FirewallRules   string         `json:"fwrules"`
 }
 
 type generalAPIRequest struct {

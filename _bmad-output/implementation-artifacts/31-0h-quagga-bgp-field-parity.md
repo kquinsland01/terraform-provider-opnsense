@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+in-progress — compatibility subgate implementation; broader advanced parity remains backlog.
 
 ## Priority
 
@@ -14,7 +14,7 @@ Extend the existing BGP neighbor and route-map owners. Neighbor gaps include BFD
 
 ## FRR 2.0 Compatibility Gate (2026-10-20)
 
-OPNsense 26.7.7 includes `os-frr` 2.0. The pinned [plugin migration notes](https://github.com/opnsense/plugins/blob/5ac2959c8514b4f60e94d65439be5f629f10521f/net/frr/pkg-descr) replace neighbor `multiprotocol` with explicit `family`, move peer-group policies into address-family configuration, group policy references, tighten validation and add automatic routing-protocol firewall rules. Existing `internal/service/quagga/bgp_neighbor_model.go` still sends `multiprotocol`; this is a source-proven compatibility risk, not a reproduced live failure or a claim that every 26.7.7 appliance has the same plugin version.
+OPNsense 26.7.7 includes `os-frr` 2.0. The pinned [plugin migration notes](https://github.com/opnsense/plugins/blob/5ac2959c8514b4f60e94d65439be5f629f10521f/net/frr/pkg-descr) replace neighbor `multiprotocol` with explicit `family`, move peer-group policies into address-family configuration, group policy references, tighten validation and add automatic routing-protocol firewall rules. The compatibility implementation adapts the existing owners using installed-package/model capability checks, preserves boolean configurations and version-0 identities, and handles grouped policy references. This is not a claim that every 26.7.7 appliance has the same plugin version or that all advanced parity is complete.
 
 Entry point: inventory core **and installed os-frr versions** on the disposable target; inspect pinned `net/frr/.../Quagga/BGP.xml`, BGP migrations, `Api/BgpController.php`, service/reconfigure and firewall templates before editing `internal/service/quagga/`. Keep existing Terraform type names and state addresses. Extend the existing neighbor, peer-group, route-map and policy owners rather than adding parallel resources.
 
@@ -37,3 +37,25 @@ Entry point: inventory core **and installed os-frr versions** on the disposable 
 ## Verification
 
 Quagga unit/schema/generated tests, real Terraform import/no-change/drift/state-upgrade tests, version-specific disposable BGP/policy/reconfigure/cleanup proof, docs generation, and `make check`. Record exact core/plugin versions, source digest and unverified rows; do not claim production compatibility from source inspection alone.
+
+## Compatibility implementation boundary
+
+- Existing registrations and individual policy-entry UUID ownership are unchanged.
+  Neighbor `family`/legacy alias resolution and offline schema-v1 upgrade are additive;
+  peer-group policy fields remain flat; route-map AS-path/community relations retain
+  `match`/`match3`, and `order` remains API sequence `id`, not resource UUID.
+- Owner-local strict reads, mutation/delete results, `status=ok` service responses,
+  serial discovery/write/recovery, authoritative group membership and private pending
+  activation protect the owners under test. Unexposed passwords are never read into
+  public state or included as empty clears in payloads.
+- FRR reconfigure is a soft reload. Fresh-lab BGP configuration precedes enabling
+  General so watchfrr starts bgpd. An already-running daemon-set change may require a
+  separately reviewed restart. PF activation is explicitly a separate lab operation;
+  disabled generated-config restoration uses a VM/TLS-guarded host-only template sync.
+  Neither operation is claimed as provider behavior.
+- See [live evidence](31-0h-frr2-live-evidence.md) for the exact frozen digest and
+  actually executed/non-skipped versions. Legacy live, OpenTofu, broader advanced
+  BGP parity, release and production adoption gates remain separate/unverified.
+- Historical WireGuard evidence belongs to its prior candidate; these FRR changes
+  do not extend that proof to this digest. No coverage-audit row is promoted to
+  complete without full row-level proof.

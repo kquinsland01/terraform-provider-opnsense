@@ -35,6 +35,8 @@ func (d *bgpNeighborDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 			"remote_as":             dsschema.Int64Attribute{Computed: true, MarkdownDescription: "Remote autonomous system number."},
 			"update_source":         dsschema.StringAttribute{Computed: true, MarkdownDescription: "Update source interface."},
 			"next_hop_self":         dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether next-hop-self is enabled."},
+			"peer_group":            dsschema.StringAttribute{Computed: true, MarkdownDescription: "Linked BGP peer-group UUID."},
+			"family":                dsschema.SetAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Activated lowercase address families."},
 			"multi_protocol":        dsschema.BoolAttribute{Computed: true, MarkdownDescription: "Whether multi-protocol support is enabled."},
 			"keepalive":             dsschema.Int64Attribute{Computed: true, MarkdownDescription: "BGP keepalive interval."},
 			"holddown":              dsschema.Int64Attribute{Computed: true, MarkdownDescription: "BGP hold time."},
@@ -64,12 +66,31 @@ func (d *bgpNeighborDataSource) Read(ctx context.Context, req datasource.ReadReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[bgpNeighborAPIResponse](ctx, d.client, bgpNeighborReqOpts, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP neighbor", fmt.Sprintf("Could not read BGP neighbor %s: %s", id, err))
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
 		return
 	}
+	defer bgpOwnerMu.Release(1)
+	capability, err := discoverFRR(ctx, d.client)
+	if err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	id := config.ID.ValueString()
+	result, err := opnsense.Get[bgpNeighborAPIResponse](ctx, d.client, strictBGPOpts(bgpNeighborReqOpts), id)
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading BGP neighbor", fmt.Sprintf("Could not read BGP neighbor %s: %s", id, frrDiagnostic(err)))
+		return
+	}
+	if err := validateBGPResponse(result, capability); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR read-back", frrDiagnostic(err))
+		return
+	}
+	prior := config
 	config.fromAPI(ctx, result, id)
+	if err := normalizeBGPRead(ctx, d.client, capability, &prior, &config); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR relation read-back", frrDiagnostic(err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &config)...)
 }

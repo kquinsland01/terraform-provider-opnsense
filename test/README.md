@@ -195,7 +195,7 @@ docker run --rm --network host \
   -e OPNSENSE_API_KEY \
   -e OPNSENSE_API_SECRET \
   -e OPNSENSE_ALLOW_INSECURE=true \
-  ghcr.io/devrail-dev/dev-toolchain:1.12.0 \
+  ghcr.io/devrail-dev/dev-toolchain:1.12.24 \
   go test -run TestAccLagg_basic -count=1 -p 1 ./internal/service/iface
 ```
 
@@ -212,7 +212,7 @@ docker run --rm --network host \
   -e OPNSENSE_API_KEY \
   -e OPNSENSE_API_SECRET \
   -e OPNSENSE_ALLOW_INSECURE=true \
-  ghcr.io/devrail-dev/dev-toolchain:1.12.0 \
+  ghcr.io/devrail-dev/dev-toolchain:1.12.24 \
   go test -run TestAccLagg_basic -count=1 -p 1 ./internal/service/iface
 ```
 

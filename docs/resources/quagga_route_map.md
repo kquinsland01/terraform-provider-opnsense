@@ -9,6 +9,44 @@ description: |-
 
 Manages a BGP route map entry on OPNsense via the FRR/Quagga plugin. Requires `os-frr`.
 
+`match_aspath`, `match_prefix` and `match_community` retain the upstream
+`match`, `match2` and `match3` relationships. Sequence siblings retain individual
+resource UUIDs and their configured `order`; no parallel group owner is introduced.
+
+## Plugin compatibility and activation boundary
+
+BGP owners discover the **installed `os-frr` package** with read-only
+`/api/core/firmware/info` and cross-check the neighbor model. The core firmware
+version does not select the wire format. The compatibility gate accepts stable
+legacy 1.46–1.55 package metadata or 2.0 / 2.0_1; an absent plugin, unknown future
+version/revision, contradictory model, permission failure or unresolved configured
+intent rejects writes. Grant read access to firmware package information as well
+as the BGP API. Legacy live acceptance remains unverified; mocks are not appliance
+version proof.
+
+On FRR 2.0, linked policies select **one logical group**, not an arbitrary entry
+from multiple differently named groups. Existing entry UUID resources are retained.
+A configured same-group sibling UUID is kept in state only after authoritative
+full-membership verification; fresh imports/data sources expose the API's canonical
+representative. Stale UUIDs and selected mixed-family prefix groups diagnose before
+writes. Route-map `order` remains the sequence number, distinct from the UUID.
+
+FRR service reconfigure is a **soft reload**, not a daemon-set restart or a PF
+filter reload. On a fresh disabled appliance, configure BGP before enabling FRR;
+changing the enabled daemon set on an already running appliance can require an
+explicit reviewed service restart. Automatic BGP firewall rules are broad inet46
+TCP/179 to/from self when general `enabled` + `firewall_rules` and BGP are enabled;
+they are independent of neighbor family. A separate filter activation is required
+for effective PF changes. The disposable acceptance runner records its explicit
+lab filter activation separately and never claims it was performed by the provider.
+
+If a confirmed save succeeds but activation/read-back fails, the UUID and private
+pending-activation state are retained. Refresh retries activation without creating
+another object. Resolve unsupported configuration/capabilities before retrying;
+reconcile an ambiguous create with no uniquely proven identity rather than blindly
+re-applying. The provider does not install or upgrade plugins, manage unexposed BGP
+credentials, or make production adoption/full advanced-field-parity claims.
+
 ## Example Usage
 
 ```terraform
@@ -33,6 +71,8 @@ resource "opnsense_quagga_route_map" "set_localpref" {
 
 - `description` (String) Description.
 - `enabled` (Boolean) Whether this route map entry is enabled.
+- `match_aspath` (Set of String) Linked match_aspath policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes.
+- `match_community` (Set of String) Linked match_community policy entry UUIDs. FRR 2.0 logical group semantics are validated before writes.
 - `match_prefix` (Set of String) Set of prefix list UUIDs to match against.
 - `set` (String) Set actions (e.g., `local-preference 200`).
 

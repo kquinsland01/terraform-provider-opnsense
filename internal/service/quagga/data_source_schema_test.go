@@ -35,10 +35,18 @@ func TestBGPNeighborDataSource_read(t *testing.T) {
 
 	const id = "neighbor-uuid"
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/core/firmware/info" {
+			_, _ = w.Write([]byte(`{"product_version":"26.7.7","package":[{"name":"os-frr","version":"1.55","installed":"1"}]}`))
+			return
+		}
+		if r.URL.Path == bgpNeighborReqOpts.GetEndpoint {
+			_, _ = w.Write([]byte(`{"neighbor":{"multiprotocol":"0"}}`))
+			return
+		}
 		if r.Method != http.MethodGet || r.URL.Path != bgpNeighborReqOpts.GetEndpoint+"/"+id {
 			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
 		}
-		_, _ = w.Write([]byte(`{"neighbor":{"enabled":"1","description":"edge peer","address":"203.0.113.10","remoteas":"64512","updatesource":{"lo0":{"selected":1}},"nexthopself":"1","multiprotocol":"1","keepalive":"30","holddown":"90","linkedPrefixlistIn":{"pl-in":{"selected":1}},"linkedPrefixlistOut":[],"linkedRoutemapIn":{"rm-in":{"selected":1}},"linkedRoutemapOut":[]}}`))
+		_, _ = w.Write([]byte(`{"neighbor":{"enabled":"1","description":"edge peer","address":"203.0.113.10","remoteas":"64512","updatesource":{"lo0":{"selected":1}},"nexthopself":"1","multiprotocol":"1","peergroup":"","keepalive":"30","holddown":"90","linkedPrefixlistIn":{"pl-in":{"selected":1}},"linkedPrefixlistOut":[],"linkedRoutemapIn":{"rm-in":{"selected":1}},"linkedRoutemapOut":[]}}`))
 	}))
 	t.Cleanup(server.Close)
 
@@ -47,6 +55,7 @@ func TestBGPNeighborDataSource_read(t *testing.T) {
 	schema := dataSourceSchema(t, ds)
 	config := BGPNeighborResourceModel{
 		ID:                  types.StringValue(id),
+		Family:              types.SetNull(types.StringType),
 		LinkedPrefixlistIn:  types.SetNull(types.StringType),
 		LinkedPrefixlistOut: types.SetNull(types.StringType),
 		LinkedRoutemapIn:    types.SetNull(types.StringType),

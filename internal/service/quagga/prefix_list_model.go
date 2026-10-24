@@ -24,13 +24,14 @@ type PrefixListResourceModel struct {
 }
 
 type prefixListAPIResponse struct {
-	Enabled     string               `json:"enabled"`
-	Description string               `json:"description"`
-	Name        string               `json:"name"`
-	Version     opnsense.SelectedMap `json:"version"`
-	SeqNumber   string               `json:"seqnumber"`
-	Action      opnsense.SelectedMap `json:"action"`
-	Network     string               `json:"network"`
+	frrReadPresence `json:"-"`
+	Enabled         string         `json:"enabled"`
+	Description     string         `json:"description"`
+	Name            string         `json:"name"`
+	Version         frrSelectedMap `json:"version"`
+	SeqNumber       string         `json:"seqnumber"`
+	Action          frrSelectedMap `json:"action"`
+	Network         string         `json:"network"`
 }
 
 type prefixListAPIRequest struct {

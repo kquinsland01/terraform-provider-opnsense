@@ -22,11 +22,12 @@ type BGPASPathResourceModel struct {
 }
 
 type bgpASPathAPIResponse struct {
-	Enabled     string               `json:"enabled"`
-	Description string               `json:"description"`
-	Number      string               `json:"number"`
-	Action      opnsense.SelectedMap `json:"action"`
-	AS          string               `json:"as"`
+	frrReadPresence `json:"-"`
+	Enabled         string         `json:"enabled"`
+	Description     string         `json:"description"`
+	Number          string         `json:"number"`
+	Action          frrSelectedMap `json:"action"`
+	AS              string         `json:"as"`
 }
 
 type bgpASPathAPIRequest struct {

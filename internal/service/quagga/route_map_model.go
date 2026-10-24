@@ -15,34 +15,41 @@ import (
 
 // RouteMapResourceModel is the Terraform state model for opnsense_quagga_route_map.
 type RouteMapResourceModel struct {
-	ID          types.String `tfsdk:"id"`
-	Enabled     types.Bool   `tfsdk:"enabled"`
-	Description types.String `tfsdk:"description"`
-	Name        types.String `tfsdk:"name"`
-	Action      types.String `tfsdk:"action"`
-	Order       types.Int64  `tfsdk:"order"`
-	MatchPrefix types.Set    `tfsdk:"match_prefix"`
-	Set         types.String `tfsdk:"set"`
+	MatchCommunity types.Set    `tfsdk:"match_community"`
+	MatchASPath    types.Set    `tfsdk:"match_aspath"`
+	ID             types.String `tfsdk:"id"`
+	Enabled        types.Bool   `tfsdk:"enabled"`
+	Description    types.String `tfsdk:"description"`
+	Name           types.String `tfsdk:"name"`
+	Action         types.String `tfsdk:"action"`
+	Order          types.Int64  `tfsdk:"order"`
+	MatchPrefix    types.Set    `tfsdk:"match_prefix"`
+	Set            types.String `tfsdk:"set"`
 }
 
 type routeMapAPIResponse struct {
-	Enabled     string                   `json:"enabled"`
-	Description string                   `json:"description"`
-	Name        string                   `json:"name"`
-	Action      opnsense.SelectedMap     `json:"action"`
-	Order       string                   `json:"id"`
-	MatchPrefix opnsense.SelectedMapList `json:"match2"`
-	Set         string                   `json:"set"`
+	frrReadPresence `json:"-"`
+	MatchCommunity  frrSelectedMapList `json:"match3"`
+	MatchASPath     frrSelectedMapList `json:"match"`
+	Enabled         string             `json:"enabled"`
+	Description     string             `json:"description"`
+	Name            string             `json:"name"`
+	Action          frrSelectedMap     `json:"action"`
+	Order           string             `json:"id"`
+	MatchPrefix     frrSelectedMapList `json:"match2"`
+	Set             string             `json:"set"`
 }
 
 type routeMapAPIRequest struct {
-	Enabled     string `json:"enabled"`
-	Description string `json:"description"`
-	Name        string `json:"name"`
-	Action      string `json:"action"`
-	Order       string `json:"id"`
-	MatchPrefix string `json:"match2"`
-	Set         string `json:"set"`
+	MatchCommunity string `json:"match3"`
+	MatchASPath    string `json:"match"`
+	Enabled        string `json:"enabled"`
+	Description    string `json:"description"`
+	Name           string `json:"name"`
+	Action         string `json:"action"`
+	Order          string `json:"id"`
+	MatchPrefix    string `json:"match2"`
+	Set            string `json:"set"`
 }
 
 func (m *RouteMapResourceModel) toAPI(ctx context.Context) *routeMapAPIRequest {
@@ -54,18 +61,22 @@ func (m *RouteMapResourceModel) toAPI(ctx context.Context) *routeMapAPIRequest {
 	}
 
 	return &routeMapAPIRequest{
-		Enabled:     opnsense.BoolToString(m.Enabled.ValueBool()),
-		Description: m.Description.ValueString(),
-		Name:        m.Name.ValueString(),
-		Action:      m.Action.ValueString(),
-		Order:       opnsense.Int64ToString(m.Order.ValueInt64()),
-		MatchPrefix: matchStr,
-		Set:         m.Set.ValueString(),
+		MatchCommunity: setToCSV(ctx, m.MatchCommunity),
+		MatchASPath:    setToCSV(ctx, m.MatchASPath),
+		Enabled:        opnsense.BoolToString(m.Enabled.ValueBool()),
+		Description:    m.Description.ValueString(),
+		Name:           m.Name.ValueString(),
+		Action:         m.Action.ValueString(),
+		Order:          opnsense.Int64ToString(m.Order.ValueInt64()),
+		MatchPrefix:    matchStr,
+		Set:            m.Set.ValueString(),
 	}
 }
 
 func (m *RouteMapResourceModel) fromAPI(_ context.Context, a *routeMapAPIResponse, uuid string) {
 	m.ID = types.StringValue(uuid)
+	m.MatchCommunity = sliceToSet(a.MatchCommunity)
+	m.MatchASPath = sliceToSet(a.MatchASPath)
 	m.Enabled = types.BoolValue(opnsense.StringToBool(a.Enabled))
 	m.Description = types.StringValue(a.Description)
 	m.Name = types.StringValue(a.Name)

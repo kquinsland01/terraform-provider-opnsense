@@ -85,7 +85,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 |---|---|
 | Data-source parity | Add read-only data sources for the 16 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
 | Gateway groups | Stable 26.7.7 source gate cleared; Story 31.0k validates CRUD/import/drift/reconfigure/tier/deletion semantics before provider implementation and support. |
-| FRR 2.0 compatibility | Story 31.0h prioritizes plugin-aware family/state/policy migration and auto-rule verification; no blanket 2.0 support claim from core version alone. |
+| FRR 2.0 compatibility | Story 31.0h compatibility subgate adds installed-plugin/model validation, family/state migration and grouped-policy preservation to existing owners. Exact non-skipped versions/digest are recorded in the FRR live evidence; legacy live, remaining advanced parity, release and adoption remain gated. Soft FRR reload is not PF activation or a daemon-set restart. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
 | Audited field/surface parity | Complete Stories 31.0f–31.0j for trust, IPsec, Quagga/BGP, live interface state, and provider retry controls before positioning/migration/adoption work. |

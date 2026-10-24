@@ -8,7 +8,7 @@ PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../.." && pwd)
 # shellcheck source=test/scripts/lib/log.sh
 . "${SCRIPT_DIR}/lib/log.sh"
 
-DEVRAIL_IMAGE=${DEVRAIL_IMAGE:-ghcr.io/devrail-dev/dev-toolchain:1.12.0}
+DEVRAIL_IMAGE=${DEVRAIL_IMAGE:-ghcr.io/devrail-dev/dev-toolchain:1.12.24}
 TEST_REGEX=${TEST_REGEX:-TestAcc}
 TEST_TIMEOUT=${TEST_TIMEOUT:-30m}
 TEST_VERBOSE=${TEST_VERBOSE:-0}
@@ -34,7 +34,7 @@ Optional environment:
   TEST_REGEX=TestAcc                       Go -run pattern
   TEST_TIMEOUT=30m                         Per-package Go test timeout
   TEST_VERBOSE=1                           Emit exact per-test PASS/SKIP lines
-  DEVRAIL_IMAGE=ghcr.io/devrail-dev/dev-toolchain:1.12.0
+  DEVRAIL_IMAGE=ghcr.io/devrail-dev/dev-toolchain:1.12.24
   OPNSENSE_ACCEPTANCE_PACKAGES='./internal/service/firewall ./internal/service/haproxy'
   RESULTS_DIR=test/acceptance-results
 
@@ -46,18 +46,18 @@ USAGE
 packages_from_args=()
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    --package)
-      [ "$#" -ge 2 ] || die "--package requires a package path"
-      packages_from_args+=("$2")
-      shift 2
-      ;;
-    *)
-      die "unknown argument: $1"
-      ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  --package)
+    [ "$#" -ge 2 ] || die "--package requires a package path"
+    packages_from_args+=("$2")
+    shift 2
+    ;;
+  *)
+    die "unknown argument: $1"
+    ;;
   esac
 done
 
@@ -115,7 +115,7 @@ optional_envs=(
 )
 for optional_env in "${optional_envs[@]}"; do
   if [ -n "${!optional_env:-}" ]; then
-    docker_env+=( -e "${optional_env}=${!optional_env}" )
+    docker_env+=(-e "${optional_env}=${!optional_env}")
   fi
 done
 
@@ -138,7 +138,7 @@ fi
 [ "${#packages[@]}" -gt 0 ] || die "no packages resolved"
 
 summary_file=${RUN_DIR}/summary.tsv
-printf 'status\tpackage\tlog\n' > "${summary_file}"
+printf 'status\tpackage\tlog\n' >"${summary_file}"
 
 log_info "running ${#packages[@]} package(s) with -run ${TEST_REGEX}"
 log_info "results: ${RUN_DIR}"
@@ -154,10 +154,10 @@ for pkg in "${packages[@]}"; do
   log_file=${RUN_DIR}/${safe_name}.log
   log_info "testing ${pkg}"
   if "${docker_base[@]}" go test "${go_test_args[@]}" "${pkg}" >"${log_file}" 2>&1; then
-    printf 'pass\t%s\t%s\n' "${pkg}" "${log_file}" >> "${summary_file}"
+    printf 'pass\t%s\t%s\n' "${pkg}" "${log_file}" >>"${summary_file}"
   else
     failures=$((failures + 1))
-    printf 'fail\t%s\t%s\n' "${pkg}" "${log_file}" >> "${summary_file}"
+    printf 'fail\t%s\t%s\n' "${pkg}" "${log_file}" >>"${summary_file}"
     log_warn "failed ${pkg}; see ${log_file}"
   fi
 done

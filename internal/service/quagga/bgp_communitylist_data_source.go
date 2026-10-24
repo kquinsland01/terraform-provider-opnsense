@@ -45,10 +45,24 @@ func (d *bgpCommunityListDataSource) Read(ctx context.Context, req datasource.Re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	id := config.ID.ValueString()
-	result, err := opnsense.Get[bgpCommunityListAPIResponse](ctx, d.client, bgpCommunityListReqOpts, id)
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
+		return
+	}
+	defer bgpOwnerMu.Release(1)
+	capability, err := discoverFRR(ctx, d.client)
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading BGP community list", fmt.Sprintf("Could not read BGP community list %s: %s", id, err))
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	id := config.ID.ValueString()
+	result, err := opnsense.Get[bgpCommunityListAPIResponse](ctx, d.client, strictBGPOpts(bgpCommunityListReqOpts), id)
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading BGP community list", fmt.Sprintf("Could not read BGP community list %s: %s", id, frrDiagnostic(err)))
+		return
+	}
+	if err := validateBGPResponse(result, capability); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR read-back", frrDiagnostic(err))
 		return
 	}
 	config.fromAPI(ctx, result, id)

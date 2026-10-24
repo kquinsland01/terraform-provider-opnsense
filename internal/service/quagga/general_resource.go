@@ -6,7 +6,7 @@ package quagga
 import (
 	"context"
 	"errors"
-	"fmt"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -54,38 +54,108 @@ func (r *generalResource) Configure(_ context.Context, req resource.ConfigureReq
 // Create applies the settings (the singleton always exists on the appliance,
 // so create is implemented as an update + read-back).
 func (r *generalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
+		return
+	}
+	defer bgpOwnerMu.Release(1)
+	if _, err := discoverFRR(ctx, r.client); err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	pending, d := pendingBGP(ctx, resp.Private)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := opnsense.RetryReconfigure(ctx, r.client, strictBGPOpts(generalReqOpts)); err != nil {
+			resp.Diagnostics.AddError("FRR activation pending", frrDiagnostic(err))
+			return
+		}
+		resp.Diagnostics.Append(markBGP(ctx, resp.Private, "")...)
+	}
+
 	var plan GeneralResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := opnsense.UpdateSingleton(ctx, r.client, generalReqOpts, plan.toAPI(ctx)); err != nil {
-		resp.Diagnostics.AddError("Error applying FRR general settings", fmt.Sprintf("%s", err))
+	if err := resolveBGPModel(ctx, req.Config, &plan); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR settings intent", frrDiagnostic(err))
 		return
 	}
-	result, err := opnsense.GetSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
+	if err := saveFRRSingleton(ctx, r.client, generalReqOpts, plan.toAPI(ctx)); err != nil {
+		var saved *opnsense.MutationReconfigureError
+		var validation *opnsense.ValidationError
+		if !errors.As(err, &validation) {
+			resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+		}
+		if errors.As(err, &saved) {
+			plan.ID = types.StringValue(generalID)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+			resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+		}
+		resp.Diagnostics.AddError("Error applying FRR general settings", frrDiagnostic(err))
+		return
+	}
+	plan.ID = types.StringValue(generalID)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+	result, err := getFRRSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading FRR general settings after apply", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error reading FRR general settings after apply", frrDiagnostic(err))
+		return
+	}
+	if err := validateBGPResponse(result, frrCapability{}); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR singleton read-back", frrDiagnostic(err))
 		return
 	}
 	plan.fromAPI(ctx, result, generalID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(markBGP(ctx, resp.Private, "")...)
 }
 
 func (r *generalResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
+		return
+	}
+	defer bgpOwnerMu.Release(1)
+	if _, err := discoverFRR(ctx, r.client); err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	pending, d := pendingBGP(ctx, resp.Private)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := opnsense.RetryReconfigure(ctx, r.client, strictBGPOpts(generalReqOpts)); err != nil {
+			resp.Diagnostics.AddError("FRR activation pending", frrDiagnostic(err))
+			return
+		}
+		resp.Diagnostics.Append(markBGP(ctx, resp.Private, "")...)
+	}
+
 	var state GeneralResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	result, err := opnsense.GetSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
+	result, err := getFRRSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
 	if err != nil {
 		var nf *opnsense.NotFoundError
 		if errors.As(err, &nf) {
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Error reading FRR general settings", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error reading FRR general settings", frrDiagnostic(err))
+		return
+	}
+	if err := validateBGPResponse(result, frrCapability{}); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR singleton read-back", frrDiagnostic(err))
 		return
 	}
 	state.fromAPI(ctx, result, generalID)
@@ -93,22 +163,75 @@ func (r *generalResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *generalResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	if err := bgpOwnerMu.Acquire(ctx, 1); err != nil {
+		resp.Diagnostics.AddError("FRR operation canceled while waiting", frrDiagnostic(err))
+		return
+	}
+	defer bgpOwnerMu.Release(1)
+	if _, err := discoverFRR(ctx, r.client); err != nil {
+		resp.Diagnostics.AddError("FRR compatibility check failed", frrDiagnostic(err))
+		return
+	}
+	pending, d := pendingBGP(ctx, resp.Private)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if pending != "" {
+		if err := opnsense.RetryReconfigure(ctx, r.client, strictBGPOpts(generalReqOpts)); err != nil {
+			resp.Diagnostics.AddError("FRR activation pending", frrDiagnostic(err))
+			return
+		}
+		resp.Diagnostics.Append(markBGP(ctx, resp.Private, "")...)
+	}
+
 	var plan GeneralResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := opnsense.UpdateSingleton(ctx, r.client, generalReqOpts, plan.toAPI(ctx)); err != nil {
-		resp.Diagnostics.AddError("Error updating FRR general settings", fmt.Sprintf("%s", err))
+	var prior GeneralResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &prior)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-	result, err := opnsense.GetSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
+	if err := resolveBGPModel(ctx, req.Config, &plan, &prior); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR settings intent", frrDiagnostic(err))
+		return
+	}
+	var mutationErr error
+	if pending != `"mutation"` || !reflect.DeepEqual(plan, prior) {
+		mutationErr = saveFRRSingleton(ctx, r.client, generalReqOpts, plan.toAPI(ctx))
+	}
+	if err := mutationErr; err != nil {
+		var saved *opnsense.MutationReconfigureError
+		var validation *opnsense.ValidationError
+		if !errors.As(err, &validation) {
+			resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+		}
+		if errors.As(err, &saved) {
+			plan.ID = types.StringValue(generalID)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+			resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+		}
+		resp.Diagnostics.AddError("Error updating FRR general settings", frrDiagnostic(err))
+		return
+	}
+	plan.ID = types.StringValue(generalID)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(markBGP(ctx, resp.Private, `"mutation"`)...)
+	result, err := getFRRSingleton[generalAPIResponse](ctx, r.client, generalReqOpts)
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading FRR general settings after update", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error reading FRR general settings after update", frrDiagnostic(err))
+		return
+	}
+	if err := validateBGPResponse(result, frrCapability{}); err != nil {
+		resp.Diagnostics.AddError("Invalid FRR singleton read-back", frrDiagnostic(err))
 		return
 	}
 	plan.fromAPI(ctx, result, generalID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(markBGP(ctx, resp.Private, "")...)
 }
 
 // Delete is a no-op for the singleton: the appliance always retains an FRR

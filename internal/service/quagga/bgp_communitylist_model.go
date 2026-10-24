@@ -23,12 +23,13 @@ type BGPCommunityListResourceModel struct {
 }
 
 type bgpCommunityListAPIResponse struct {
-	Enabled     string               `json:"enabled"`
-	Description string               `json:"description"`
-	Number      string               `json:"number"`
-	SeqNumber   string               `json:"seqnumber"`
-	Action      opnsense.SelectedMap `json:"action"`
-	Community   string               `json:"community"`
+	frrReadPresence `json:"-"`
+	Enabled         string         `json:"enabled"`
+	Description     string         `json:"description"`
+	Number          string         `json:"number"`
+	SeqNumber       string         `json:"seqnumber"`
+	Action          frrSelectedMap `json:"action"`
+	Community       string         `json:"community"`
 }
 
 type bgpCommunityListAPIRequest struct {

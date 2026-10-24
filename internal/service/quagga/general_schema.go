@@ -18,7 +18,7 @@ import (
 
 func (r *generalResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages FRR (Quagga) general service settings on OPNsense. This is a singleton resource — there is one FRR configuration per appliance; `terraform destroy` only removes it from state and does not delete the appliance config. Requires the `os-frr` plugin.",
+		MarkdownDescription: "Manages FRR (Quagga) general service settings on OPNsense. This is a singleton resource — there is one FRR configuration per appliance; `terraform destroy` only removes it from state and does not delete the appliance config. Requires the `os-frr` plugin plus read access to installed package metadata and the BGP model for the compatibility gate. A soft service reload is not a daemon-set restart or a PF filter activation.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true, MarkdownDescription: "Synthetic identifier for this singleton (always `general`).",
