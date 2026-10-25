@@ -21,3 +21,12 @@ jobs:
           fetch-depth: 0
       - name: Run scan
         run: make _scan
+      - name: Retain Trivy failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-diagnostics-scan
+          path: .devrail-output/trivy.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7

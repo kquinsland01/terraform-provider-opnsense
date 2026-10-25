@@ -26,6 +26,15 @@ jobs:
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
       - name: Run all checks
         run: make _check
+      - name: Retain Trivy failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-diagnostics-check
+          path: .devrail-output/trivy.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
 
   generate-check:
     name: Generated Code Check

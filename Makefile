@@ -801,8 +801,10 @@ _scan: _check-config
 	@start_time=$$(date +%s%3N); \
 	overall_exit=0; \
 	failed_scanners=""; \
-	trivy fs --format json --output /tmp/trivy-results.json . 2>/dev/null; \
+	mkdir -p .devrail-output || exit 2; \
+	trivy fs --format json --output /tmp/trivy-results.json . 2>.devrail-output/trivy.log; \
 	trivy_exit=$$?; \
+	if [ $$trivy_exit -ne 0 ]; then cat .devrail-output/trivy.log >&2; fi; \
 	if [ $$trivy_exit -eq 1 ]; then \
 		overall_exit=1; \
 		failed_scanners="$${failed_scanners}\"trivy\","; \
