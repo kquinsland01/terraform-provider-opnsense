@@ -102,7 +102,7 @@ The downstream Ansible role's proven sequence: `add` → `sign` → poll `search
 - [Source: internal/service/acme/certificate_resource.go — current plain-CRUD implementation, no sign]
 - [Source: 8-2-acme-certificate-resource-with-issuance.md — title/AC claims issuance]
 - [Pairs with: Story 29.3 (frontend cert binding via refid)]
-- [Downstream driver: opnsense-manager ansible/roles/acme/tasks/main.yml — add/sign/poll(statusCode=200)/refid]
+- [Downstream driver: consumer automation ansible/roles/acme/tasks/main.yml — add/sign/poll(statusCode=200)/refid]
 
 ## Dev Agent Record
 

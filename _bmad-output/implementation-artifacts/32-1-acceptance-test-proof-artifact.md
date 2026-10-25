@@ -21,7 +21,7 @@ so that I can trust that documented resources were exercised against a real OPNs
 ## Dev Notes
 
 - The provider already has local/live validation history. This story makes it visible and repeatable.
-- QEMU/Vagrant disposable appliance proof is enough; do not depend on production h155 or lab firewall interfaces.
+- QEMU/Vagrant disposable appliance proof is enough; do not depend on production or shared lab firewall interfaces.
 
 ## Validation
 

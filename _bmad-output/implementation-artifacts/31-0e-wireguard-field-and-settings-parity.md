@@ -2,7 +2,7 @@
 
 ## Status
 
-review
+done — PR63 merged; published in v0.7.0
 
 ## Priority
 
@@ -56,3 +56,9 @@ keys fail tests. Runner attestation binds host and actual container TLS fingerpr
 before authentication; missing/malformed/mismatch tests emit no HTTP requests.
 Digest sensitivity covers all transitive Go source plus the runner logging library.
 No OpenTofu or earlier-version acceptance execution is claimed.
+
+## Publication checkpoint — 2026-10-25
+
+The reviewed implementation merged in PR63 and shipped in v0.7.0. The recorded
+21-step disposable 26.7.7 lifecycle proof remains the tested boundary; this does
+not imply every legacy release/OpenTofu or private operator adoption was tested.

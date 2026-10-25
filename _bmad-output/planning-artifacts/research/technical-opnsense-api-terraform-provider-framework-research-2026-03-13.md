@@ -1353,9 +1353,9 @@ terraform {
 **Initialization:**
 ```bash
 terraform init \
-  -backend-config="address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>" \
-  -backend-config="lock_address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
-  -backend-config="unlock_address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
+  -backend-config="address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>" \
+  -backend-config="lock_address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
+  -backend-config="unlock_address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
   -backend-config="username=<USERNAME>" \
   -backend-config="password=<PERSONAL_ACCESS_TOKEN>" \
   -backend-config="lock_method=POST" \
@@ -1780,7 +1780,7 @@ go mod tidy
 ```hcl
 provider_installation {
   dev_overrides {
-    "registry.terraform.io/matthew-on-git/opnsense" = "/home/mmellor/go/bin"
+    "registry.terraform.io/matthew-on-git/opnsense" = "/home/developer/go/bin"
   }
   direct {}
 }

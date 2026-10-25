@@ -4,9 +4,9 @@ resource "opnsense_haproxy_mapfile" "domain_map" {
   description = "Host to backend routing map"
   type        = "dom"
   content     = <<-EOT
-    grafana.example.com grafana-backend
-    argocd.example.com argocd-backend
-    tipsyhive.example.com tipsyhive-backend
-    www.tipsyhive.example.com tipsyhive-backend
+    grafana.example.com metrics-backend
+    argocd.example.com deploy-backend
+    portal.example.com app-backend
+    www.portal.example.com app-backend
   EOT
 }

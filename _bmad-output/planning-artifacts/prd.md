@@ -43,7 +43,7 @@ terraform-provider_opnsense is a comprehensive Terraform provider that delivers 
 
 The provider targets DevOps engineers, homelabbers, and MSP operators who have adopted OPNsense as a cost-effective replacement for enterprise edge appliances (F5, Palo Alto, Citrix ADC) but lack mature IaC tooling to manage it. The existing provider landscape is fragmented and incomplete — the most mature option (browningluke/opnsense, pre-v1.0) covers a narrow subset of base APIs with zero plugin support, forcing operators into Ansible or manual UI configuration. OPNsense's API has reached sufficient maturity to support a comprehensive provider, but no one has built one.
 
-The primary success criterion is complete appliance management: when any operator can manage their entire OPNsense appliance from a single Terraform configuration with accurate plan/apply and drift detection, the provider has succeeded. The first validation is retiring the author's production Ansible automation (opnsense-manager) entirely in favor of Terraform.
+The primary success criterion is complete appliance management: when any operator can manage their entire OPNsense appliance from a single Terraform configuration with accurate plan/apply and drift detection, the provider has succeeded. Validation uses synthetic, disposable-appliance compositions; operator-specific migration and retirement decisions are maintained privately.
 
 ### What Makes This Special
 
@@ -51,7 +51,7 @@ The primary success criterion is complete appliance management: when any operato
 - **First provider with enough coverage to actually be useful.** Every existing provider fails the completeness test — they cover enough to demo, not enough to deploy. This provider now supports 102 resource types across core APIs and plugin/service areas, eliminating the need for a second configuration tool for most OPNsense configurations.
 - **Plugins are the product, not an afterthought.** HAProxy, FRR/BGP, ACME, WireGuard, IPsec, and Dynamic DNS are what make OPNsense viable as an enterprise edge platform. Covering the core API without these is like a cloud provider that manages VPCs but not load balancers.
 - **Handles OPNsense's API correctly, not just broadly.** The OPNsense API has non-standard patterns that break naive integrations: HTTP 200 on validation errors, blank defaults for missing resources, a two-phase reconfigure lifecycle, and write-only password fields. This provider handles all of them through a purpose-built API client with custom error types, mutex-protected reconfigure, and proper state management.
-- **Built on production operational experience.** Resource schemas are informed by a battle-tested Ansible automation project (opnsense-manager) that runs in production CI/CD with plan/apply stages against a live OPNsense appliance — not speculative API mappings.
+- **Built on production operational experience.** Resource schemas are informed by a battle-tested Ansible automation project (consumer automation) that runs in production CI/CD with plan/apply stages against a live OPNsense appliance — not speculative API mappings.
 - **Modern architecture, professional standards.** Built from scratch on the Terraform Plugin Framework (not legacy SDKv2), following DevRail project standards, with acceptance tests against real OPNsense instances and documentation generated from schemas.
 
 ## Project Classification
@@ -70,11 +70,11 @@ This is a high-complexity infrastructure provider built from scratch in Go, targ
 
 | Criterion | Measurable Outcome |
 |---|---|
-| **Complete appliance management** | Every resource currently managed by opnsense-manager Ansible roles (BGP, HAProxy, ACME, DHCP) plus Unbound DNS, Dynamic DNS, WireGuard, IPsec, firewall, interfaces, and routing is manageable via Terraform |
+| **Complete appliance management** | Every resource currently managed by consumer automation Ansible roles (BGP, HAProxy, ACME, DHCP) plus Unbound DNS, Dynamic DNS, WireGuard, IPsec, firewall, interfaces, and routing is manageable via Terraform |
 | **Accurate plan/apply** | `terraform plan` output matches actual changes on apply — zero surprises. No reported cases where apply produced changes not shown in plan |
 | **Smooth import** | Existing OPNsense resources importable via `terraform import` without manual state file editing or extensive tinkering. Import → plan → "No changes" on first try |
 | **Drift detection** | Out-of-band changes made via OPNsense UI or API are detected on the next `terraform plan` with an accurate diff |
-| **Ansible retirement** | opnsense-manager Ansible project fully retired. All OPNsense configuration lives in Terraform HCL committed to Git |
+| **Ansible retirement** | consumer automation Ansible project fully retired. All OPNsense configuration lives in Terraform HCL committed to Git |
 
 ### Business Success
 
@@ -102,7 +102,7 @@ This is a high-complexity infrastructure provider built from scratch in Go, targ
 | **First resource works end-to-end** | `opnsense_firewall_alias`: create, read, update, delete, import, drift detection — all passing |
 | **Ansible role parity** | Each of the 4 Ansible roles (BGP, HAProxy, ACME, DHCP) has equivalent Terraform resources with passing acceptance tests |
 | **Full import** | Matthew's live OPNsense appliance fully imported into Terraform state. `terraform plan` shows "No changes" |
-| **Ansible retired** | opnsense-manager repository archived. No Ansible playbooks running against OPNsense |
+| **Ansible retired** | Generic migration examples support a single owner without requiring any operator repository retirement |
 
 ## Domain-Specific Requirements
 
@@ -352,7 +352,7 @@ Resources are built in dependency and usage-priority order. Each tier delivers i
 
 **Climax:** After importing his last resource, Alex runs `terraform plan` across his entire configuration. The output reads: **"No changes. Your infrastructure matches the configuration."** His entire OPNsense appliance — every firewall rule, every BGP neighbor, every HAProxy backend, every VPN tunnel — is now under Terraform management.
 
-**Resolution:** Alex archives the opnsense-manager Ansible repository. His OPNsense config lives in Git alongside his Kubernetes manifests and cloud infrastructure. For the first time, every piece of his infrastructure speaks the same language.
+**Resolution:** Alex completes a synthetic ownership handoff after import and no-change validation. His OPNsense config lives in Git alongside his Kubernetes manifests and cloud infrastructure. For the first time, every piece of his infrastructure speaks the same language.
 
 **Requirements revealed:** Import by UUID for all resources. Accurate state read-back (no drift on import). Dependency-aware import ordering guidance in documentation. Cross-resource UUID references resolve correctly after import. Plan must show "No changes" after clean import.
 
@@ -382,7 +382,7 @@ Resources are built in dependency and usage-priority order. Each tier delivers i
 
 **Rising Action:** Alex's scheduled `terraform plan` runs in GitLab CI as part of a morning drift check. The pipeline reports changes detected.
 
-**Climax:** The plan output shows two diffs. The firewall rule shows `port: "443" → "443,8080"` — the colleague added port 8080. The NAT rule shows `target: "10.131.0.103" → "10.131.0.199"` — the destination was changed. Alex sees exactly what was modified, attribute by attribute.
+**Climax:** The plan output shows two diffs. The firewall rule shows `port: "443" → "443,8080"` — the colleague added port 8080. The NAT rule shows `target: "192.0.2.103" → "192.0.2.199"` — the destination was changed. Alex sees exactly what was modified, attribute by attribute.
 
 **Resolution:** Alex discusses with the colleague. The NAT change was a debug leftover — he runs `terraform apply` to revert it to the declared state. The firewall port change was intentional — he updates the HCL to include port 8080, runs `terraform plan` to confirm "No changes," and commits. The audit trail captures both decisions. Drift detection turned invisible manual changes into visible, reviewable events.
 

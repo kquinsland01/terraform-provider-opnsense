@@ -139,7 +139,7 @@ Peer-group policy fields remain flat; templates moved them under each activated 
 
 ## Verification
 
-All generation/lint/tests run inside DevRail1.12.24; use `bash -c`, not login bash. Parent owns a fresh VM102 on pmx-02 with disabled production-bridge net0, QEMU user-network WAN/test NICs and loopback-only forwarding. Expected UUID is `13921598-695f-42cc-9d09-1b06dd2d38b5`; runtime credentials/guest probe will be supplied privately when ready. Do not use retired WireGuard runtime/credentials. Do not provision or target production. Retain all unfinished live work explicitly until parent supplies lab access and proof actually runs.
+All generation/lint/tests run inside DevRail1.12.24; use `bash -c`, not login bash. Parent owns a fresh disposable VM on isolated hypervisor with disabled production-bridge net0, QEMU user-network WAN/test NICs and loopback-only forwarding. Obtain the exact expected VM UUID through the private runtime identity channel; example placeholder: `00000000-0000-4000-8000-000000000001`; runtime credentials/guest probe will be supplied privately when ready. Do not use retired WireGuard runtime/credentials. Do not provision or target production. Retain all unfinished live work explicitly until parent supplies lab access and proof actually runs.
 
 **Commands:**
 - `go test -count=1 -v ./internal/service/quagga/... ./pkg/opnsense/...` -- all compatibility/schema/upgrade/recovery/grouped-policy tests run/pass; acceptance may skip only in this offline command, never as live evidence.

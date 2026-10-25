@@ -2,7 +2,7 @@
 
 ## Status
 
-in-progress — compatibility subgate implementation; broader advanced parity remains backlog.
+in-progress — compatibility subgate merged in PR64 and released in v0.7.0; numeric 2.0 package-revision eligibility fixed in PR69/v0.8.1. Broader advanced parity remains backlog.
 
 ## Priority
 
@@ -54,8 +54,8 @@ Quagga unit/schema/generated tests, real Terraform import/no-change/drift/state-
   disabled generated-config restoration uses a VM/TLS-guarded host-only template sync.
   Neither operation is claimed as provider behavior.
 - See [live evidence](31-0h-frr2-live-evidence.md) for the exact frozen digest and
-  actually executed/non-skipped versions. Legacy live, OpenTofu, broader advanced
-  BGP parity, release and production adoption gates remain separate/unverified.
+  actually executed/non-skipped versions. Legacy live, OpenTofu and broader advanced BGP parity remain unverified.
+  Compatibility publication is complete; operator-specific adoption is tracked privately.
 - Historical WireGuard evidence belongs to its prior candidate; these FRR changes
   do not extend that proof to this digest. No coverage-audit row is promoted to
   complete without full row-level proof.

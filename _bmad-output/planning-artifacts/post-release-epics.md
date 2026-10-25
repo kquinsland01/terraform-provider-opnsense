@@ -59,7 +59,7 @@ Goal: keep OPNsense-side blockers visible, honest, and periodically reviewed.
 
 ## Epic 29: Appliance Migration Blockers — HAProxy Routing, TLS & ACME Issuance
 
-Goal: close the specific gaps that block migrating a real multi-domain OPNsense edge off Ansible onto this provider. Driven by the downstream `opnsense-manager` appliance, whose `https-in` frontend routes many domains (incl. CNAME aliases) via a domain map + actions, applies internal-only deny rules and an HTTP→HTTPS redirect, and binds an ACME-issued certificate. Verified missing/incomplete against **v0.2.0** source.
+Goal: close the specific gaps that block migrating a real multi-domain OPNsense edge off Ansible onto this provider. Driven by the downstream `consumer automation` appliance, whose `https-in` frontend routes many domains (incl. CNAME aliases) via a domain map + actions, applies internal-only deny rules and an HTTP→HTTPS redirect, and binds an ACME-issued certificate. Verified missing/incomplete against **v0.2.0** source.
 
 | Story | Status | File |
 |---|---|---|

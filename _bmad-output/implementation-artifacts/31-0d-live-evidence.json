@@ -15,7 +15,7 @@
     "product": "OPNsense",
     "version": "26.7.7",
     "disposable": true,
-    "vm_name": "opnsense-acceptance-102",
+    "vm_name": "disposable acceptance guest",
     "vm_uuid": "7298f552-694f-409a-baa8-b98c23bb581a"
   },
   "command": "test/scripts/run-story-31-0d-acceptance.sh",

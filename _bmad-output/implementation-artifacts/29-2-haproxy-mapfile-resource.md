@@ -96,11 +96,11 @@ var mapfileReqOpts = opnsense.ReqOpts{
 
 The appliance's `domain-map` is generated from `haproxy_backends[].domain` + aliases, e.g.:
 ```
-grafana.mfsoho.linkridge.net grafana-backend
-argocd.mfsoho.linkridge.net argocd-backend
-tipsyhive.mfsoho.linkridge.net tipsyhive-backend
-thetipsyhive.com tipsyhive-backend
-tipsyhive.com tipsyhive-backend
+metrics.example.test metrics-backend
+deploy.example.test deploy-backend
+app.example.test app-backend
+example.net app-backend
+example.org app-backend
 ```
 A single `map_use_backend` action (Story 29.1) references this map; values are backend **names** (not UUIDs) as HAProxy resolves the map value to a backend at runtime — verify whether OPNsense expects backend name or UUID in the map value on the target version and document it.
 
@@ -118,7 +118,7 @@ Modified: `internal/service/haproxy/exports.go`
 
 - [Source: https://docs.opnsense.org/development/api/plugins/haproxy.html — MapFile endpoints]
 - [Pairs with: Story 29.1 (map_use_backend action)]
-- [Downstream driver: opnsense-manager ansible/roles/haproxy/tasks/frontend.yml — domain map generation]
+- [Downstream driver: consumer automation ansible/roles/haproxy/tasks/frontend.yml — domain map generation]
 
 ## Dev Agent Record
 

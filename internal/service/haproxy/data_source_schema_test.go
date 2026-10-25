@@ -92,7 +92,7 @@ func TestMapfileDataSource_read(t *testing.T) {
 		if r.Method != http.MethodGet || r.URL.Path != mapfileReqOpts.GetEndpoint+"/"+id {
 			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
 		}
-		_, _ = w.Write([]byte(`{"mapfile":{"name":"domain-map","description":"domains","type":{"dom":{"value":"dom - Domains","selected":1},"str":{"value":"str - Strings","selected":0}},"content":"grafana.example.test grafana-backend\n\n"}}`))
+		_, _ = w.Write([]byte(`{"mapfile":{"name":"domain-map","description":"domains","type":{"dom":{"value":"dom - Domains","selected":1},"str":{"value":"str - Strings","selected":0}},"content":"grafana.example.test metrics-backend\n\n"}}`))
 	}))
 	t.Cleanup(server.Close)
 
@@ -122,7 +122,7 @@ func TestMapfileDataSource_read(t *testing.T) {
 	if state.Name.ValueString() != "domain-map" || state.Type.ValueString() != "dom" {
 		t.Fatalf("unexpected state metadata: %#v", state)
 	}
-	if state.Content.ValueString() != "grafana.example.test grafana-backend" {
+	if state.Content.ValueString() != "grafana.example.test metrics-backend" {
 		t.Fatalf("content was not normalized: %q", state.Content.ValueString())
 	}
 }

@@ -11,7 +11,7 @@ The example uses documentation-only hostnames and IP addresses. Replace them wit
 | `roles/haproxy` servers and backend pools | `opnsense_haproxy_server`, `opnsense_haproxy_backend` |
 | `roles/haproxy` domain map | `opnsense_haproxy_mapfile.domain_map` |
 | `roles/haproxy` map routing action | `opnsense_haproxy_action.route_domain_map` with `type = "map_use_backend"` |
-| `roles/haproxy` explicit host routing | `opnsense_haproxy_acl.is_tipsyhive_host` plus `opnsense_haproxy_action.route_tipsyhive_host` |
+| `roles/haproxy` explicit host routing | `opnsense_haproxy_acl.is_portal_host` plus `opnsense_haproxy_action.route_portal_host` |
 | `roles/haproxy` internal-only deny for protected apps | `opnsense_haproxy_acl.is_protected_host`, `opnsense_haproxy_acl.is_external_source`, and `opnsense_haproxy_action.deny_external_protected` |
 | `roles/haproxy` HTTP to HTTPS redirect | `opnsense_haproxy_action.redirect_https` linked to `opnsense_haproxy_frontend.http_in` |
 | `roles/haproxy` forwarded-proto header | `opnsense_haproxy_action.set_forwarded_proto` |

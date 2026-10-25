@@ -1,6 +1,6 @@
 Story 31.0c sanitized live acceptance output
 Run: 20261019-repair2-field-complete
-Target: disposable OPNsense 26.7.7, VM opnsense-acceptance-102, UUID aa90e347-371e-4e3b-8ba7-af7218b8a92b
+Target: disposable OPNsense 26.7.7, VM disposable acceptance guest, UUID 00000000-0000-4000-8000-000000000002
 Command: test/scripts/run-story-31-0c-acceptance.sh
 Code/test digest before run: 0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4
 

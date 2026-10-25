@@ -1,6 +1,8 @@
 # Story 31.0h FRR 2.0 compatibility live evidence
 
-Status: in progress. No final frozen-digest compatibility claim yet.
+Status: final 13-step frozen-candidate proof passed; PR64 merged and compatibility published in v0.7.0. Numeric package-revision handling followed in PR69/v0.8.1. Historical checkpoints below retain their original verification scope.
+
+Documentation-only sanitization replaced lab inventory identifiers after publication; historical digests identify the original tested candidates, not the subsequently edited documentation tree.
 
 ## Scope
 
@@ -11,8 +13,8 @@ retained. No production firewall was accessed or modified.
 
 ## Isolated target
 
-- Exact VM: `opnsense-acceptance-102`, UUID
-  `13921598-695f-42cc-9d09-1b06dd2d38b5`, parent-provisioned on pmx-02.
+- Exact VM: `disposable acceptance guest`, UUID
+  `00000000-0000-4000-8000-000000000001`, parent-provisioned on isolated hypervisor.
 - Production-bridge NIC is link-down; WAN/test NICs use QEMU user networking with
   loopback-only API/SSH forwarding. Connected isolated prefix: `198.18.31.0/24`.
 - Independently observed core: OPNsense `26.7.7`; installed package `os-frr 2.0_1`;
@@ -270,4 +272,4 @@ The earlier timeout attempt remains a failure above. Only the isolated appliance
 
 Parent publication-tree verification: all six default full gates passed in 66.065s, plus fresh focused/full Go suites, deterministic generation twice, constructor structure, inventory-failure regression and whitespace checks. Exact 87-file publication directory scanning found zero secrets. Two four-layer reviews plus parent regressions retain 44 individual triage rows (34 patched, 10 refuted), and the bounded independent repair recheck converged.
 
-After the successful runner exited, exact VM name/UUID/disk/isolation guards passed. VM 102 on pmx-02 and `local-lvm:vm-102-disk-0` were removed and absence verified. The exact collector, oracle and SSH-tunnel PIDs were stopped; node/host lab listeners were absent. The temporary private runtime/credentials were moved to private Trash. Production firewalls, BGP, firmware and ownership were unchanged. Maintainer merge and a validated release remain separate from this proof; no tag/release was created. Legacy installed-plugin live, OpenTofu and remaining advanced 31.0h parity remain unverified/incomplete.
+After the successful runner exited, exact VM name/UUID/disk/isolation guards passed. disposable VM on isolated hypervisor and `lab-owned disk` were removed and absence verified. The exact collector, oracle and SSH-tunnel PIDs were stopped; node/host lab listeners were absent. The temporary private runtime/credentials were moved to private Trash. Production firewalls, BGP, firmware and ownership were unchanged. Maintainer merge and a validated release remain separate from this proof; no tag/release was created. Legacy installed-plugin live, OpenTofu and remaining advanced 31.0h parity remain unverified/incomplete.

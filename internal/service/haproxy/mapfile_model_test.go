@@ -19,14 +19,14 @@ func TestMapfileModel_toAPI(t *testing.T) {
 		Name:        types.StringValue("domain-map"),
 		Description: types.StringValue("Domain routing map"),
 		Type:        types.StringValue(mapfileTypeMapString),
-		Content:     types.StringValue("grafana.example.com grafana-backend\nargocd.example.com argocd-backend"),
+		Content:     types.StringValue("grafana.example.com metrics-backend\nargocd.example.com deploy-backend"),
 	}
 
 	req := model.toAPI(context.Background())
 	if req.Name != "domain-map" || req.Type != mapfileTypeMapString {
 		t.Fatalf("unexpected API request: %#v", req)
 	}
-	if req.Content != "grafana.example.com grafana-backend\nargocd.example.com argocd-backend" {
+	if req.Content != "grafana.example.com metrics-backend\nargocd.example.com deploy-backend" {
 		t.Fatalf("content was not preserved: %q", req.Content)
 	}
 }
@@ -39,13 +39,13 @@ func TestMapfileModel_fromAPINormalizesTrailingWhitespace(t *testing.T) {
 		Name:        "domain-map",
 		Description: "Domain routing map",
 		Type:        opnsense.SelectedMap(mapfileTypeMapString),
-		Content:     "grafana.example.com grafana-backend\nargocd.example.com argocd-backend\n\n\t ",
+		Content:     "grafana.example.com metrics-backend\nargocd.example.com deploy-backend\n\n\t ",
 	}, "mapfile-1")
 
 	if model.ID.ValueString() != "mapfile-1" || model.Type.ValueString() != mapfileTypeMapString {
 		t.Fatalf("unexpected model metadata: %#v", model)
 	}
-	const expected = "grafana.example.com grafana-backend\nargocd.example.com argocd-backend"
+	const expected = "grafana.example.com metrics-backend\nargocd.example.com deploy-backend"
 	if model.Content.ValueString() != expected {
 		t.Fatalf("content = %q, want %q", model.Content.ValueString(), expected)
 	}

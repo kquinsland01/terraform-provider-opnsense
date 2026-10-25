@@ -17,7 +17,7 @@ func TestPeerModelMapsServers(t *testing.T) {
 		Enabled:       types.BoolValue(true),
 		Name:          types.StringValue("cross-site-peer"),
 		PublicKey:     types.StringValue("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-		TunnelAddress: tfconv.SliceToSet([]string{"169.254.155.1/32"}),
+		TunnelAddress: tfconv.SliceToSet([]string{"169.254.1.1/32"}),
 		ServerAddress: types.StringValue("edge-01.example.invalid"),
 		ServerPort:    types.Int64Value(51822),
 		Keepalive:     types.Int64Value(25),
@@ -35,7 +35,7 @@ func TestPeerModelMapsServers(t *testing.T) {
 		Enabled:       strictBool(true),
 		Name:          "cross-site-peer",
 		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-		TunnelAddress: strictSelectedMapList{"169.254.155.1/32"},
+		TunnelAddress: strictSelectedMapList{"169.254.1.1/32"},
 		ServerAddress: "edge-01.example.invalid",
 		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
 		Keepalive:     strictOptionalInteger{Value: 25, Set: true},
@@ -55,7 +55,7 @@ func TestPeerModelMapsMultipleTunnelAddresses(t *testing.T) {
 		Enabled:       strictBool(true),
 		Name:          "cross-site-peer",
 		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-		TunnelAddress: strictSelectedMapList{"169.254.155.1/32", "10.129.0.0/24", "10.131.0.0/24"},
+		TunnelAddress: strictSelectedMapList{"169.254.1.1/32", "192.0.2.0/24", "198.51.100.0/24"},
 		ServerAddress: "edge-01.example.invalid",
 		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
 		Keepalive:     strictOptionalInteger{Value: 25, Set: true},
@@ -64,7 +64,7 @@ func TestPeerModelMapsMultipleTunnelAddresses(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := "10.129.0.0/24,10.131.0.0/24,169.254.155.1/32"
+	want := "169.254.1.1/32,192.0.2.0/24,198.51.100.0/24"
 	if got := tfconv.SetToCSV(context.Background(), read.TunnelAddress); got != want {
 		t.Fatalf("fromAPI tunnel_address = %q, want %q", got, want)
 	}
@@ -75,7 +75,7 @@ func TestPeerModelOmitsUnsetKeepalive(t *testing.T) {
 		Enabled:       types.BoolValue(true),
 		Name:          types.StringValue("no-keepalive-peer"),
 		PublicKey:     types.StringValue("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-		TunnelAddress: tfconv.SliceToSet([]string{"169.254.155.1/32"}),
+		TunnelAddress: tfconv.SliceToSet([]string{"169.254.1.1/32"}),
 		ServerAddress: types.StringValue("edge-01.example.invalid"),
 		ServerPort:    types.Int64Value(51822),
 		Keepalive:     types.Int64Null(),
@@ -97,7 +97,7 @@ func TestPeerModelMapsEmptyKeepaliveToNull(t *testing.T) {
 		Enabled:       strictBool(true),
 		Name:          "no-keepalive-peer",
 		PublicKey:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-		TunnelAddress: strictSelectedMapList{"169.254.155.1/32"},
+		TunnelAddress: strictSelectedMapList{"169.254.1.1/32"},
 		ServerAddress: "edge-01.example.invalid",
 		ServerPort:    strictOptionalInteger{Value: 51822, Set: true},
 		Keepalive:     strictOptionalInteger{},

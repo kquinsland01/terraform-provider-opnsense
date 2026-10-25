@@ -91,7 +91,7 @@ In the downstream Ansible setup, the **ACME role owns cert binding** and the HAP
 
 - [Source: 4-2-haproxy-frontend-resource-with-acl-routing.md#What-NOT-to-Build — "defer ssl_certificates, ssl_default_certificate"]
 - [Pairs with: Story 29.4 (ACME refid output)]
-- [Downstream driver: opnsense-manager ansible/roles/acme/tasks/main.yml — frontend ssl_certificates refid binding]
+- [Downstream driver: consumer automation ansible/roles/acme/tasks/main.yml — frontend ssl_certificates refid binding]
 
 ## Dev Agent Record
 
