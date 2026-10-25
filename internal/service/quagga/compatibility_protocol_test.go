@@ -812,3 +812,83 @@ func TestProtocolFRRSingletonAmbiguousUpdateRestartRecovery(t *testing.T) {
 		}
 	}
 }
+
+// Reproduce #67 at the provider refresh boundary, not just the version regexp.
+func TestProtocolFRR20PackageRevisionRefresh(t *testing.T) {
+	for _, tc := range []struct {
+		version               string
+		compatibleModel, good bool
+	}{
+		{"2.0_2", true, true},
+		{"2.0_999", true, true},
+		{"2.0_2", false, false},
+		{"2.1", true, false},
+		{"2.0_2-devel", true, false},
+	} {
+		t.Run(fmt.Sprintf("%s/model=%t", tc.version, tc.compatibleModel), func(t *testing.T) {
+			reads := 0
+			api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Errorf("refresh mutated appliance: %s %s", r.Method, r.URL.Path)
+				}
+				if r.URL.Path == "/api/core/firmware/info" {
+					_, _ = fmt.Fprintf(w, `{"product_version":"26.7.7","package":[{"name":"os-frr","version":%q,"installed":"1"}]}`, tc.version)
+					return
+				}
+				if r.URL.Path == "/api/quagga/bgp/get_neighbor" && !tc.compatibleModel {
+					_, _ = fmt.Fprint(w, `{"neighbor":{"multiprotocol":"0"}}`)
+					return
+				}
+				if frrFixture(w, r) {
+					return
+				}
+				if r.URL.Path == "/api/quagga/bgp/get_neighbor/11111111-1111-4111-8111-111111111111" {
+					reads++
+					_, _ = fmt.Fprint(w, `{"neighbor":{"enabled":"1","description":"","address":"192.0.2.1","remoteas":"64512","updatesource":"","nexthopself":"0","family":"ipv4","peergroup":"","keepalive":"","holddown":"","linkedPrefixlistIn":[],"linkedPrefixlistOut":[],"linkedRoutemapIn":[],"linkedRoutemapOut":[]}}`)
+					return
+				}
+				t.Errorf("unexpected refresh request %s", r.URL.Path)
+				http.NotFound(w, r)
+			}))
+			defer api.Close()
+			server, schemas := frrProtocolServer(t, api.URL)
+			name := "opnsense_quagga_bgp_neighbor"
+			schema := schemas.ResourceSchemas[name]
+			prior := frrProtocolValue(t, schema, frrNeighborProtocolValues())
+			response, err := server.ReadResource(context.Background(), &tfprotov6.ReadResourceRequest{TypeName: name, CurrentState: prior})
+			if err != nil || frrProtocolErrors(response.Diagnostics) == tc.good {
+				t.Fatal(err, response.Diagnostics)
+			}
+			if !tc.good {
+				if reads != 0 {
+					t.Fatal("incompatible package/model reached neighbor read")
+				}
+				return
+			}
+			if reads != 1 {
+				t.Fatal("refresh did not read existing neighbor")
+			}
+			attrs := frrProtocolAttrs(t, schema, response.NewState)
+			if !attrs["id"].Equal(tftypes.NewValue(tftypes.String, "11111111-1111-4111-8111-111111111111")) {
+				t.Fatal("refresh changed UUID")
+			}
+			var family []tftypes.Value
+			if err := attrs["family"].As(&family); err != nil || len(family) != 1 || !family[0].Equal(tftypes.NewValue(tftypes.String, "ipv4")) {
+				t.Fatal("modern family lost", err)
+			}
+			config := frrProtocolValue(t, schema, map[string]any{"address": "192.0.2.1", "remote_as": 64512, "family": []string{"ipv4"}})
+			plan, err := server.PlanResourceChange(context.Background(), &tfprotov6.PlanResourceChangeRequest{TypeName: name, PriorState: response.NewState, ProposedNewState: response.NewState, Config: config})
+			if err != nil || frrProtocolErrors(plan.Diagnostics) {
+				t.Fatal(err, plan.Diagnostics)
+			}
+			before, err := response.NewState.Unmarshal(schema.ValueType())
+			if err != nil {
+				t.Fatal(err)
+			}
+			after, err := plan.PlannedState.Unmarshal(schema.ValueType())
+			if err != nil || !before.Equal(after) {
+				t.Fatal("revision refresh produced nonempty plan", err)
+			}
+		})
+	}
+}
