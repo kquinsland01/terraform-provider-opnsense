@@ -1,0 +1,63 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Dnsmasq"
+description: |-
+  Manages the Dnsmasq DNS/DHCP general settings on OPNsense.
+---
+
+# {{.Name}} ({{.Type}})
+
+Manages the Dnsmasq DNS/DHCP general settings on OPNsense. The `dhcp` attribute
+is a typed object corresponding to the nested `dnsmasq.dhcp` API branch.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_dnsmasq_settings/resource.tf"}}
+
+Only configured, known nested DHCP values are sent on create/update. Omitted
+nested settings preserve the appliance configuration; explicit `false`, `0`,
+`domain = ""`, and `no_interface = []` are intentional updates. Null integers
+preserve the existing value; API empty integer strings read as null, not zero.
+`no_interface` contains interface identifiers such as `lan`, not display labels.
+`domain` is configurable; `%domain` is response-only system-domain metadata and
+is never managed or written by this resource.
+
+`reply_delay` must be 0–60 and `lease_max` must be nonnegative. `log_dhcp` and
+`log_quiet` cannot both be true. The appliance validates the DHCP domain using
+its HostnameField rules (DNS name, not an IP address). Malformed or incomplete
+DHCP responses fail reads rather than silently clearing state.
+
+These preservation semantics apply to the nested DHCP object. Existing global
+Boolean attributes retain their documented defaults; import the singleton and
+review the complete plan before applying changes to an existing appliance.
+Destroy only removes this singleton from Terraform state; it does not reset
+settings or disable Dnsmasq.
+
+## Upgrade from v0.7.x and earlier
+
+The old `dhcp` set/CSV represented the API incorrectly. Replace `dhcp = []` with
+`dhcp = { ... }` using the desired typed settings, or omit `dhcp` to leave it
+unmanaged. Existing null/empty-set schema-version-0 state upgrades in place to a
+null object; the next refresh reads the actual DHCP settings. No replacement or
+appliance write is needed for that upgrade.
+
+Non-empty legacy sets cannot be translated reliably and fail with a migration
+diagnostic. Back up Terraform state and appliance configuration first. Remove
+the old `dhcp` argument, then remove **only this singleton** from state and
+import it again (use your actual resource address):
+
+```shell
+terraform state rm opnsense_dnsmasq_settings.example
+terraform import opnsense_dnsmasq_settings.example dnsmasq
+terraform plan
+```
+
+State removal and import do not change appliance configuration. Review the full
+plan and explicitly configure any existing global settings you intend to keep
+before applying. OpenTofu users can use the corresponding `tofu` commands.
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+{{codefile "shell" "examples/resources/opnsense_dnsmasq_settings/import.sh"}}

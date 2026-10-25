@@ -6,6 +6,10 @@ resources:
     type_name: dnsmasq_settings
     title: the Dnsmasq DNS/DHCP general settings
     kind: singleton
+    # DHCP is a nested object, not a selector. Its typed model/schema and
+    # version-0 set migration are maintained in settings_{model,schema,dhcp}.go.
+    custom_model: true
+    custom_schema: true
     id: dnsmasq
     reconfigure: /api/dnsmasq/service/reconfigure
     monad: dnsmasq
@@ -35,7 +39,6 @@ resources:
       - {name: AddMAC, tf: add_mac, json: add_mac, type: selectmap, default: "", desc: "Add requesting MAC to forwarded queries (standard, base64, text)."}
       - {name: AddSubnet, tf: add_subnet, json: add_subnet, type: bool, default: "false", desc: "Add the client subnet to forwarded queries."}
       - {name: StripSubnet, tf: strip_subnet, json: strip_subnet, type: bool, default: "false", desc: "Strip the client subnet from replies."}
-      - {name: DHCP, tf: dhcp, json: dhcp, type: selectmaplist, desc: "DHCP behaviour flags."}
       - {name: NoIdent, tf: no_ident, json: no_ident, type: bool, default: "true", desc: "Disable the chaos TXT ident responses."}
 
   - name: host

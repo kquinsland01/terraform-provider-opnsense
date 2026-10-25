@@ -2,7 +2,17 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
-## 0.7.0 (Unreleased)
+## 0.8.0 (Unreleased)
+
+UPGRADE NOTES:
+
+* `opnsense_dnsmasq_settings.dhcp` is now a typed object instead of a set of strings. Remove legacy `dhcp = []` arguments or replace them with the documented object syntax. Empty/null version-0 DHCP state upgrades in place and refreshes from the appliance. Non-empty legacy sets fail with explicit recovery guidance instead of guessing DHCP configuration; back up state and appliance configuration, remove the legacy argument, remove only this singleton from state, and import it again as `dnsmasq`. State removal/import do not change the appliance.
+
+BUG FIXES:
+
+* Correct the nested Dnsmasq DHCP/RA read and write contract, preserve omitted nested settings, keep `%domain` response metadata out of writes, and validate reply delay, lease limits and mutually exclusive logging flags. Regression verification uses tagged 26.7.7-shaped fixtures and the provider protocol; live appliance lifecycle validation is not claimed.
+
+## 0.7.0 (October 24, 2026)
 
 UPGRADE NOTES:
 
