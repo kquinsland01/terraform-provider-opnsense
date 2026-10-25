@@ -573,6 +573,12 @@ These tools run for every project regardless of language.
 **Key rules:**
 
 - `trivy` runs as part of `make scan`
+- Trivy stderr is retained in ignored `.devrail-output/trivy.log` and printed on
+  failure. The Scan and aggregate CI workflows upload that diagnostic log for
+  seven days after a failed job, even when the aggregate target captures stderr.
+  Raw scanner findings/secret reports are not uploaded. Scanner selection and
+  nonzero-exit enforcement are unchanged; inspect the retained diagnostic before
+  classifying a hosted scan failure or retrying it.
 - `gitleaks` runs as part of `make scan` and as a pre-commit hook
 - Both tools produce JSON output in CI
 - Findings at any severity level cause a non-zero exit code

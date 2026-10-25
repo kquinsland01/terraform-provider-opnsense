@@ -84,7 +84,10 @@ type Resource struct {
 	// CustomResource keeps generated model/schema/test files while allowing a
 	// handwritten lifecycle for resources whose API contract spans multiple
 	// independently owned branches.
-	CustomResource   bool   `yaml:"custom_resource"`
+	CustomResource bool `yaml:"custom_resource"`
+	// CustomModel and CustomSchema leave nested API models and schemas handwritten.
+	CustomModel      bool   `yaml:"custom_model"`
+	CustomSchema     bool   `yaml:"custom_schema"`
 	StrictDelete     bool   `yaml:"strict_delete_response"`
 	StrictMissing    bool   `yaml:"strict_missing_object_response"`
 	CompositeDestroy string `yaml:"composite_destroy"`
@@ -177,6 +180,9 @@ func generateResource(pkg string, r *Resource) error {
 		}{"data_source", dataSourceTmpl, dataSourceImports(r)})
 	}
 	for _, f := range files {
+		if (f.kind == "model" && r.CustomModel) || (f.kind == "schema" && r.CustomSchema) {
+			continue
+		}
 		var buf strings.Builder
 		err := f.tmpl.Execute(&buf, map[string]any{"Pkg": pkg, "R": r, "Imports": f.imports})
 		if err != nil {

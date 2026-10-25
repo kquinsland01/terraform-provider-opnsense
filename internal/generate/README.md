@@ -50,6 +50,17 @@ resources:
 shared helpers `setToCSV`, `sliceToSet`, `intOrEmpty`, `intOrZero` (present in
 `internal/service/quagga`).
 
-Acceptance tests are not generated — add `*_resource_test.go` by hand or via
-the test-arch tooling, and validate field/monad/endpoint accuracy against a
-live OPNsense box.
+### Handwritten nested models
+
+Set `custom_model: true` and/or `custom_schema: true` on a resource to keep its
+model/schema handwritten while still generating its lifecycle and acceptance
+smoke test. Dnsmasq settings uses these switches because `dnsmasq.dhcp` is a
+nested configuration object, not a `selectmaplist`. Its maintained files are
+`settings_model.go`, `settings_schema.go` and `settings_dhcp.go`; the latter also
+contains version-0 state migration. Do not regenerate obsolete `.gen.go` copies
+of those model/schema files. Nested field definitions and validators live in
+`dhcpSchema()`, not in the flat YAML field list.
+
+Acceptance smoke tests are generated; add contract and lifecycle tests by hand,
+and validate field/monad/endpoint accuracy against a disposable OPNsense appliance
+before claiming live compatibility.
