@@ -80,7 +80,7 @@ This is a high-complexity infrastructure provider built from scratch in Go, targ
 
 | Criterion | Target |
 |---|---|
-| **Personal workflow replacement** | Matthew's OPNsense appliance managed entirely via Terraform with GitLab CI pipeline (plan on MR, manual apply on merge) |
+| **Operator migration readiness** | A synthetic appliance configuration supports import, no-change plans and an explicit manual apply gate |
 | **Portfolio quality** | Provider published on Terraform Registry, documented, and presentable at matthew.mellor.earth as a professional open-source project |
 | **Community adoption** (secondary) | Provider is publicly available and usable by others. Community growth is welcome but not a gating success criterion |
 
@@ -101,7 +101,7 @@ This is a high-complexity infrastructure provider built from scratch in Go, targ
 |---|---|
 | **First resource works end-to-end** | `opnsense_firewall_alias`: create, read, update, delete, import, drift detection — all passing |
 | **Ansible role parity** | Each of the 4 Ansible roles (BGP, HAProxy, ACME, DHCP) has equivalent Terraform resources with passing acceptance tests |
-| **Full import** | Matthew's live OPNsense appliance fully imported into Terraform state. `terraform plan` shows "No changes" |
+| **Full import** | A disposable reference appliance imported into Terraform state. `terraform plan` shows "No changes" |
 | **Ansible retired** | Generic migration examples support a single owner without requiring any operator repository retirement |
 
 ## Domain-Specific Requirements
@@ -247,7 +247,7 @@ Mutex, error handling, wrapper key marshaling, and reconfigure are all handled t
 
 ### MVP Strategy & Philosophy
 
-**MVP Approach:** Problem-solving MVP — build the minimum that lets Matthew retire his Ansible automation and manage his entire OPNsense appliance through Terraform. There is no market validation phase because the developer is the primary user. The MVP is complete when `terraform plan` can show the full state of the appliance and `terraform apply` can make any change currently handled by Ansible.
+**MVP Approach:** Problem-solving MVP — build reusable appliance management and import workflows validated against a synthetic disposable reference appliance. Operator-specific automation retirement is outside this public product plan. The MVP is complete when `terraform plan` can show the full state of the appliance and `terraform apply` can make any change currently handled by Ansible.
 
 **Resource Requirements:** Solo developer with AI-assisted development, following DevRail project standards. No team coordination overhead — all architectural decisions are made by the author.
 

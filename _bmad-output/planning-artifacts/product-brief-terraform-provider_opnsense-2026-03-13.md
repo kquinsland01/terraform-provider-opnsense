@@ -120,7 +120,7 @@ Open source contributors who want to add resources for OPNsense plugins not yet 
 |---|---|---|
 | **Ansible replacement** | First plugin areas (HAProxy, FRR/BGP) fully functional — begin migrating consumer automation workloads | Complete replacement — consumer automation retired, all OPNsense config lives in Terraform |
 | **Registry presence** | Published on Terraform Registry with documentation and examples for initial resources | Comprehensive provider with 8+ plugin/service areas covered |
-| **Community adoption** | First external users beyond Matthew; initial GitHub stars and Registry downloads | Recognized as the go-to OPNsense provider; community PRs for plugins not in initial scope |
+| **Community adoption** | First external users beyond the original developer; initial GitHub stars and Registry downloads | Recognized as the go-to OPNsense provider; community PRs for plugins not in initial scope |
 | **Portfolio value** | Provider listed on matthew.mellor.earth with architecture writeup | Demonstrates end-to-end professional open source project lifecycle (DevRail standards, CI/CD, docs, community) |
 
 ### Key Performance Indicators

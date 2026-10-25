@@ -97,7 +97,7 @@ The prior candidate is already implemented and locally green. Preserve it; this 
 
 - 2026-10-20 review repair1: verified optional-field planning, saved-secret recovery, ambiguous singleton activation, target binding and proof gaps. Amended execution/proof requirements outside the immutable intent. Avoid stale prior secrets, lost pending markers, unknown-as-clear, and unbound endpoint attestation. KEEP the successful advanced lifecycle, strict APIs, association preservation, disabled singleton, exact cleanup/restore and PR62 planning.
 
-- 2026-10-20: This new planning revision supersedes the blocked original generated spec only where stable 26.7.7 disproved explicit-empty create serialization. Original contract remains unchanged in the historical spec. The bounded omitted-instance control returned saved plus API-assigned instance=0; explicit instance="" failed validation. KEEP typed state migration, secret boundaries, owner-locked recovery, import-first singleton, disabled daemon and all six-row proof requirements. This is an API-contract correction under Matthew's approved provider work, not a new production authorization.
+- 2026-10-20: This new planning revision supersedes the blocked original generated spec only where stable 26.7.7 disproved explicit-empty create serialization. Original contract remains unchanged in the historical spec. The bounded omitted-instance control returned saved plus API-assigned instance=0; explicit instance="" failed validation. KEEP typed state migration, secret boundaries, owner-locked recovery, import-first singleton, disabled daemon and all six-row proof requirements. This is an API-contract correction under the approved provider scope, not a new production authorization.
 
 ## Review Triage Log
 
