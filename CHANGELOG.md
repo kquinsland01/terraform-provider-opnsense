@@ -2,7 +2,13 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
-## 0.7.0 (Unreleased)
+## 0.7.1 (Unreleased)
+
+BUG FIXES:
+
+* Accept installed `os-frr 2.0_2` with the existing neighbor-model capability checks. Later revisions and minor versions remain gated; no BGP write compatibility claim is added.
+
+## 0.7.0
 
 UPGRADE NOTES:
 

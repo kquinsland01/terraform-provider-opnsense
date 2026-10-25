@@ -26,7 +26,7 @@ type frrCapability struct {
 	Grouped       bool
 }
 
-var frrPackageVersion = regexp.MustCompile(`^(?:1\.(?:4[6-9]|5[0-5])(?:_[0-9]+)?|2\.0(?:_1)?)$`)
+var frrPackageVersion = regexp.MustCompile(`^(?:1\.(?:4[6-9]|5[0-5])(?:_[0-9]+)?|2\.0(?:_[12])?)$`)
 
 func frrRead(ctx context.Context, c *opnsense.Client, endpoint string, out any) error {
 	// Firmware package metadata can block behind the appliance's pkg/configd

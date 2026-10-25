@@ -11,7 +11,7 @@ This existing singleton retains its state address and does not delete appliance
 settings on destroy. The compatibility gate requires read permission for installed
 package metadata (`/api/core/firmware/info`) and the BGP neighbor model, in addition
 to the general settings/service APIs. Accepted installed metadata is legacy os-frr
-1.46–1.55 or 2.0 / 2.0_1 with a coherent read-only model; legacy live validation is
+1.46–1.55 or 2.0 / 2.0_1 / 2.0_2 with a coherent read-only model; legacy live validation is
 unverified. No core-firmware inference or provider-managed plugin upgrade is used.
 
 On a fresh disabled appliance, configure BGP before enabling General so watchfrr

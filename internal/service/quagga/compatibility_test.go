@@ -25,6 +25,9 @@ func TestFRRInstalledPackageAndReadOnlyCapability(t *testing.T) {
 		good                     bool
 	}{
 		{"frr2_revision", `[{"name":"os-frr","version":"2.0_1","installed":"1"}]`, `{"family":{"ipv4":{"value":"IPv4","selected":1},"ipv6":{"value":"IPv6","selected":0}}}`, 200, true},
+		{"frr2_revision_2", `[{"name":"os-frr","version":"2.0_2","installed":"1"}]`, `{"family":{"ipv4":{"value":"IPv4","selected":1},"ipv6":{"value":"IPv6","selected":0}}}`, 200, true},
+		{"frr2_revision_2_contradiction", `[{"name":"os-frr","version":"2.0_2","installed":"1"}]`, `{"multiprotocol":"0"}`, 200, false},
+		{"frr2_revision_2_not_installed", `[{"name":"os-frr","version":"2.0_2","installed":"0"}]`, `{}`, 200, false},
 		{"legacy", `[{"name":"os-frr","version":"1.55_2","installed":"1"}]`, `{"multiprotocol":"0"}`, 200, true},
 		{"missing", "[]", `{}`, 200, false},
 		{"catalog_not_installed", `[{"name":"os-frr","version":"2.0","installed":"0"}]`, `{}`, 200, false},
@@ -57,6 +60,9 @@ func TestFRRInstalledPackageAndReadOnlyCapability(t *testing.T) {
 			got, err := discoverFRR(context.Background(), newTestClient(t, api.URL))
 			if (err == nil) != tc.good {
 				t.Fatalf("got capability %v err %v", got, err)
+			}
+			if tc.name == "frr2_revision_2" && (!got.Grouped || got.Version != "2.0_2") {
+				t.Fatalf("revision 2 lost modern API classification: %+v", got)
 			}
 			if tc.good && (got.Core != "99.1" || requests != 2) {
 				t.Fatal("core was used as plugin authority or template omitted")
@@ -200,7 +206,7 @@ func TestFRRNeighborPasswordPreservedOutsidePublicModel(t *testing.T) {
 }
 
 func TestFRRSourceRevisionAndMalformedCapabilityBoundaries(t *testing.T) {
-	for _, v := range []string{"2.0_2", "2.0_999", "1.56", "1.55-devel", "2.0_", ""} {
+	for _, v := range []string{"2.0_3", "2.0_999", "1.56", "1.55-devel", "2.0_", ""} {
 		if frrPackageVersion.MatchString(v) {
 			t.Fatalf("unproven package revision accepted: %s", v)
 		}

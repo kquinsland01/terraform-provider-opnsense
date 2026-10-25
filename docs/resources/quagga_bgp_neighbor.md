@@ -26,7 +26,7 @@ comparisons are deferred until apply, where unresolved/conflicting intent reject
 BGP owners discover the **installed `os-frr` package** with read-only
 `/api/core/firmware/info` and cross-check the neighbor model. The core firmware
 version does not select the wire format. The compatibility gate accepts stable
-legacy 1.46–1.55 package metadata or 2.0 / 2.0_1; an absent plugin, unknown future
+legacy 1.46–1.55 package metadata or 2.0 / 2.0_1 / 2.0_2; an absent plugin, unknown future
 version/revision, contradictory model, permission failure or unresolved configured
 intent rejects writes. Grant read access to firmware package information as well
 as the BGP API. Legacy live acceptance remains unverified; mocks are not appliance
