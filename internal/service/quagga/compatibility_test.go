@@ -25,6 +25,9 @@ func TestFRRInstalledPackageAndReadOnlyCapability(t *testing.T) {
 		good                     bool
 	}{
 		{"frr2_revision", `[{"name":"os-frr","version":"2.0_1","installed":"1"}]`, `{"family":{"ipv4":{"value":"IPv4","selected":1},"ipv6":{"value":"IPv6","selected":0}}}`, 200, true},
+		{"frr2_revision_2", `[{"name":"os-frr","version":"2.0_2","installed":"1"}]`, `{"family":{"ipv4":{"value":"IPv4","selected":1},"ipv6":{"value":"IPv6","selected":0}}}`, 200, true},
+		{"frr2_revision_999", `[{"name":"os-frr","version":"2.0_999","installed":"1"}]`, `{"family":{"ipv4":{"value":"IPv4","selected":1},"ipv6":{"value":"IPv6","selected":0}}}`, 200, true},
+		{"frr2_revision_model_contradiction", `[{"name":"os-frr","version":"2.0_2","installed":"1"}]`, `{"multiprotocol":"0"}`, 200, false},
 		{"legacy", `[{"name":"os-frr","version":"1.55_2","installed":"1"}]`, `{"multiprotocol":"0"}`, 200, true},
 		{"missing", "[]", `{}`, 200, false},
 		{"catalog_not_installed", `[{"name":"os-frr","version":"2.0","installed":"0"}]`, `{}`, 200, false},
@@ -200,9 +203,9 @@ func TestFRRNeighborPasswordPreservedOutsidePublicModel(t *testing.T) {
 }
 
 func TestFRRSourceRevisionAndMalformedCapabilityBoundaries(t *testing.T) {
-	for _, v := range []string{"2.0_2", "2.0_999", "1.56", "1.55-devel", "2.0_", ""} {
+	for _, v := range []string{"2.1", "2.1_1", "2.0.1", "2.0_2-devel", "2.0_2_1", "2.0_-1", "2.0_2,1", "2.00", "1.56", "1.55-devel", "2.0_", ""} {
 		if frrPackageVersion.MatchString(v) {
-			t.Fatalf("unproven package revision accepted: %s", v)
+			t.Fatalf("unsupported plugin version accepted: %s", v)
 		}
 	}
 	if _, err := legacyFamilies("bad-address", types.BoolValue(false)); err == nil {

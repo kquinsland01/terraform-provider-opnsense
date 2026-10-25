@@ -2,6 +2,12 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
+## 0.8.1 (Unreleased)
+
+BUG FIXES:
+
+* Accept installed `os-frr` 2.0 numeric package revisions (including `2.0_2`) for existing modern-model capability checks, fixing BGP refresh rejection. New plugin releases such as 2.1, prerelease/malformed versions, uninstalled/contradictory metadata and incompatible models remain rejected. The change has fixture/provider-protocol regression coverage, not a new live appliance or OpenTofu acceptance claim.
+
 ## 0.8.0 (Unreleased)
 
 UPGRADE NOTES:

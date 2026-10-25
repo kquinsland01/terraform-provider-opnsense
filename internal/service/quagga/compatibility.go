@@ -26,7 +26,9 @@ type frrCapability struct {
 	Grouped       bool
 }
 
-var frrPackageVersion = regexp.MustCompile(`^(?:1\.(?:4[6-9]|5[0-5])(?:_[0-9]+)?|2\.0(?:_1)?)$`)
+// Package revisions do not change the plugin release. Keep 2.0 revisions
+// eligible for modern-model validation without accepting 2.1 or other 2.x APIs.
+var frrPackageVersion = regexp.MustCompile(`^(?:1\.(?:4[6-9]|5[0-5])(?:_[0-9]+)?|2\.0(?:_[0-9]+)?)$`)
 
 func frrRead(ctx context.Context, c *opnsense.Client, endpoint string, out any) error {
 	// Firmware package metadata can block behind the appliance's pkg/configd
