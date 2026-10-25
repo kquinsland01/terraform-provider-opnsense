@@ -6,7 +6,7 @@ Status: **implementation proven; in review**. Independent review/PR publication 
 
 - Digest: `514e0d9a632f39fd098903e9ee9b6994e9e521c9e284b9f12f2399f9c89cc214`.
 - Core: **OPNsense 26.7.7**.
-- Disposable VM: `disposable acceptance guest`, UUID `d630950e-d4dd-4df0-9fcb-fac6b086bded`.
+- Disposable VM: `disposable acceptance guest`, UUID `00000000-0000-4000-8000-000000000004`.
 - The runner executed the root-owned live Proxmox identity probe and checked live name/UUID, isolation and exact QEMU HOST_FORWARD ownership before obtaining TLS SHA256 over trusted SSH from node-loopback18443. The host runner and the exact container API endpoint both matched that independent fingerprint before credentialed HTTP traffic. Credentials came from the mode-600 temporary runtime env file; no values are retained here.
 - Container traffic used the root-owned tunnel at `host.docker.internal:18444`. No production appliance or production bridge was used. Provisioning/tunnel/credential retirement remains root-owned.
 - Origin/main PR62's planning/public-document changes were integrated before the final digest. FRR2 compatibility gating, Stories 31.0k/31.0l and Unbound completion are preserved.
@@ -52,7 +52,7 @@ WIREGUARD_PARITY_CLEANUP namespace=server total=0
 WIREGUARD_PARITY_CLEANUP namespace=client total=0
 WIREGUARD_SETTINGS_RESTORE equal=true
 --- PASS: TestAccWireGuardParity (72.21s)
-WIREGUARD_PARITY_EVIDENCE digest=514e0d9a632f39fd098903e9ee9b6994e9e521c9e284b9f12f2399f9c89cc214 version=26.7.7 vm_name=disposable acceptance guest vm_uuid=d630950e-d4dd-4df0-9fcb-fac6b086bded restore_equal=true singleton_destroy_unchanged=true terraform_deleted=0 final_leftovers=0 secret_scan=pass
+WIREGUARD_PARITY_EVIDENCE digest=514e0d9a632f39fd098903e9ee9b6994e9e521c9e284b9f12f2399f9c89cc214 version=26.7.7 vm_name=disposable acceptance guest vm_uuid=00000000-0000-4000-8000-000000000004 restore_equal=true singleton_destroy_unchanged=true terraform_deleted=0 final_leftovers=0 secret_scan=pass
 ```
 
 Exactly six audited WireGuard rows are now covered (client/peer uses `covered-different-name`); inventory is **109 resources / 95 data sources**. No duplicate client owner, unaudited field or production change was introduced.

@@ -16,7 +16,7 @@
     "version": "26.7.7",
     "disposable": true,
     "vm_name": "disposable acceptance guest",
-    "vm_uuid": "7298f552-694f-409a-baa8-b98c23bb581a"
+    "vm_uuid": "00000000-0000-4000-8000-000000000003"
   },
   "command": "test/scripts/run-story-31-0d-acceptance.sh",
   "result": {
