@@ -16,6 +16,7 @@ func Resources() []func() resource.Resource {
 		newVipResource,
 		newRouteResource,
 		newGatewayResource,
+		newGatewayGroupResource,
 		newTunableResource,
 	}
 }
@@ -28,6 +29,7 @@ func DataSources() []func() datasource.DataSource {
 		newVipDataSource,
 		newRouteDataSource,
 		newGatewayDataSource,
+		newGatewayGroupDataSource,
 		newTunableDataSource,
 	}
 }

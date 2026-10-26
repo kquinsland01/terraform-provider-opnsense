@@ -116,22 +116,22 @@ The provider uses four public support states:
 | Needs research | Published or suspected endpoint evidence exists, but target-version availability or durable Terraform semantics are not confirmed. |
 | Upstream-blocked | OPNsense does not currently expose a stable usable API, or an upstream dependency must land first. |
 
-Current provider baseline:
+Current implementation inventory (including unreleased surfaces):
 
 | Capability | Count |
 |------------|------:|
-| Resources | 108 |
-| Data sources | 93 |
-| Resource docs | 108 |
-| Data source docs | 93 |
+| Resources | 110 |
+| Data sources | 96 |
+| Resource docs | 110 |
+| Data source docs | 96 |
 | Ephemeral resources / docs | 1 / 1 |
-| Remaining data-source gaps | 17 |
+| Remaining data-source gaps | 16 |
 
 | Supported today | Coming / provider-owned follow-up | Needs research | Upstream-blocked / OPNsense dependency |
 |-----------------|------------------------------------|----------------|----------------------------------------|
-| Firewall, HAProxy, ACME, DNS/Dnsmasq, DHCP/Kea, Dynamic DNS, VPN, FRR/Quagga, interface assignment/IP on OPNsense `26.7.6+` plus LAGG and other interface types, system tunables, auth, trust, syslog, Monit, cron, and traffic shaping resources. | Data-source parity for singleton or sensitive special-case resources; gateway groups and generic Kea option/DDNS owners after isolated 26.7.7 direct-API probes; provider/Terraform lifecycle acceptance pending. | Kea matching-option linkage/ordering details; HASync configuration `syncitems` model shape; HASync status/actions; PPPoE semantics for future interface settings. | System general settings: action/status plus setup-wizard evidence does not establish durable target-release get/set support. |
+| Firewall, HAProxy, ACME, DNS/Dnsmasq, DHCP/Kea, Dynamic DNS, VPN, FRR/Quagga, interface assignment/IP on OPNsense `26.7.6+` plus LAGG and other interface types, system tunables, auth, trust, syslog, Monit, cron, and traffic shaping resources. | Data-source parity for singleton or sensitive special-case resources; gateway-group owner/lookup passed isolated 26.7.7 Terraform lifecycle/recovery proof and is unreleased for 0.9.0, with populated first-tier clearing explicitly upstream-limited; generic Kea option/DDNS owners remain unimplemented. | Kea matching-option linkage/ordering details; HASync configuration `syncitems` model shape; HASync status/actions; PPPoE semantics for future interface settings. | System general settings: action/status plus setup-wizard evidence does not establish durable target-release get/set support. |
 
-OPNsense core and plugin versions are separate compatibility gates. The 26.7.7 release includes os-frr 2.0, which changes BGP address-family and policy semantics; existing FRR resources are not a blanket 2.0 compatibility claim until the version-specific migration/lifecycle gate passes. Merged interface/Kea parity code also does not imply inclusion in published v0.6.0.
+OPNsense core and plugin versions are separate compatibility gates. Released FRR 2.0 compatibility covers the verified installed-plugin/model and migration/lifecycle subgate; advanced BGP field/policy parity remains a separate follow-up, not a blanket compatibility claim for every plugin release. New unreleased surfaces, including the live-validated but unreleased gateway-group owner/lookup, are distinct from released compatibility and do not gain support from API probes alone.
 
 The full current Supported / Coming / Needs research / Upstream-blocked matrix is maintained in
 the repository at

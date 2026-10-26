@@ -86,7 +86,7 @@ development_status:
   5-3-virtual-ip-resource: done
   5-4-static-route-resource: done
   5-5-gateway-resource: done
-  5-6-gateway-group-resource: done      # historical gate; stable 26.7.7 source cleared, 31.0k owns lifecycle validation
+  5-6-gateway-group-resource: done      # historical gate only; 31.0k records API validation, 31.0m owns Terraform lifecycle; first-tier clear remains upstream-limited
   5-7-system-general-settings-resource: done  # BLOCKED upstream — no target-release durable system general settings MVC/API; initial_setup is wizard-only and unsafe for day-2 Terraform management
   epic-5-retrospective: optional
 
@@ -135,7 +135,7 @@ development_status:
   epic-11: in-progress
   11-1-dhcpv4-pool-resource: done
   11-2-dhcpv4-static-mapping-resource: done
-  11-3-dhcpv4-option-resource: backlog   # NEEDS RESEARCH — published docs list Kea dhcpv4 *_option endpoints, but live 25.x probe returned 'Endpoint not found' (2026-05-31)
+  11-3-dhcpv4-option-resource: backlog   # superseded ownership track: stable 26.7.7 direct-API validation in 31.0l; generic Terraform owner is 31.0n, not completed subnet option_data
   epic-11-retrospective: optional
 
   # Epic 12: Data Sources, Documentation & Registry Release
@@ -206,13 +206,13 @@ development_status:
   20-6-ipsec-key-pair-resource: done   # opnsense_ipsec_key_pair (hand-written; public/private key write-only, live-validated)
 
   # Epic 21: DHCP Completion (Kea) — singletons depend on Epic 13
-  epic-21: in-progress   # buildable stories done; 21-4 dhcpv4-option + 21-6 ddns need live endpoint recheck before implementation
+  epic-21: in-progress   # stable option/DDNS APIs validated by 31.0l; missing Terraform owners tracked by 31.0n/o, not absent-API blockers
   21-1-kea-dhcpv6-subnet-resource: done   # opnsense_kea_dhcpv6_subnet (hand-written, composition-tested with dhcpv6_settings)
   21-2-kea-dhcpv6-reservation-resource: done   # opnsense_kea_dhcpv6_reservation (hand-written, composition-tested via subnet)
   21-3-kea-ha-peer-resource: done   # opnsense_kea_ha_peer (generated, live-validated)
-  21-4-kea-dhcpv4-option-resource: backlog   # NEEDS RESEARCH — same as 11-3; published docs conflict with live endpoint-not-found evidence
+  21-4-kea-dhcpv4-option-resource: backlog   # historical alias of 11-3; 31.0n owns generic option implementation and Core lifecycle proof
   21-5-kea-ctrl-agent-settings-resource: done   # opnsense_kea_ctrl_agent singleton (codegen via dotted monad ctrlagent.general, live-validated)
-  21-6-kea-ddns-settings-resource: backlog   # NEEDS RESEARCH — published docs list kea/ddns get/set, but tested build returned Endpoint not found
+  21-6-kea-ddns-settings-resource: backlog   # stable targeted ddns.general API validated; 31.0o owns singleton/state-only destroy and Core proof
 
   # Epic 22: DNS Completion (Unbound extensions; optional dnsmasq)
   epic-22: done
@@ -237,7 +237,7 @@ development_status:
   # Epic 25: Upstream Contribution Track (the 3 blocked domains — two-front workstream)
   epic-25: backlog
   25-1-track-interface-assignment-pr-8436: backlog
-  25-2-author-gateway-group-mvc-pr: backlog
+  25-2-author-gateway-group-mvc-pr: done # stable CRUD already shipped; no new absent-API MVC PR needed; first-tier-clear follow-up remains explicit in 31.0m
   25-3-adopt-system-general-when-api-ships: backlog
 
   # === POST-v0.1.0 SCOPE (post-release-epics.md, 2026-06-02) ===
@@ -306,7 +306,7 @@ development_status:
   31-0j-provider-retry-settings: backlog         # P1 — audit-derived; before 31.1
   31-0k-gateway-group-stable-api-validation: review # direct-API proof recorded; 31.0m owns implementation/TF gates
   31-0l-kea-option-ddns-stable-api-validation: review # direct-API proof recorded; 31.0n/o own implementation/TF gates
-  31-0m-gateway-group-resource: backlog # API contract validated; provider/TF acceptance pending
+  31-0m-gateway-group-resource: review # owner/lookup and 16-step Core proof/reviews passed; unreleased; populated first-tier clear remains upstream-limited
   31-0n-kea-generic-option-resource: backlog # distinct from subnet option_data
   31-0o-kea-ddns-settings-resource: backlog # ddns.general only; state-only destroy
   31-1-complete-provider-positioning-docs: backlog

@@ -2,6 +2,12 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
+## 0.9.0 (Unreleased)
+
+FEATURES:
+
+* Added `opnsense_system_gateway_group` resource and UUID-keyed data source for stable OPNsense 26.7.7+, with typed gateway-name tiers, immutable names, strict firmware/model/read validation and durable save/delete activation recovery. Route reconfigure does not apply PF. The 16-step isolated Terraform lifecycle, independent saved-field observations and exact cleanup/restoration passed. Populated first-tier clearing is rejected before any write because the stable API ignores it; later-tier clears are supported. Older versions, OpenTofu and actual traffic failover remain unverified.
+
 ## 0.8.1 (Unreleased)
 
 BUG FIXES:

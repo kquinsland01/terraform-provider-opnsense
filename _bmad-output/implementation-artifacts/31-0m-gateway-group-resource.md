@@ -1,67 +1,112 @@
-# Story 31.0m: Gateway Group Resource and Data Source
+# Story 31.0m: Gateway group resource and data source
 
-## Status
+Status: review — implemented and live-validated; maintainer PR/release pending
 
-backlog — stable-source/direct-API contract validated; implementation and real
-Terraform acceptance remain required. This story does not confer provider support.
+## Scope
 
-## Priority and Entry Point
+Implements `opnsense_system_gateway_group` resource and UUID-keyed lookup for the
+validated stable OPNsense 26.7.7 Routing API. Public schema owns immutable name,
+five gateway-name tier sets, trigger, pool options and description. The stable API
+cannot clear a populated first tier; the owner rejects that transition before
+saving any fields. Initially empty first tiers remain supported when another
+tier is populated. This is bounded ownership, not full all-tier-clear parity. Route
+reconfigure does not apply PF and is not a traffic failover test.
 
-P1, before public completeness/migration positioning. Read AGENTS.md and the
-consumer-neutral validation reports in `_bmad-output/planning-artifacts/`.
-Use existing resource addresses/ownership conventions; no operator inventory or
-private adoption plan belongs in this specification.
+## Acceptance contract
 
-## Implementation Scope
+Given a supported disposable appliance, when Terraform Core create, read, import,
+no-change, tier/trigger/pool updates, explicit clears, lookup, drift/repair and
+delete execute, then all fields converge with one stable UUID. Given an in-use
+group or malformed response, when delete/read fails, then tracked identity and
+valid prior state remain. Given confirmed or uncertain saves/deletes and failed
+activation, when returned protocol state/private bytes survive provider restart,
+then authoritative recovery avoids duplicated mutations.
 
-Extend `internal/service/system/gateway_group_{resource,schema,model,data_source}.go`
-and `exports.go`; use `opnsense_system_gateway_group`, existing gateway owners and
-stable routing/group_settings APIs. Consume the gateway-group validation report.
-Expose typed five-tier gateway-name sets, immutable name, trigger/pool/description;
-require at least one nonempty tier and normalize selected-map keys without labels.
-Do not silently accept the all-empty normalization observed upstream. Preserve UUID
-on in-use delete and failed reconfigure; commit create identity before reporting
-activation failure, with restart/retry tests that prove no duplicate creation.
-Do not claim PF activation or actual traffic failover from route reconfigure.
+## Verification and remaining gates
 
-## Tasks
+Implementation and offline verification are recorded separately from live proof.
+The identity/TLS/version guarded runner binds source/helper hashes before and
+after execution, keeps raw artifacts privately, requires non-skipped Core proof,
+and independently checks zero synthetic entries before baseline rollback and
+again after exact config/routes restoration. Failed attempts remain distinct.
 
-1. Re-read tagged 26.7.7 model/controller and the validation evidence, then write a
-   complete implementation spec with exact fields, request/read shapes, defaults,
-   unknown/null/empty semantics, activation and recovery paths before coding.
-2. Add strict model/schema/resource/data source files above, exports, matching
-   schema/example templates and generated docs. Gate unsupported versions or
-   unavailable model endpoints before mutation; document required permissions.
-3. Add unit and actual provider-protocol fixtures for malformed responses,
-   create/update/delete/save/reconfigure failures, restart/refresh recovery,
-   cancellation, imports and data-source parity. Never treat HTTP success alone
-   as saved/activated state or turn validation errors into a missing object.
-4. Run non-skipped real Terraform lifecycle on a disposable, identity-guarded,
-   loopback-accessible target, with services/traffic disabled where applicable.
-   Capture independent API/config/runtime observations and exact restoration.
-5. Regenerate docs/audit deterministically, run full gates and independent review,
-   update support claims only for executed proof, and add the required versioned
-   Unreleased changelog entry in the implementation PR.
+The repaired 16-step real Terraform lifecycle and independent follow-up reviews
+passed. Parent owns the final publication-tree binding and sanitized evidence
+linked below before PR handoff. This is validated unreleased bounded ownership,
+not universal first-tier-clear completeness. No older-core, OpenTofu, real traffic
+failover or production adoption claim is made.
 
-## Acceptance Criteria
+## Offline verification
 
-- **Given** a valid configuration, **when** create/import/update/refresh run through
-  Terraform Core, **then** the UUID/singleton identity and all readable fields are
-  preserved and a subsequent plan has no changes.
-- **Given** drift or a populated optional field, **when** repaired or explicitly
-  cleared, **then** the API and Terraform state converge without losing unrelated
-  fields or accepting malformed/unknown intent as an empty clear.
-- **Given** a save/reconfigure/delete failure, **when** the provider restarts and
-  retries or refreshes, **then** state accurately retains committed identity and
-  recovery intent without duplication or silent deletion of an in-use owner.
-- **Given** completed acceptance, **when** Terraform destroy and harness cleanup
-  finish, **then** no test entries remain and singleton/settings/runtime baselines
-  are restored exactly; state-only singleton destruction must not alter services.
+Executed in cached `ghcr.io/devrail-dev/dev-toolchain:1.12.24`:
 
-## Verification
+- Gateway-group named unit/protocol tests pass with `-count=1 -race -v`, without
+  skips. Actual protocol6 provider registration, returned state/private restart,
+  mutation counters, cancellation, concurrency and strict missing-object controls
+  are exercised. The full system package race run also passes; live acceptance
+  tests are intentionally not counted as proof when `TF_ACC` is absent.
+- `go test -count=1 ./...` passes.
+- Two consecutive `go generate ./...` runs produce identical source/docs/audit
+  content hashes. Generated inventory is 110 resources and 96 data sources.
+- `make check` passes all six targets, with no suppressions; `git diff --check`,
+  focused `golangci-lint`, ShellCheck, shell formatting and Terraform example
+  formatting pass.
 
-Focused uncached/race-enabled service tests; actual provider-protocol tests;
-real Terraform import/no-change/drift/clear/failure/cleanup proof on disposable
-26.7.7; deterministic `go generate ./...`, structure and whitespace checks,
-`make check` and complete hosted CI. Legacy appliance/OpenTofu/live traffic or
-private adoption are unverified unless separately executed and documented.
+The strict 404 owner mapping is local to this gated resource; existing shared
+CRUD contracts and individual-gateway lifecycle are unchanged. Non-idempotent
+group writes use the authenticated single-attempt transport and reconcile
+uncertain outcomes instead of inheriting automatic POST retries.
+
+## Runner private interface
+
+`test/scripts/run-story-31-0m-acceptance.sh` requires an absolute private
+`STORY31_0M_RUNTIME_ENV` shell environment file and `STORY31_0M_PRIVATE_ROOT`
+outside the publication tree. Runtime values include API URI/key/secret, TLS
+policy, synthetic gateway interface/addresses, expected source digest, and
+absolute guard/oracle executables. `STORY31_0M_EXPECTED_HELPER_DIGEST` is an
+independently reviewed SHA256 of the combined `shasum -a 256 GUARD ORACLE`
+output (including its path names), hashed again with SHA256. The runner requires
+and compares it **before either helper executes**, then proves both executables
+unchanged afterward. Missing/mismatched expectations fail closed before helper
+execution. Private inputs and raw logs are never public.
+
+The guard emits JSON with `ok`, `identity_verified`, `tls_verified`,
+`version_verified`, `isolated` all true and `tls_sha256` (64 lowercase hex). It
+must independently attest the exact disposable VM, pinned endpoint, minimum stable
+version, isolation and route-reconfigure-safe management path. The acceptance-only
+container launcher routes actual provider HTTP requests through a loopback proxy
+with one fixed HTTPS upstream. Every upstream TLS connection verifies the exact
+attested certificate digest before forwarding HTTP bytes or API credentials;
+a changed certificate or any redirect is rejected. A separate one-time pin
+preflight is not treated as continuous protection. The proxy and launcher are
+reviewed source-digest inputs and add no provider setting or public interface.
+The in-Core oracle uses the private loopback HTTP
+service via `STORY31_0M_ORACLE_URL` and `STORY31_0M_ORACLE_TOKEN`, posting to
+`/action` with JSON `args` matching the executable argument contract.
+
+Oracle invocation is `oracle ACTION PRIVATE_EVIDENCE_DIR [GROUP_UUID GROUP_NAME]`.
+Every successful action returns JSON `ok:true`. `snapshot` includes `core_version`,
+`config_sha256`, `routes_sha256`, and zero `test_groups`/`test_gateways`.
+`verify-zero` and `cleanup` include zero counts. `verify-restored` includes
+`config_equal:true` and `routes_equal:true` and is read-only. `restore` performs
+parent-owned baseline restoration only after the pre-restoration zero check has
+been attempted. `remove-reference` includes `reference_removed:true`; `drift`
+includes `changed:true`; `establish-reference` includes `eligible:true` and
+`reference_established:true` for the supplied Terraform-tracked UUID. An unmet
+dependency fixture returns `ok:false` and a specific private `reason`; it is not a
+skip/pass. `cleanup` removes only identity-guarded synthetic test objects through
+official APIs, never raw XML. Cleanup attempts all phases even after failures and
+cannot promote a failed test to passing proof.
+
+`observe-group` returns `ok:true` and an independent persisted `group` object:
+scalar `name`, `descr`, `trigger`, `poolopts` and selected gateway-name arrays
+`item`, `item2`, `item3`, `item4`, `item5`. The Core fixture compares every field
+against explicit expectations after positive phases, including initial tier2-only
+creation/update and populated/cleared tiers 3–5. Descriptions are compared
+literally; only gateway selector arrays are compared order-insensitively.
+
+## Publication proof
+
+See [sanitized exact-tree lifecycle evidence](31-0m-gateway-group-live-evidence.md).
+The evidence record is outside the executable/source digest to avoid a recursive
+self-hash; all runtime source, test helpers and publication claim inputs are bound.
