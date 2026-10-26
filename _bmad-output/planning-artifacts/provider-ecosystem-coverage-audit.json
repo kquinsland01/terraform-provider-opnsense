@@ -10,10 +10,10 @@
     "provider_config_count": 1
   },
   "local_inventory": {
-    "resource_count": 109,
-    "data_source_count": 95,
-    "resource_doc_count": 109,
-    "data_source_doc_count": 95,
+    "resource_count": 110,
+    "data_source_count": 96,
+    "resource_doc_count": 110,
+    "data_source_doc_count": 96,
     "ephemeral_resource_count": 1,
     "ephemeral_resource_doc_count": 1,
     "resource_only_data_source_gaps": [

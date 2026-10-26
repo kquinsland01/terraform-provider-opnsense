@@ -21,8 +21,8 @@ func TestDataSources_schemaIDs(t *testing.T) {
 	t.Parallel()
 
 	constructors := DataSources()
-	if len(constructors) != 6 {
-		t.Fatalf("expected 6 system data sources including system_info, got %d", len(constructors))
+	if len(constructors) != 7 {
+		t.Fatalf("expected 7 system data sources including system_info, got %d", len(constructors))
 	}
 
 	for _, constructor := range constructors[1:] {

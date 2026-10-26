@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "System"
+description: |-
+  Reads a gateway group by UUID on stable OPNsense 26.7.7 or newer.
+---
+
+# {{.Name}} ({{.Type}})
+
+Reads an existing Routing gateway group by exact UUID on **stable OPNsense
+26.7.7 or newer**, without mutation or activation. Credentials require read access
+to `/api/core/firmware/status` and the Routing group model/get API. Firmware and
+model availability are checked before lookup. Missing, unavailable and malformed
+responses are diagnosed rather than guessed. Tier sets contain gateway names,
+not UUIDs or labels; the default pool selection is an empty string.
+
+Actual traffic failover/load balancing, OpenTofu and older versions remain
+unverified. The support matrix distinguishes implementation from live proof.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_system_gateway_group/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
