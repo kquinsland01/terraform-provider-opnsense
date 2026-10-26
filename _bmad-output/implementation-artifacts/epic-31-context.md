@@ -56,3 +56,15 @@ Make the provider complete enough to be the default choice for an OPNsense appli
 - The coverage audit drives parity follow-ups; reconcile completed work rather than rebuilding it. Finish remaining parity and compatibility gates before positioning, migration guidance, and adoption examples. FRR 2.0 compatibility is a separate prerequisite to BGP adoption; compatibility alone does not complete advanced parity.
 - Gateway-group validation precedes its owner/lookup. Kea option/DDNS validation precedes their separate owners; ordered parent linkage is an additional gate, not completion conferred by standalone generic-option ownership. Existing subnet/PXE/DHCPv6 work is not repeated.
 - Retain Epic 30's assignment API release gate. Epic 32's repeatable acceptance proof and explicit stability criteria remain prerequisites for credible v1 positioning.
+
+## Story 31.0o implementation boundary
+
+The compatible stable 26.7.7+ DDNS general singleton now has a four-field owner
+and read-only lookup in the working candidate. It preserves omitted optional
+values, writes only explicit configured fields and persists fixed-ID requested-
+subset save recovery. Delete itself is zero-API/state-only, even with pending
+recovery; normal Core planning refresh may read/recover/activate first or fail
+before Delete. Delete does not roll back saved settings or activate them. Actual Core failed-create
+taint remains normal. Full/race verification and bounded review rechecks passed. The final digest-bound
+disabled-appliance evidence gates publication; merge/release remain separate.
+Active DNS delivery remains unverified.

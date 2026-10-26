@@ -24,10 +24,21 @@ func TestDataSources_schemaIDs(t *testing.T) {
 	t.Parallel()
 
 	constructors := DataSources()
-	if len(constructors) != 8 {
-		t.Fatalf("expected 8 Kea data sources, got %d", len(constructors))
+	if len(constructors) != 9 {
+		t.Fatalf("expected 9 Kea data sources, got %d", len(constructors))
 	}
 	for _, constructor := range constructors {
+		var metadata datasource.MetadataResponse
+		constructor().Metadata(context.Background(), datasource.MetadataRequest{ProviderTypeName: "opnsense"}, &metadata)
+		if metadata.TypeName == "opnsense_kea_ddns_settings" {
+			var singleton datasource.SchemaResponse
+			constructor().Schema(context.Background(), datasource.SchemaRequest{}, &singleton)
+			id, ok := singleton.Schema.Attributes["id"].(dsschema.StringAttribute)
+			if !ok || !id.Computed || id.Required || id.Optional {
+				t.Fatal("singleton lookup must expose only a computed fixed ID")
+			}
+			continue
+		}
 		assertRequiredID(t, constructor())
 	}
 }

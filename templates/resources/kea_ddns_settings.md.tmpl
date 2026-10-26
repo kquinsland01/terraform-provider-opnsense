@@ -1,0 +1,86 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Manages the existing Kea DDNS general settings singleton on compatible stable OPNsense 26.7.7+.
+---
+
+# {{.Name}} ({{.Type}})
+
+Manages exactly `ddns.general.enabled`, `manual_config`, `server_ip` and
+`server_port` on **stable OPNsense 26.7.7 or newer** with the compatible scalar
+model. The singleton already exists; create applies explicit desired settings
+over an authoritative appliance baseline, not a new object or a default reset.
+Use only one Terraform owner for these fields.
+
+Credentials require read permission for `/api/core/firmware/status` and
+`/api/kea/ddns/get`, write permission for `/api/kea/ddns/set`, and permission for
+`/api/kea/service/reconfigure`. Grant these using the appliance API permission
+selector. Product identity, stable version and the actual four-field DDNS model
+are verified before mutation; no generic-option catalog is required.
+
+`enabled` is required to make service-state intent explicit. Omitted optional
+fields preserve appliance, imported and prior values, including at creation and
+after removing an argument. API defaults are observed, never imposed. Explicit
+`false` is written. Unknown configured values remain unknown and must resolve
+before a write; they are not replaced by prior values or defaults. Only explicitly
+configured arguments are sent in targeted partial writes.
+
+`server_ip` accepts canonical IPv4 or the exact upstream `any` sentinel, not
+empty strings, IPv6, CIDR or lists. `server_port` is an integer from 1 through
+65535; zero/empty does not clear. `manual_config` owns the flag only, not manual
+configuration files, hooks or integrations. DHCPv4/6 settings, Control Agent,
+generic options and parent links are outside this owner's scope. Kea reconfigure
+is shared; it does not imply only one process reloads or prove DNS delivery.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_kea_ddns_settings/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Recovery and state-only destruction
+
+Mutations and recovery use the shared client mutex; this does not lock out
+out-of-band edits. GET reads honor configured retries. POST writes are attempted
+once, redirects are rejected, and affirmative save plus authoritative requested-
+field read-back is required before activation.
+
+A confirmed or uncertain save retains fixed identity `ddns`, known state and
+canonical private requested-field intent after a lost/malformed reply, read-back
+failure, cancellation or activation failure. Preserve returned Terraform state
+and refresh using a fresh plan. Recovery observes authoritative truth without
+repeating set. Matching requested fields alone permit activation; omitted fields
+do not veto recovery. Valid contradictions become authoritative state and clear
+pending intent without activation; review a fresh plan. Malformed/unavailable
+truth retains identity and intent, never infers singleton absence. Do not edit
+private bytes. Field validation rejection is an error, not successful creation.
+
+Terraform Core may taint failed creates. Recovery does not override its normal
+replacement planning. Refresh and inspect the plan; recovery itself never repeats
+a saved write.
+
+**The provider's Delete operation is zero-API and state-only**, including
+unconfigured/canceled clients and pending recovery. Delete never reads, resets,
+stops or reconfigures Kea. However, normal Terraform Core planning refresh runs
+Read before Delete: it may read/reconcile pending saves, activate verified matching
+requested fields, or fail before Delete is reached. Therefore a whole
+`terraform destroy` command is not guaranteed to make zero API calls or zero
+activation calls. Disabling refresh is a distinct Core behavior, not a change to
+Read recovery semantics.
+
+If Delete receives pending recovery directly, it abandons that ownership and
+activation intent without rolling back saved settings. Review appliance settings
+and backup/state before reimport or manual reconciliation. Destroy is not a way
+to disable DDNS.
+
+Disabled-appliance lifecycle verification, implementation, merge and publication
+are separate gates. Older-core/OpenTofu compatibility, daemon enablement and
+actual DNS updates are not claimed by this work.
+
+## Import
+
+Import only the exact fixed ID `ddns`. Configure required `enabled` to match the
+appliance, omit optional fields if desired, and inspect a no-change plan.
+
+{{codefile "shell" "examples/resources/opnsense_kea_ddns_settings/import.sh"}}
