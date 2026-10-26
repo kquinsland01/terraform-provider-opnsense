@@ -57,3 +57,41 @@ operator integration gates outside the public provider feature contract.
 Controller SHA256s: DHCPv4 `9fa1ca628fadcba5b844e536a9ed082da59bb2fa1fbfffdace5610ae73614669`;
 DDNS `f645aa48e3a2dfcfb6b2a6b096ceac5d84eb95624c77194afb8b1b10b051d2d3`.
 DDNS model SHA256: `a54b2b92ab3832d77855d51ea5a6cf7030794f8cb622ec24ddb801786a04ae84`.
+
+
+## Subsequent generic-option contract calibration
+
+A second guarded isolated appliance on the same exact core verified population
+and explicit clearing of `match_code`, `match_encoding` and `match_data`.
+An encoding-only value with empty match code/data is valid; an all-three-or-none
+provider validator would incorrectly reject this upstream-supported state.
+Two same-code options with distinct descriptions coexist. Description is required,
+unique and mutable, not an immutable option name.
+
+An official-API subnet reference caused option deletion to return HTTP500 while
+retaining the tracked option UUID and complete saved values. Unlinking allowed
+cleanup. Reversing the stored parent option UUID sequence changed the installed
+model's generated flex-option order, consistent with last-matching-same-code
+precedence. The observation invoked installed model generation to a private
+throwaway file while all DHCP/DDNS daemons stayed inactive; ordinary service
+reconfigure correctly skipped generation while disabled. It is not active
+packet-delivery, normal disabled-service-generation or Terraform linkage proof.
+The stored force flag changed on read-back but did not change that generated
+fixture; tagged generator source does not consume it, so no packet-level force
+semantics are established.
+
+A first calibration attempt stopped because its observer tried to parse the
+unchanged stock commented runtime file as strict JSON. Its matching/dependency
+checks had passed, but the attempt is retained as failed overall; zero entries
+and exact restoration passed. The corrected private-artifact observation passed
+independently. Both cleanups verified zero tagged options/subnets/reservations,
+exact full DHCPv4 GET, saved configuration and IPv4/IPv6 route restoration.
+No active DHCP or DNS traffic, production configuration or private inventory was
+used. These observations refine the implementation contract; real Terraform
+owner/lookup proof is recorded separately for Story31.0n in
+`../implementation-artifacts/31-0n-kea-option-live-evidence.md`; the API calibration alone does not establish it.
+
+Existing subnet/reservation resources do not yet expose the generic option
+relation. ModelRelationField GET choice maps are label-sorted and do not prove
+stored selection order; ordered parent linkage is an explicit separate follow-up
+31.0p, not completion conferred by creating an unlinked generic option.

@@ -2,7 +2,7 @@
 
 Pinned baseline: `browningluke/opnsense` v0.26.0 at `33c2a03c2bc1a7339cb5aa5b611e15014e27f7ba` (47 resources, 45 data sources, 1 ephemeral resource, and provider retry configuration).
 
-Current local inventory: **110 resources and 96 data sources**, with 110/96 generated docs. There are **16 resource-only same-name data-source gaps** and the data-only surfaces are `system_info`, `unbound_settings`.
+Current local inventory: **112 resources and 98 data sources**, with 112/98 generated docs. There are **16 resource-only same-name data-source gaps** and the data-only surfaces are `system_info`, `unbound_settings`.
 
 ## Ownership Direction
 

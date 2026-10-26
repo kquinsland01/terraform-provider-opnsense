@@ -1,0 +1,26 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Reads the four Kea DDNS general settings without saving or activating configuration.
+---
+
+# {{.Name}} ({{.Type}})
+
+Reads all four scalar `ddns.general` fields and fixed identity `ddns` on
+compatible **stable OPNsense 26.7.7 or newer**. No lookup arguments are required.
+Credentials need read permission for `/api/core/firmware/status` and
+`/api/kea/ddns/get`; this lookup never writes, recovers or reconfigures settings.
+
+`server_ip` is canonical IPv4 or the exact upstream `any` sentinel;
+`server_port` is 1–65535. Missing/null/wrapper/invalid fields and HTTP failures
+are errors, not singleton absence. Extra unowned fields are not adopted. The
+manual-config flag does not grant ownership of manual configuration files.
+Stored enabled settings do not prove active DNS delivery, and this work does not
+claim live daemon enablement, older-core or OpenTofu compatibility.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_kea_ddns_settings/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

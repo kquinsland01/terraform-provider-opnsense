@@ -4,7 +4,7 @@
 
 ## Goal
 
-Close meaningful coverage gaps so operators can choose one OPNsense provider for an appliance, then translate verified completeness into clear positioning, dependable brownfield migration guidance, and useful adoption examples. Coverage must mean field depth and correct lifecycle behavior, not merely a larger resource count.
+Make the provider complete enough to be the default choice for an OPNsense appliance, then translate verified coverage into trust and adoption. Close meaningful field, lifecycle, and lookup gaps before promoting broad appliance management; support dependency-aware migration from existing providers without competing ownership or unexpected changes.
 
 ## Stories
 
@@ -24,32 +24,47 @@ Close meaningful coverage gaps so operators can choose one OPNsense provider for
 - Story 31.0m: Gateway Group Resource/Data Source
 - Story 31.0n: Kea Generic Option Resource/Data Source
 - Story 31.0o: Kea DDNS Settings Resource/Data Source
+- Story 31.0p: Kea Ordered Generic-Option Linkage
 - Story 31.1: Complete Provider Positioning README and Registry Pass
 - Story 31.2: Existing Provider Migration Guide
 - Story 31.3: Example Stacks for Adoption
 
 ## Requirements & Constraints
 
-- Compare equivalent provider surfaces by semantics, fields, types, defaults, lifecycle, lookup behavior, and secret handling. Distinguish renamed coverage, broader coverage, deliberate differences, buildable gaps, and upstream limitations. Refresh the deterministic audit after registration or schema changes; do not infer parity from counts.
-- Public support claims must match verified support and release availability. Keep stable API presence, provider implementation, published release, and live Terraform lifecycle proof distinct. Development-branch models alone do not establish supported APIs. Interface assignment/IP support requires OPNsense 26.7.6 or later.
-- Use official OPNsense APIs only; no legacy-page scraping, direct XML edits, or ownership bypasses. A validation report establishing a buildable contract does not itself ship a resource or prove Terraform behavior. Gateway-group and Kea option/DDNS probes establish contracts on 26.7.7; traffic failover and external DHCP/DDNS integrations remain unproved.
-- Prove create/read/update/delete, import, no-change plans, drift, failure consistency, and cleanup on disposable appliances as applicable. Read-only lookups must not mutate configuration. Preserve existing user state and support schema evolution without manual state editing.
-- Use one provider owner per object domain in steady state. Migration must account for uncovered fields and explicit blockers before ownership changes; two providers must never manage the same object. Provider development does not authorize production firmware, routing, or ownership cutovers.
-- Keep all public artifacts consumer-neutral. Use synthetic disposable compositions, reserved example domains, and documentation address ranges; exclude private inventory, credentials, real topology, and operator deployment plans.
+- Establish completeness through semantic field and lifecycle coverage, not resource counts or matching names. Compare against a pinned ecosystem baseline; distinguish covered, renamed/broader, buildable, upstream-blocked, and intentionally different surfaces. Refresh the deterministic audit after schema or registration changes.
+- Keep supported, unreleased, research-only, and upstream-blocked capabilities distinct. Stable API availability, provider implementation, published release, and live lifecycle proof are separate gates. README, Registry documentation, and migration claims must match the verified support matrix rather than older roadmap snapshots.
+- Preserve Terraform semantics: accurate refresh and drift detection, in-place updates where valid, API read-back after writes, consistent state after partial failures, and clear reconfigure diagnostics. Verify import and a no-change plan, not merely successful API calls or mocked CRUD.
+- Maintain one owner per appliance/object domain in steady state; never let two providers manage the same object. Migration must identify gaps and ownership boundaries before handoff. Synthetic examples require an explicit manual apply gate; provider work does not authorize production firmware, routing, DHCP, or ownership changes.
+- Publish consumer-neutral examples using documentation addresses and reserved domains. Exclude operator inventory, allocations, hostnames, operational plans, credentials, and local workspace paths. Record only sanitized test versions, behavior, and results.
 
 ## Technical Decisions
 
-- Preserve accurate plan/apply semantics: read authoritative API state after mutations, update mutable network resources in place, and retain consistent state after partial failures. Serialize mutations globally while permitting bounded concurrent reads; reconfigure only the affected service. Firewall filter changes require savepoint/apply/rollback-confirmation protection.
-- Handle OPNsense response semantics explicitly: successful HTTP status may contain validation failures, and missing UUIDs may return blank defaults. Surface field-specific diagnostics; distinguish absent objects from authentication, service, and dependency failures.
-- Normalize API selected maps to selected keys, preserving multi-value sets rather than labels or whole response maps. Respect request wrappers, omitted-field preservation, explicit clears, and API-assigned metadata. Ownership must be limited to the actual managed object or settings subtree.
-- Treat API write-only secrets as sensitive and preserve prior values when refresh omits them; never invent readable secret parity. Use ephemeral/write-only flows where supported, and do not expose resource-only secrets through data sources. Document unavoidable secret drift-detection limits.
-- Singleton settings need durable get/set semantics and non-destructive ownership boundaries, not fabricated CRUD. Kea DDNS owns only its general settings subtree and has state-only destroy; generic options are distinct from subnet option data. Operational interface lookups describe live state rather than durable configuration ownership.
-- Expose configurable retries and backoff through the shared client while retaining transient-failure recovery and actionable exhaustion errors.
+- Consume durable OPNsense APIs with explicit core/plugin compatibility gates. Do not scrape legacy pages, edit configuration XML directly, or invent private endpoints to bypass upstream ownership. Interface assignment/IP support requires OPNsense 26.7.6+; PPPoE remains separately unverified. Gateway-group and generic-option/DDNS contracts have stable 26.7.7 evidence, not proof for older targets.
+- Respect each ownership model: UUID-backed items, read-only lookups, settings singletons, and sensitive/ephemeral operations are not interchangeable. Limit singleton writes to the owned subtree; a filtered GET does not establish ownership of surrounding configuration. Kea DDNS owns only its general settings subtree and uses state-only destroy.
+- Preserve omission versus explicit clearing, selected-key semantics, and ordering where behavior depends on it. Generic options are independent objects, not proof of parent linkage. Label-sorted relation choices do not establish stored order; ordered linkage remains gated on an adequate read contract. Stored force flags do not establish packet-level behavior.
+- Honor observed API limitations without silently reporting success: gateway-group populated first-tier clearing is upstream-gated and must be rejected before other fields are saved. In-use deletion failures retain identity/state and must not be treated as successful deletion or not-found.
+- Follow shared lifecycle safety: serialize mutations, reconfigure only the affected service, and retain firewall rollback protection. Evidence should exercise real Terraform lifecycle, import/no-change, drift, failure recovery, deletion or state-only removal as appropriate, and exact disposable-appliance restoration. Direct-API validation alone proves none of those Terraform behaviors.
 
 ## UX & Interaction Patterns
 
-The provider's interface is HCL, Terraform diagnostics, README, and Registry documentation. Present broad modern appliance management and brownfield import without unsupported completeness claims or adversarial comparisons. Explain supported versions, plugin/API permissions, authentication precedence, known gaps, and a working quickstart. Migration guidance follows dependency-aware import, matching configuration, and a no-change plan before an explicit apply gate; composition examples demonstrate connected resources and serve as migration target configurations.
+- Lead README and Registry pages with broad modern core/plugin coverage backed by explicit support status; avoid unsupported completeness claims or adversarial provider comparisons. Explain authentication, permissions, compatibility requirements, and a working quickstart.
+- Present migration as matching configuration, importing identities in dependency order, and inspecting a no-change plan before ownership handoff. Explain semantic name/field differences and unsupported cases; do not imply provider state is automatically interchangeable.
+- Supply realistic multi-resource compositions and complete import examples alongside generated argument/attribute references. Show how resources connect so examples also serve as migration targets.
 
 ## Cross-Story Dependencies
 
-The coverage audit drives parity work; finish verified gaps before positioning and migration claims. Prioritize the FRR compatibility gate before BGP adoption. Gateway-group validation precedes its resource/data source, and Kea option/DDNS validation precedes their separate owners; completed subnet/PXE coverage must not be rebuilt as a generic-option substitute. README/Registry positioning precedes the migration guide, with examples supporting adoption. Keep Epic 30's assignment release evidence current; Epic 32's acceptance-proof work is a prerequisite for credible v1 positioning, not a consequence of broader coverage alone.
+- The coverage audit drives parity follow-ups; reconcile completed work rather than rebuilding it. Finish remaining parity and compatibility gates before positioning, migration guidance, and adoption examples. FRR 2.0 compatibility is a separate prerequisite to BGP adoption; compatibility alone does not complete advanced parity.
+- Gateway-group validation precedes its owner/lookup. Kea option/DDNS validation precedes their separate owners; ordered parent linkage is an additional gate, not completion conferred by standalone generic-option ownership. Existing subnet/PXE/DHCPv6 work is not repeated.
+- Retain Epic 30's assignment API release gate. Epic 32's repeatable acceptance proof and explicit stability criteria remain prerequisites for credible v1 positioning.
+
+## Story 31.0o implementation boundary
+
+The compatible stable 26.7.7+ DDNS general singleton now has a four-field owner
+and read-only lookup in the working candidate. It preserves omitted optional
+values, writes only explicit configured fields and persists fixed-ID requested-
+subset save recovery. Delete itself is zero-API/state-only, even with pending
+recovery; normal Core planning refresh may read/recover/activate first or fail
+before Delete. Delete does not roll back saved settings or activate them. Actual Core failed-create
+taint remains normal. Full/race verification and bounded review rechecks passed. The final digest-bound
+disabled-appliance evidence gates publication; merge/release remain separate.
+Active DNS delivery remains unverified.
