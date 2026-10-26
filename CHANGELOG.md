@@ -2,13 +2,21 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
-## 0.9.0 (Unreleased)
+## 0.10.0 (Unreleased)
 
 FEATURES:
 
 * Added `opnsense_kea_ddns_settings` resource and read-only four-field lookup for compatible stable OPNsense 26.7.7+, fixed `ddns` import identity, omission-preserving partial writes, explicit false/unknown handling, canonical durable save recovery, and zero-API state-only Delete (including pending activation; normal Core planning refresh may recover/activate first). Owns only `ddns.general` enabled/manual_config/server_ip/server_port; no manual files or DNS-delivery claim. Implementation, disabled-appliance proof, merge and publication remain separate gates.
 
 * Added `opnsense_kea_dhcpv4_option` resource and UUID lookup for the eight stored generic-option fields on stable OPNsense 26.7.7+, with mutable unique description, omission-preserving optional intent, strict model/read validation, single-attempt writes and durable UUID-bound save/delete recovery. Ordered subnet/reservation linkage remains separate; the stored force flag is not a packet guarantee. The disabled-appliance 14-step Terraform lifecycle, 17 independent saved-field observations, in-use HTTP500 identity retention, deletion and exact restoration passed. Publication remains separately gated.
+
+UPGRADE NOTES:
+
+* These are independent, opt-in owners. Existing subnet/reservation option links and manual DDNS files/hooks are not adopted. DDNS create preserves omitted appliance settings; Delete abandons Terraform ownership without resetting the singleton, but normal Core planning refresh can recover/activate a pending save before Delete. Review ownership and the documented recovery boundaries before adoption.
+
+## 0.9.0 (October 26, 2026)
+
+FEATURES:
 
 * Added `opnsense_system_gateway_group` resource and UUID-keyed data source for stable OPNsense 26.7.7+, with typed gateway-name tiers, immutable names, strict firmware/model/read validation and durable save/delete activation recovery. Route reconfigure does not apply PF. The 16-step isolated Terraform lifecycle, independent saved-field observations and exact cleanup/restoration passed. Populated first-tier clearing is rejected before any write because the stable API ignores it; later-tier clears are supported. Older versions, OpenTofu and actual traffic failover remain unverified.
 
