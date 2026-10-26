@@ -27,3 +27,20 @@ See DEVELOPMENT.md for the complete reference.
 - Before opening a PR, inspect the release version/tag decision and explain any deliberate changelog exemption in the PR. Docs/planning-only changes may be exempt; do not silently omit provider behavior changes.
 - After merge, distinguish CI success, auto-tag/dispatch success, GitHub release/assets and Terraform Registry availability. Verify each before claiming publication. Never add a manual tag while the automatic path is pending; follow the documented recovery procedure if it fails.
 - See [Provider Release Automation](DEVELOPMENT.md#provider-release-automation) for the exact trigger and verification checklist.
+
+## Public Project / Private Consumer Boundary
+
+This is a public, reusable provider project. Keep operator-specific inventory,
+site names, internal/public service hostnames tied to an operator, real network
+allocations, credentials, local workspace paths, deployment/adoption plans and
+operational notes out of this repository, its issues/PR bodies and CI artifacts.
+Store those in the operator's private documentation or infrastructure repository.
+Public product roadmaps and acceptance specifications must remain consumer-neutral.
+Use RFC 5737/RFC 3849 documentation addresses and reserved example domains in
+fixtures and examples; do not copy an operator's topology into a public test.
+Record only sanitized test versions, behavior and results publicly. Before
+publication, inspect the full diff (including generated files and planning
+artifacts) for identifying information; a secret scanner alone does not enforce
+this boundary. Removing HEAD content does not remove Git history: document any
+historical exposure privately and do not rewrite shared history without a
+maintainer-approved remediation plan.

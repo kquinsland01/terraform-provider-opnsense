@@ -194,7 +194,7 @@ deferred: []
 - Before rollback cleanup can delete anything, the final acceptance step must non-mutatingly search both query-forward and DoT namespaces and require zero owner-tagged objects left by Terraform. Emit stable per-namespace proof lines and require them in the digest-bound runner.
 - Add direct older-appliance HTTP-contract tests for established general and query-forward Create/Update behavior and for rejection of configured parity-only and DoT surfaces. Keep the compatibility promise only where those executable branches pass.
 - Reconcile the core scorecard to 94 data sources, 94 data-source docs, and 16 resource-matching gaps; record `description` as local-only for both forward rows; and prove every non-target audit row matches the preserved baseline.
-- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on VM 102, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
+- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on disposable VM, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
 
 ### 2026-10-19 — Review pass 5
 - verdicts: seven deduplicated verified findings — medium 5, low 2; all require Repair 5 before publication
@@ -227,7 +227,7 @@ deferred: []
 - Decode search pagination with presence-aware fields. Require a non-null array `rows`, present `rowCount`, `total`, and `current`, exact requested-page identity, non-negative metadata, and `rowCount` equal to the number of decoded page rows before any zero-result or ownership conclusion is authoritative.
 - Add direct tests for empty/missing/null pagination envelopes, negative totals and row counts, mismatched page and row counts, changing totals, overrun totals, and a premature empty page.
 - Deterministically block the first ambiguous forward and DNSBL Create inside its recovery search, start a second creator, and prove the second creator cannot issue preflight or mutation traffic until recovery releases the owner lock. Assert the complete critical-section request ordering for both owners.
-- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on VM 102, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
+- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on disposable VM, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
 
 ### 2026-10-19 — Review pass 7
 - verdicts: three reviewers found no product defect; two independently verified one low proof-quality gap, plus one low direct-test omission
@@ -239,7 +239,7 @@ deferred: []
 
 - Inject an owner-local lock test seam while retaining the shared production lock. Signal synchronously when the second creator attempts acquisition, sample traffic only after that signal, and assert the exact complete request order and counts for both forward and DNSBL owners.
 - Add direct null-metadata cases for `rowCount`, `total`, and `current` so every required non-null pagination member is covered.
-- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on VM 102, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
+- Regenerate and rerun focused/full tests, deterministic generation, diff hygiene, all six DevRail checks, replacement exact-digest proof on disposable VM, and a fresh four-layer convergence pass before recreating evidence or promoting any audit row.
 
 ## Design Notes
 

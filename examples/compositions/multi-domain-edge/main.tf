@@ -34,7 +34,7 @@ resource "opnsense_acme_challenge" "dns" {
 resource "opnsense_acme_certificate" "edge" {
   name                   = "grafana.example.com"
   description            = "Example multi-domain edge certificate"
-  alt_names              = "argocd.example.com,tipsyhive.example.com,thetipsyhive.example,tipsyhive.example"
+  alt_names              = "argocd.example.com,portal.example.com,portal-alias.example,portal.example"
   account                = opnsense_acme_account.edge.id
   validation_method      = opnsense_acme_challenge.dns.id
   key_length             = "key_ec256"
@@ -57,15 +57,15 @@ resource "opnsense_haproxy_server" "argocd" {
   weight  = 100
 }
 
-resource "opnsense_haproxy_server" "tipsyhive" {
-  name    = "tipsyhive-01"
+resource "opnsense_haproxy_server" "portal" {
+  name    = "portal-01"
   address = "192.0.2.30"
   port    = 8080
   weight  = 100
 }
 
 resource "opnsense_haproxy_backend" "grafana" {
-  name                 = "grafana-backend"
+  name                 = "metrics-backend"
   mode                 = "http"
   algorithm            = "roundrobin"
   linked_servers       = [opnsense_haproxy_server.grafana.id]
@@ -74,7 +74,7 @@ resource "opnsense_haproxy_backend" "grafana" {
 }
 
 resource "opnsense_haproxy_backend" "argocd" {
-  name                 = "argocd-backend"
+  name                 = "deploy-backend"
   mode                 = "http"
   algorithm            = "roundrobin"
   linked_servers       = [opnsense_haproxy_server.argocd.id]
@@ -82,11 +82,11 @@ resource "opnsense_haproxy_backend" "argocd" {
   forward_for          = true
 }
 
-resource "opnsense_haproxy_backend" "tipsyhive" {
-  name                 = "tipsyhive-backend"
+resource "opnsense_haproxy_backend" "portal" {
+  name                 = "app-backend"
   mode                 = "http"
   algorithm            = "roundrobin"
-  linked_servers       = [opnsense_haproxy_server.tipsyhive.id]
+  linked_servers       = [opnsense_haproxy_server.portal.id]
   health_check_enabled = true
   forward_for          = true
 }
@@ -96,18 +96,18 @@ resource "opnsense_haproxy_mapfile" "domain_map" {
   description = "Host-to-backend routing map for the migrated edge"
   type        = "dom"
   content     = <<-EOT
-    grafana.example.com grafana-backend
-    argocd.example.com argocd-backend
-    tipsyhive.example.com tipsyhive-backend
-    thetipsyhive.example tipsyhive-backend
-    tipsyhive.example tipsyhive-backend
+    grafana.example.com metrics-backend
+    argocd.example.com deploy-backend
+    portal.example.com app-backend
+    portal-alias.example app-backend
+    portal.example app-backend
   EOT
 }
 
-resource "opnsense_haproxy_acl" "is_tipsyhive_host" {
-  name       = "is-tipsyhive-host"
+resource "opnsense_haproxy_acl" "is_portal_host" {
+  name       = "is-portal-host"
   expression = "hdr"
-  hdr        = "tipsyhive.example.com"
+  hdr        = "portal.example.com"
 }
 
 resource "opnsense_haproxy_acl" "is_protected_host" {
@@ -139,18 +139,18 @@ resource "opnsense_haproxy_action" "set_forwarded_proto" {
   set_header_content = "https"
 }
 
-resource "opnsense_haproxy_action" "route_tipsyhive_host" {
-  name        = "route-tipsyhive-host"
+resource "opnsense_haproxy_action" "route_portal_host" {
+  name        = "route-portal-host"
   type        = "use_backend"
-  use_backend = opnsense_haproxy_backend.tipsyhive.id
-  linked_acls = [opnsense_haproxy_acl.is_tipsyhive_host.id]
+  use_backend = opnsense_haproxy_backend.portal.id
+  linked_acls = [opnsense_haproxy_acl.is_portal_host.id]
 }
 
 resource "opnsense_haproxy_action" "route_domain_map" {
   name                    = "route-domain-map"
   type                    = "map_use_backend"
   mapfile                 = opnsense_haproxy_mapfile.domain_map.id
-  map_use_backend_default = opnsense_haproxy_backend.tipsyhive.id
+  map_use_backend_default = opnsense_haproxy_backend.portal.id
 }
 
 resource "opnsense_haproxy_action" "redirect_https" {
@@ -170,14 +170,14 @@ resource "opnsense_haproxy_frontend" "https_in" {
   name                = "https-in"
   bind                = "0.0.0.0:443"
   mode                = "http"
-  default_backend     = opnsense_haproxy_backend.tipsyhive.id
+  default_backend     = opnsense_haproxy_backend.portal.id
   ssl_enabled         = true
   certificates        = [opnsense_acme_certificate.edge.cert_ref_id]
   default_certificate = opnsense_acme_certificate.edge.cert_ref_id
   linked_actions = [
     opnsense_haproxy_action.deny_external_protected.id,
     opnsense_haproxy_action.set_forwarded_proto.id,
-    opnsense_haproxy_action.route_tipsyhive_host.id,
+    opnsense_haproxy_action.route_portal_host.id,
     opnsense_haproxy_action.route_domain_map.id,
   ]
   forward_for = true

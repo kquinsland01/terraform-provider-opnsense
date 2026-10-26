@@ -2,7 +2,7 @@
 stepsCompleted: [1, 2, 3, 4, 5, 6]
 status: complete
 inputDocuments:
-  - "opnsense-manager Ansible project (external: /home/mmellor/Work/gitlab.mfsoho.linkridge.net/hardware-infra/opnsense/opnsense-manager)"
+  - "Operator automation requirements (private consumer inventory is excluded from this public project)"
 date: 2026-03-13
 author: Matthew
 ---
@@ -108,7 +108,7 @@ Open source contributors who want to add resources for OPNsense plugins not yet 
 
 | Metric | Target | Measurement |
 |---|---|---|
-| **Ansible replacement completeness** | 100% of current opnsense-manager functionality reproducible in Terraform | All 4 Ansible roles (BGP, HAProxy, ACME, DHCP) plus Unbound, Dynamic DNS, WireGuard, and IPsec fully covered by provider resources |
+| **Ansible replacement completeness** | 100% of current consumer automation functionality reproducible in Terraform | All 4 Ansible roles (BGP, HAProxy, ACME, DHCP) plus Unbound, Dynamic DNS, WireGuard, and IPsec fully covered by provider resources |
 | **Plan accuracy** | Zero surprises on apply — `terraform plan` output matches actual changes every time | No reported issues where apply produced changes not shown in plan |
 | **Import success** | Existing OPNsense configurations importable via `terraform import` without manual state editing | All resource types support import from live appliance |
 | **Drift detection reliability** | `terraform plan` correctly detects out-of-band changes made via UI or API | Plan shows accurate diff when resources are modified outside Terraform |
@@ -118,9 +118,9 @@ Open source contributors who want to add resources for OPNsense plugins not yet 
 
 | Objective | 3-Month Target | 12-Month Target |
 |---|---|---|
-| **Ansible replacement** | First plugin areas (HAProxy, FRR/BGP) fully functional — begin migrating opnsense-manager workloads | Complete replacement — opnsense-manager retired, all OPNsense config lives in Terraform |
+| **Ansible replacement** | First plugin areas (HAProxy, FRR/BGP) fully functional — begin migrating consumer automation workloads | Complete replacement — consumer automation retired, all OPNsense config lives in Terraform |
 | **Registry presence** | Published on Terraform Registry with documentation and examples for initial resources | Comprehensive provider with 8+ plugin/service areas covered |
-| **Community adoption** | First external users beyond Matthew; initial GitHub stars and Registry downloads | Recognized as the go-to OPNsense provider; community PRs for plugins not in initial scope |
+| **Community adoption** | First external users beyond the original developer; initial GitHub stars and Registry downloads | Recognized as the go-to OPNsense provider; community PRs for plugins not in initial scope |
 | **Portfolio value** | Provider listed on matthew.mellor.earth with architecture writeup | Demonstrates end-to-end professional open source project lifecycle (DevRail standards, CI/CD, docs, community) |
 
 ### Key Performance Indicators
@@ -148,7 +148,7 @@ Open source contributors who want to add resources for OPNsense plugins not yet 
 - **Terraform Registry publishing:** Provider published and discoverable on the Terraform Registry with full documentation
 - **Documentation:** Every resource includes usage examples, argument/attribute reference, and import instructions
 
-#### Plugin/Service Resources (8 areas — replaces opnsense-manager Ansible 1:1 plus additions)
+#### Plugin/Service Resources (8 areas — replaces consumer automation Ansible 1:1 plus additions)
 
 | Area | Resources | Priority |
 |---|---|---|
@@ -189,7 +189,7 @@ Open source contributors who want to add resources for OPNsense plugins not yet 
 
 | Criteria | Validation |
 |---|---|
-| **Ansible retirement** | All 4 opnsense-manager Ansible roles (BGP, HAProxy, ACME, DHCP) fully replaced by Terraform resources with equivalent or better functionality |
+| **Ansible retirement** | All 4 consumer automation Ansible roles (BGP, HAProxy, ACME, DHCP) fully replaced by Terraform resources with equivalent or better functionality |
 | **Complete appliance management** | All 8 plugin/service areas + core APIs under Terraform control — no second tool needed |
 | **Import existing config** | Live OPNsense appliance fully imported into Terraform state via `terraform import` without manual state file editing |
 | **Accurate plan/apply** | `terraform plan` produces correct diffs; `terraform apply` makes exactly the changes shown in plan; no surprises |

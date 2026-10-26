@@ -33,6 +33,6 @@ OpenVPN schema/unit tests, ephemeral state-safety test, disposable-appliance lif
 ## Evidence
 
 - Repair-2 candidate digest: `0a9077a69f9048582dd92e1de06b708fd7c6de70027461a6ef3a449ef484c3e4` before and after the field-complete run.
-- Disposable target: `opnsense-acceptance-102` (`aa90e347-371e-4e3b-8ba7-af7218b8a92b`), OPNsense 26.7.7.
+- Disposable target: `disposable acceptance guest` (`aa90e347-371e-4e3b-8ba7-af7218b8a92b`), OPNsense 26.7.7.
 - Fixture namespace: `tf-story31c-dm8xu0a7821f`; cleanup `instance=0`, `client-overwrite=0`; saved-plan/state/log exact-value scan clean.
 - Sanitized repair-2 evidence: `31-0c-live-evidence.json` and `31-0c-live-output.txt`.

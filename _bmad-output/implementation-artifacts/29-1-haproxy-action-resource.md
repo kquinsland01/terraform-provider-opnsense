@@ -12,7 +12,7 @@ So that I can build ACL-based routing rules (host → backend), domain-map routi
 
 Story 4.2 shipped `opnsense_haproxy_frontend` with a `linked_actions` (UUID Set) field, and Story 4.3 shipped `opnsense_haproxy_acl`. But **the action resource that sits between them was never built** — Story 4.2 "What NOT to Build" punted it to "Story 4.3," and 4.3 only implemented ACLs. The result: a frontend can link to action UUIDs, and ACLs can define match conditions, but **there is no way to create the actions that tie an ACL to a routing behavior.** Without this resource, the provider can only do single-`default_backend` frontends — no multi-domain host routing, no deny rules, no redirects.
 
-This is the #1 blocker for migrating a real multi-domain OPNsense edge (e.g. the `opnsense-manager` appliance, which routes argocd/grafana/tipsyhive + CNAME aliases through one `https-in` frontend using actions + a domain map) off Ansible.
+This is the #1 blocker for migrating a real multi-domain OPNsense edge (e.g. the `consumer automation` appliance, which routes deployment/metrics/application services + CNAME aliases through one `https-in` frontend using actions + a domain map) off Ansible.
 
 ## Acceptance Criteria
 
@@ -125,7 +125,7 @@ var actionReqOpts = opnsense.ReqOpts{
 
 ### Reference appliance usage (what this must express)
 
-From the downstream `opnsense-manager` Ansible HAProxy role, the actions in production are:
+From the downstream `consumer automation` Ansible HAProxy role, a synthetic action composition is:
 - `route-by-domain-map` → `map_use_backend` referencing the `domain-map` map file (Story 29.2)
 - `use-wildcard-<svc>` → `use_backend` gated by a `host-ends-with-<svc>` ACL
 - `deny-external-<svc>` → `http-request_deny` gated by host ACL + `unless` internal-network ACL
@@ -153,4 +153,4 @@ Modified: `internal/service/haproxy/exports.go`, `examples/compositions/haproxy-
 - [Source: _bmad-output/implementation-artifacts/4-2-haproxy-frontend-resource-with-acl-routing.md#What-NOT-to-Build]
 - [Source: _bmad-output/implementation-artifacts/4-3-haproxy-acl-resource.md]
 - [Source: https://docs.opnsense.org/development/api/plugins/haproxy.html — Action endpoints]
-- [Downstream driver: opnsense-manager ansible/roles/haproxy/tasks/frontend.yml — actions wired via linkedActions]
+- [Downstream driver: consumer automation ansible/roles/haproxy/tasks/frontend.yml — actions wired via linkedActions]

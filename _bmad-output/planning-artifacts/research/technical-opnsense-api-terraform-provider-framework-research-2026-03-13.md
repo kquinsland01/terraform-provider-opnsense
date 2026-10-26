@@ -32,7 +32,7 @@ This deep technical research validates that building a comprehensive Terraform p
 - Global mutex concurrency control is required — OPNsense cannot handle parallel mutations safely
 - YAML-driven code generation for the API client layer eliminates boilerplate across 30+ resources
 - QEMU-based acceptance testing in CI is proven and working (browningluke's approach)
-- GitLab HTTP backend supports Terraform state with locking for Matthew's self-hosted setup
+- GitLab HTTP backend supports Terraform state with locking for self-hosted operator environments
 - Registry publishing requires GitHub mirror but development stays on GitLab
 
 **Strategic Recommendations:**
@@ -1100,7 +1100,7 @@ templates/
 
 **Important:** Registry publication is **permanent** — once a version is published, it cannot be removed. Test thoroughly before releasing.
 
-**Note for Matthew's GitLab setup:** The Terraform Registry requires GitHub releases. The provider source can live on self-hosted GitLab, but releases must be mirrored to GitHub for Registry publication. Alternatively, use a private registry for internal use.
+**Note for self-hosted GitLab users:** The Terraform Registry requires GitHub releases. The provider source can live on self-hosted GitLab, but releases must be mirrored to GitHub for Registry publication. Alternatively, use a private registry for internal use.
 
 **Confidence:** HIGH
 
@@ -1214,7 +1214,7 @@ templates/
 | Testing | Acceptance tests with QEMU OPNsense VM | Tests against real API; browningluke proves this works in CI |
 | Documentation | tfplugindocs with templates | Registry-compatible, auto-generated from schemas |
 | Release | GoReleaser + GitHub Actions + GPG | Standard Terraform Registry publishing pipeline |
-| CI/CD | GitLab CI (primary) + GitHub mirror (for Registry) | Matches Matthew's self-hosted GitLab; GitHub required for Registry |
+| CI/CD | GitLab CI (primary) + GitHub mirror (for Registry) | Supports self-hosted development; GitHub releases required for Registry |
 
 ---
 
@@ -1353,9 +1353,9 @@ terraform {
 **Initialization:**
 ```bash
 terraform init \
-  -backend-config="address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>" \
-  -backend-config="lock_address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
-  -backend-config="unlock_address=https://gitlab.mfsoho.linkridge.net/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
+  -backend-config="address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>" \
+  -backend-config="lock_address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
+  -backend-config="unlock_address=https://gitlab.example.test/api/v4/projects/<PROJECT_ID>/terraform/state/<STATE_NAME>/lock" \
   -backend-config="username=<USERNAME>" \
   -backend-config="password=<PERSONAL_ACCESS_TOKEN>" \
   -backend-config="lock_method=POST" \
@@ -1780,7 +1780,7 @@ go mod tidy
 ```hcl
 provider_installation {
   dev_overrides {
-    "registry.terraform.io/matthew-on-git/opnsense" = "/home/mmellor/go/bin"
+    "registry.terraform.io/matthew-on-git/opnsense" = "/home/developer/go/bin"
   }
   direct {}
 }
@@ -1981,7 +1981,7 @@ import {
 - QEMU-based acceptance tests in CI
 - Registry publishing (GoReleaser + GPG)
 - v0.1.0 on Terraform Registry
-- Migrate Matthew's OPNsense from Ansible to Terraform
+- Validate generic Ansible-to-Terraform migration using a disposable appliance
 
 **Sources:**
 - https://developer.hashicorp.com/terraform/plugin/best-practices

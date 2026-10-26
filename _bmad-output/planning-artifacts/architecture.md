@@ -66,7 +66,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 | **Plugin installation prerequisite** | Domain (OPNsense plugin system) | Plugin resources (HAProxy, FRR, ACME, etc.) require the corresponding OPNsense plugin to be pre-installed. Provider must detect missing plugins and report clear errors (FR64), not fail with cryptic 404s. |
 | OPNsense version 26.1.x target | Domain | Version detection, endpoint routing may vary across majors |
 | Terraform Registry publishing | Distribution requirement | Requires GitHub mirror, GoReleaser, GPG RSA signing |
-| GitLab CI primary | Matthew's infrastructure | Development on self-hosted GitLab, releases mirror to GitHub |
+| GitLab CI primary | Consumer-neutral CI workflow | Repository workflows and release artifacts are hosted on GitHub |
 
 ### Cross-Cutting Concerns Identified
 

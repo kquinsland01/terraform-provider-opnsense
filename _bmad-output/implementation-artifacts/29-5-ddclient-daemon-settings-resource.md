@@ -95,7 +95,7 @@ Story 13.1 added `GetSingleton[K]` / `UpdateSingleton[K]` precisely for get/set 
 - [Source: 9-5 cancellation note in sprint-status.yaml — "CANCELLED — redundant"]
 - [Source: 13-1-singleton-get-set-client-support.md — GetSingleton/UpdateSingleton]
 - [Pattern: internal/service/unbound/general_*.go, internal/service/quagga/general_*.go]
-- [Downstream driver: opnsense-manager ansible/roles/dyndns/tasks/main.yml — /dyndns/settings/set]
+- [Downstream driver: consumer automation ansible/roles/dyndns/tasks/main.yml — /dyndns/settings/set]
 
 ## Dev Agent Record
 

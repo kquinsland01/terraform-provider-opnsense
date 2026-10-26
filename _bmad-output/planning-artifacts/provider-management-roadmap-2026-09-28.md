@@ -10,7 +10,7 @@ inputs:
   - support-matrix.md
   - docs/upstream-blocked.md
   - Provider ecosystem coverage comparison, 2026-09-28
-  - OrgDocs h155 OPNsense provider/API gap note
+  - Generic provider/API gap requirements; operator-specific adoption records are maintained privately
 ---
 
 # Provider Management Roadmap
@@ -93,10 +93,10 @@ Goal: make this provider the standard OPNsense provider by closing meaningful co
 | 31.0b Kea Field and Surface Parity | P0 | done | `_bmad-output/implementation-artifacts/31-0b-kea-field-and-surface-parity.md` |
 | 31.0c OpenVPN Field and Key Parity | P0 | done (repair 2 proved) | `_bmad-output/implementation-artifacts/spec-31-0c-openvpn-field-and-key-parity.md` |
 | 31.0d Unbound Settings and Forward Parity | P0 | done | `_bmad-output/implementation-artifacts/31-0d-unbound-settings-and-forward-parity.md` |
-| 31.0e WireGuard Field and Settings Parity | P0 | review | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
+| 31.0e WireGuard Field and Settings Parity | P0 | done (PR63; v0.7.0+) | `_bmad-output/implementation-artifacts/31-0e-wireguard-field-and-settings-parity.md` |
 | 31.0f Trust Lifecycle and Settings Parity | P0 | backlog | `_bmad-output/implementation-artifacts/31-0f-trust-lifecycle-and-settings-parity.md` |
 | 31.0g IPsec Field Parity | P1 | backlog | `_bmad-output/implementation-artifacts/31-0g-ipsec-field-parity.md` |
-| 31.0h Quagga/BGP Field Parity | P1 | backlog | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |
+| 31.0h Quagga/BGP Field Parity | P1 | in-progress (compatibility released; advanced parity pending) | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |
 | 31.0i Live Interface Data Sources | P1 | backlog | `_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md` |
 | 31.0j Provider Retry Settings | P1 | backlog | `_bmad-output/implementation-artifacts/31-0j-provider-retry-settings.md` |
 | 31.1 Complete Provider Positioning README and Registry Pass | P1 | backlog | `_bmad-output/implementation-artifacts/31-1-complete-provider-positioning-docs.md` |

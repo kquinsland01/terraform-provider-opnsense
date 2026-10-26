@@ -14,7 +14,7 @@ So that I can prove the provider reproduces a real OPNsense edge end-to-end befo
 
 ## Context
 
-Stories 29.1–29.4 add the missing pieces (action, map file, frontend cert binding, ACME issuance+refid). This story is the **integration capstone**: a single composition that exercises all of them together in the exact shape of the downstream `opnsense-manager` appliance (argocd/grafana/tipsyhive + CNAME aliases, internal-only deny, HTTP→HTTPS redirect). It is both a docs artifact and the acceptance gate that says "the HAProxy edge is migratable." It also surfaces ordering/dependency issues (cert refid availability, action→mapfile→backend references) that only appear when the resources are composed.
+Stories 29.1–29.4 add the missing pieces (action, map file, frontend cert binding, ACME issuance+refid). This story is the **integration capstone**: a single composition that exercises all of them together in the exact shape of the downstream `consumer automation` appliance (deployment/metrics/application services + CNAME aliases, internal-only deny, HTTP→HTTPS redirect). It is both a docs artifact and the acceptance gate that says "the HAProxy edge is migratable." It also surfaces ordering/dependency issues (cert refid availability, action→mapfile→backend references) that only appear when the resources are composed.
 
 Depends on: 29.1, 29.2, 29.3, 29.4 (and existing 4.1–4.4, 8.1–8.3).
 
@@ -28,7 +28,7 @@ Depends on: 29.1, 29.2, 29.3, 29.4 (and existing 4.1–4.4, 8.1–8.3).
 
 3. **And** a second `terraform plan` immediately after apply shows **"No changes"** (the whole stack is idempotent — this is the migration-readiness signal)
 
-4. **And** a short `README.md` in the composition maps each Terraform resource to the equivalent Ansible role/task in `opnsense-manager` (a migration crosswalk), and calls out the refid binding and ACME issuance wait explicitly
+4. **And** a short `README.md` in the composition maps each Terraform resource to the equivalent Ansible role/task in `consumer automation` (a migration crosswalk), and calls out the refid binding and ACME issuance wait explicitly
 
 5. **And** the existing `examples/compositions/haproxy-full-stack/main.tf` is updated (or this supersedes it) so no shipped composition shows the misleading inert-ACL pattern (an ACL created but never used for routing)
 
@@ -53,9 +53,9 @@ Depends on: 29.1, 29.2, 29.3, 29.4 (and existing 4.1–4.4, 8.1–8.3).
 
 ### Target shape (from the live appliance)
 
-This composition should mirror `opnsense-manager`'s `ansible/inventory/mfsoho/group_vars/all.yml` topology:
-- Backends: `grafana-backend`, `argocd-backend`, `tipsyhive-backend` (each → MetalLB/cluster IP:port)
-- Domain map: `grafana.mfsoho.linkridge.net`, `argocd.mfsoho.linkridge.net`, `tipsyhive.mfsoho.linkridge.net`, plus aliases `thetipsyhive.com`, `tipsyhive.com` → `tipsyhive-backend`
+This composition uses a synthetic multi-service topology, independent of any operator inventory:
+- Backends: `metrics-backend`, `deploy-backend`, `app-backend` (each → MetalLB/cluster IP:port)
+- Domain map: `metrics.example.test`, `deploy.example.test`, `app.example.test`, plus aliases `example.net`, `example.org` → `app-backend`
 - Internal-only deny for argocd + grafana (deny unless source ∈ RFC1918)
 - One ACME cert (e.g. per-domain) bound to `https-in`
 - `http-in` → redirect-to-https
@@ -64,7 +64,7 @@ Keep IPs/domains as example placeholders; the point is structural fidelity, not 
 
 ### Migration crosswalk (for the README, AC #4)
 
-| Ansible (opnsense-manager) | Terraform (this provider) |
+| Ansible (consumer automation) | Terraform (this provider) |
 |---|---|
 | `roles/haproxy` servers/backends | `opnsense_haproxy_server` / `opnsense_haproxy_backend` |
 | `roles/haproxy` domain map | `opnsense_haproxy_mapfile` (29.2) |
@@ -92,7 +92,7 @@ DHCP PXE/TFTP options are **not** covered by Epic 29 — they remain tracked-but
 - [Depends on: 29.1, 29.2, 29.3, 29.4]
 - [Source: 12-3 composition-examples — validation bar for compositions]
 - [Source: 26-3-full-appliance-migration-guide.md — rows to update]
-- [Downstream driver: opnsense-manager ansible/inventory/mfsoho/group_vars/all.yml + roles/haproxy]
+- Synthetic downstream consumer: inventory and deployment details are maintained outside this public project.
 
 ## Dev Agent Record
 

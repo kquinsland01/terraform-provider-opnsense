@@ -85,7 +85,7 @@ overallStatus: PASS
 
 **Differentiators:** Fully Covered — All 5 original differentiators present plus additional ones added during party mode (OPNsense API correctness, user experience lead).
 
-**Success Metrics:** Partially Covered — Core metrics (Ansible replacement, plan accuracy, import, drift detection, test coverage) fully covered. Community adoption metrics (Registry downloads 100+/mo, GitHub stars 50+) intentionally deprioritized per Matthew's explicit guidance — adoption is secondary to personal workflow replacement.
+**Success Metrics:** Partially Covered — Core metrics (Ansible replacement, plan accuracy, import, drift detection, test coverage) fully covered. Community adoption metrics (Registry downloads 100+/mo, GitHub stars 50+) intentionally deprioritized in favor of provider completeness and reusable migration readiness.
 
 ### Coverage Summary
 
