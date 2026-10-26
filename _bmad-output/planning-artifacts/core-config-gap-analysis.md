@@ -68,7 +68,7 @@ A feature-complete Terraform provider covers all OPNsense core configuration tha
 |---|---|---|
 | Static route | Supported | Resource only |
 | Gateway | Supported | Resource only |
-| Gateway group | Coming | Stable 26.7.7 `routing/group_settings` CRUD/search/reconfigure is source-confirmed. Story 31.0k must prove tier/default/wrapper semantics, in-use dependency refusal and convergence before implementation/support. No claim for older core versions. |
+| Gateway group | Coming | Stable 26.7.7 source and isolated direct-API CRUD/tier/trigger/pool/clear/rename/dependency-delete/route-restoration probes are recorded in `gateway-group-api-validation.md`. Story 31.0m owns provider implementation and real Terraform import/no-change/drift/recovery acceptance; no older-core or actual multi-WAN failover claim. |
 
 ### Dynamic Routing (FRR / Quagga)
 
@@ -122,7 +122,7 @@ FRR support above is not a blanket os-frr 2.0 compatibility claim. Story 31.0h n
 | Kea DHCPv6 reservation | Supported | Resource |
 | Kea HA peer | Supported | Resource + data source |
 | DHCPv4 option | Needs research | Stable 26.7.7 `kea/dhcpv4` option CRUD/search exists. Story 31.0l validates generic options separately from completed 31.0b subnet PXE/TFTP fields; no absent-stable-API blocker remains. |
-| Kea DDNS | Needs research | Stable 26.7.7 `Kea/Api/DdnsController.php` exists. Story 31.0l must prove inherited set semantics, wrapper/default handling, reconfigure and non-destructive singleton lifecycle before implementation. |
+| Kea DDNS | Coming | Stable 26.7.7 source and disabled-service direct-API option/DDNS probes are recorded in `kea-option-ddns-api-validation.md`: targeted updates/preservation/false clear, reconfigure, required-field negatives and exact settings restoration. Stories 31.0n/o own the missing provider owners and real Terraform acceptance. Matching-option linkage/ordering, older targets and operator integrations remain separate; do not duplicate completed subnet/PXE/DHCPv6 parity. |
 | Dynamic DNS account | Supported | Resource only |
 | DDNS provider | Not planned | Redundant with provider/service field on account unless a separate endpoint emerges. |
 
@@ -185,6 +185,6 @@ The public register and maintenance workflow live in [`docs/upstream-blocked.md`
 ## Release Matrix
 
 - **Supported:** 109 resources and 95 data sources listed in `support-matrix.md` and generated docs.
-- **Coming:** data-source parity for singleton and sensitive special cases; gateway-group lifecycle validation for OPNsense 26.7.7 (Story 31.0k).
-- **Needs research:** Kea DHCPv4 option, Kea DDNS, HASync configuration, HASync status/actions, and PPPoE semantics.
+- **Coming:** data-source parity for singleton and sensitive special cases; gateway groups and generic Kea option/DDNS owners after direct-API probes (Stories 31.0m–31.0o); provider/TF acceptance pending.
+- **Needs research:** Kea matching-option linkage/ordering details, HASync configuration, HASync status/actions, and PPPoE semantics.
 - **Upstream-blocked:** system general settings. Gateway groups moved to Coming for the verified 26.7.7 target; see Story 31.0k.

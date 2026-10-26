@@ -84,7 +84,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 | Domain | Work |
 |---|---|
 | Data-source parity | Add read-only data sources for the 16 supported singleton/sensitive special-case resources that do not yet have same-name data-source counterparts. |
-| Gateway groups | Stable 26.7.7 source gate cleared; Story 31.0k validates CRUD/import/drift/reconfigure/tier/deletion semantics before provider implementation and support. |
+| Gateway groups | Stable 26.7.7 source and isolated direct-API CRUD/tier/trigger/pool/clear/rename/dependency-delete/route-restoration probes are recorded in `gateway-group-api-validation.md`. Story 31.0m owns provider implementation and real Terraform import/no-change/drift/recovery acceptance; no older-core or actual multi-WAN failover claim. |
 | FRR 2.0 compatibility | Story 31.0h compatibility subgate adds installed-plugin/model validation, family/state migration and grouped-policy preservation to existing owners. Exact non-skipped versions/digest are recorded in the FRR live evidence; legacy live, remaining advanced parity, release and adoption remain gated. Soft FRR reload is not PF activation or a daemon-set restart. |
 | Documentation | Fill missing resource templates for generated docs, expand composition examples, and keep the provider index support matrix current. |
 | Release hardening | Keep release workflow, Registry manifest, changelog, and provider docs verified for subsequent patch/minor releases. |
@@ -95,7 +95,7 @@ Data-source parity is tracked in [data-source-parity-plan.md](data-source-parity
 
 | Domain | Research needed |
 |---|---|
-| Kea | Stable OPNsense 26.7.7 contains DHCPv4 option CRUD/search and `kea/ddns/get` plus the inherited mutable controller surface. Payload/set/reconfigure/lifecycle semantics for dedicated option/DDNS owners remain unproven. Completed Story 31.0b already covers subnet PXE/TFTP fields, peers and delegated-prefix pools; do not repeat that implementation or equate it with generic option/DDNS support. Story 31.0l owns the remaining validation. |
+| Kea | Stable 26.7.7 source and disabled-service direct-API option/DDNS probes are recorded in `kea-option-ddns-api-validation.md`: targeted updates/preservation/false clear, reconfigure, required-field negatives and exact settings restoration. Stories 31.0n/o own the missing provider owners and real Terraform acceptance. Matching-option linkage/ordering, older targets and operator integrations remain separate; do not duplicate completed subnet/PXE/DHCPv6 parity. |
 | System / HA | HASync configuration needs request/response shape research because current `Hasync.xml` uses dynamic `JsonKeyValueStoreField` `syncitems`; HASync status `services`/`version` are data-source candidates after live validation, while service operations are action candidates only after product/framework decision. |
 | Interfaces | Base assignment/IP settings are supported by `opnsense_interface_assignment` on OPNsense 26.7.6+ after disposable 26.7.7 lifecycle/drift/restoration proof. PPPoE semantics remain separate research. |
 

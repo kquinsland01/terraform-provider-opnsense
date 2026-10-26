@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+review — stable source/direct-API probes recorded on 26.7.7; implementation follow-ups registered. Terraform resource/lifecycle support remains pending.
 
 ## Priority and Owner
 
@@ -29,3 +29,10 @@ Read completed `31-0b-kea-field-and-surface-parity.md`, `internal/service/kea/dh
 ## Verification
 
 Source/payload audit, disposable non-skipped lifecycle proof, existing Kea regression tests, generated-doc checks when relevant, `git diff --check` and full `make check`. Never label unavailable proof passed.
+
+## Validation handoff — 2026-10-25
+
+See [direct-API contract and executed/unverified cases](../planning-artifacts/kea-option-ddns-api-validation.md).
+Implementation owner: 31.0n (generic options) and 31.0o (DDNS settings). Source availability and these direct-API
+probes are not a provider support claim; real Terraform import/no-change/drift,
+failure/restart recovery and final restoration still belong to implementation.
