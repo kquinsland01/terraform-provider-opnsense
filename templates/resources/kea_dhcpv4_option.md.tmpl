@@ -1,0 +1,90 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Manages an independent generic Kea DHCPv4 option on stable OPNsense 26.7.7+.
+---
+
+# {{.Name}} ({{.Type}})
+
+Manages a generic DHCPv4 option by UUID on **stable OPNsense 26.7.7 or newer**
+with the compatible eight-field option model. Firmware identity/version and the
+unsaved model template are verified before writes. Credentials need read access
+to `/api/core/firmware/status`, `/api/kea/dhcpv4/get_option` and
+`/api/kea/dhcpv4/search_option`, write permission for `add_option`, `set_option`,
+`del_option`, and `/api/kea/service/reconfigure`. Use the appliance API permission
+selector; no invented ACL identifier is required.
+
+`code` is a scalar option selector **key**, not its label; pad/end are excluded.
+`encoding` is a scalar key among hex, ipv4-address, ipv6-address, uint8, uint16,
+uint32, int32, boolean, string and fqdn. Code/data semantic validation remains
+with OPNsense (for example code 15 supports fqdn/hex, not string). `data`,
+`match_data` and `description` preserve literal strings, not normalized CSV or
+runtime-encoded bytes. Description is required, unique and mutable; options with
+the same code and distinct descriptions may coexist.
+
+Omitted optional fields preserve prior/imported values, including after removing
+an optional argument from configuration. On create only, omitted `encoding`
+defaults to hex, `force` to false and matching fields to empty. Explicit false is
+written; explicit empty matching fields clear them. Unknown configured values
+remain unknown and cannot be silently replaced by prior/default values. Updates
+write required fields plus explicitly configured optional fields only.
+`match_code` and `match_data` must both be populated or both empty; populated
+match data requires `match_encoding`. Encoding alone with empty matching code/data
+is valid. Partial clears that leave an invalid pair fail before mutation.
+
+The stored `force` flag is **not a packet-level force guarantee**: the tagged
+upstream generator does not consume it. This owner does not enable DHCP/DDNS,
+own singleton settings/option_data, or attach options to subnets/reservations.
+Parent links and their persisted order affect last-match precedence; selected-map
+key/label order cannot recover that order. Ordered parent linkage is separate
+Story 31.0p; there is no invented generic-option position attribute. Older-core,
+OpenTofu and active packet delivery remain unverified. Implementation and live
+acceptance/release publication are separate gates; see the support matrix.
+
+## Example Usage
+
+{{tffile "examples/resources/opnsense_kea_dhcpv4_option/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Recovery and dependencies
+
+Writes are single-attempt; reads honor configured client retries. Discover,
+mutation and recovery are serialized with the shared client lock. A presence
+preflight prevents knowingly setting an absent UUID through the upstream upsert;
+it is not an atomic transaction against out-of-band edits.
+
+Confirmed saves retain UUID and committed values if read-back or reconfigure
+fails. UUID-bound private state persists requested wire fields across provider
+restarts. Preserve returned state and run a fresh refresh/plan/apply. Only
+verified matching requested fields permit recovery activation; omitted unrelated
+fields do not participate in that comparison. Valid contradictory truth is
+reconciled without another set or activation and requires a fresh plan.
+Unavailable/malformed truth retains identity and uncertainty. An absent uncertain
+save needs manual authoritative reconciliation, not repeated blind writes.
+
+Terraform may mark an errored create as tainted. Recovery retains its UUID and
+private intent, but does not override Core's normal replacement planning. Refresh
+first and inspect the plan before retrying; recovery itself must not issue another
+add, and ordinary destruction must retain ownership until deletion is confirmed.
+
+A lost/invalid add reply is recoverable only from a before/after snapshot with
+exactly one new UUID and a complete payload match. Existing descriptions require
+import. Zero/multiple/unreadable recovery candidates require manual inspection
+and supported Terraform import/state reconciliation; never blindly recreate or
+adopt an arbitrary same-code object. Do not edit private recovery bytes.
+
+In-use deletion (including HTTP500 dependency rejection) retains UUID. Remove
+parent references through their owner before retrying. A present uncertain delete
+reconciles successfully during normal refresh so a fresh destroy can proceed.
+Saved deletions require authoritative absence and activation before state is
+removed; reappeared UUIDs remain tracked. Malformed/null/wrapper failures and
+HTTP errors are not object absence. A lookup never activates configuration.
+
+## Import
+
+Import the exact UUID, configure required values and review a no-change plan.
+Optional values can be omitted without clearing imported values.
+
+{{codefile "shell" "examples/resources/opnsense_kea_dhcpv4_option/import.sh"}}

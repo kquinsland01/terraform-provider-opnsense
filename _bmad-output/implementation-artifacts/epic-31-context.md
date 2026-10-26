@@ -24,6 +24,7 @@ Make the provider complete enough to be the default choice for an OPNsense appli
 - Story 31.0m: Gateway Group Resource/Data Source
 - Story 31.0n: Kea Generic Option Resource/Data Source
 - Story 31.0o: Kea DDNS Settings Resource/Data Source
+- Story 31.0p: Kea Ordered Generic-Option Linkage
 - Story 31.1: Complete Provider Positioning README and Registry Pass
 - Story 31.2: Existing Provider Migration Guide
 - Story 31.3: Example Stacks for Adoption
@@ -54,3 +55,7 @@ The user interface is HCL, Terraform plans/diagnostics and documentation. Brownf
 - The coverage audit drives parity work; finish and reconcile meaningful P0/P1 gaps before positioning, migration and adoption examples. Preserve completed subnet/PXE/DHCPv6 coverage rather than implementing duplicate Kea owners.
 - Gateway-group and generic Kea option/DDNS validation establish API contracts; the subsequent owner stories still require real Terraform acceptance. Direct-API validation does not close provider import, no-change, drift, recovery or settings-destroy obligations.
 - README/Registry positioning precedes the existing-provider migration guide; example stacks must compose only verified, appropriately version-gated surfaces. Completed assignment API adoption supplies interface coverage, while broader acceptance-proof publication and v1 criteria remain separate Epic 32 work.
+
+- Generic-option inventory does not attach options: existing subnet/reservation owners lack the relation, and selected-map order does not establish stored precedence. Story31.0p owns ordered-read API research and parent linkage; do not silently claim effective option-delivery completeness from31.0n.
+
+- Story 31.0n implements the eight-field generic-option owner/lookup with omission-preserving intent and UUID-bound recovery; the disabled-appliance 14-step Core lifecycle now passes, with exact restoration and immutable evidence. Merge, hosted checks and release publication remain separate. Ordered parent links remain 31.0p and DDNS remains 31.0o.

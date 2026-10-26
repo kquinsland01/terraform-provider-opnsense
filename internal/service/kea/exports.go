@@ -15,6 +15,7 @@ func Resources() []func() resource.Resource {
 		newCtrlAgentResource,
 		newDHCPv4SettingsResource,
 		newDHCPv4SubnetResource,
+		newDHCPv4OptionResource,
 		newDHCPv4ReservationResource,
 		newDHCPv6SettingsResource,
 		newDHCPv6SubnetResource,
@@ -29,6 +30,7 @@ func Resources() []func() resource.Resource {
 func DataSources() []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newDHCPv4SubnetDataSource,
+		newDHCPv4OptionDataSource,
 		newDHCPv4ReservationDataSource,
 		newDHCPv6SubnetDataSource,
 		newDHCPv6ReservationDataSource,

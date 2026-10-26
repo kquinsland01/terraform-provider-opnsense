@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Kea"
+description: |-
+  Reads all eight stored generic Kea DHCPv4 option fields by UUID.
+---
+
+# {{.Name}} ({{.Type}})
+
+Reads an exact option UUID on **stable OPNsense 26.7.7+** with the compatible
+eight-field model. Requires read access to `/api/core/firmware/status` and
+`/api/kea/dhcpv4/get_option`; use the appliance API permission selector.
+No mutation or service activation is performed. All eight fields are returned
+strictly, using selected keys rather than labels. Missing/null/malformed fields,
+invalid flags and unavailable endpoints are errors, not fabricated empty values.
+Data and description remain literal strings. `force` is only the stored flag,
+not a packet-level guarantee. This view does not attach options or recover ordered
+parent linkage. Older cores, OpenTofu and packet delivery are unverified.
+
+## Example Usage
+
+{{tffile "examples/data-sources/opnsense_kea_dhcpv4_option/data-source.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

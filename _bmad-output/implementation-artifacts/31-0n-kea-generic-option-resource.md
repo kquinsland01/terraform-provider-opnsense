@@ -1,66 +1,73 @@
-# Story 31.0n: Kea Generic Option Resource and Data Source
+# Story 31.0n: Kea generic DHCPv4 option owner and lookup
 
-## Status
+Status: review / implemented and live-validated locally; upstream merge, hosted
+checks and release publication remain separate. No active-packet claim is made.
 
-backlog — stable-source/direct-API contract validated; implementation and real
-Terraform acceptance remain required. This story does not confer provider support.
+## Implementation
 
-## Priority and Entry Point
+- Registered `opnsense_kea_dhcpv4_option` resource and UUID lookup for eight fields.
+- Stable core >=26.7.7 and compatible model/catalog gate, strict selected-key and
+  string-boolean mapping; only successful actual empty controller item responses
+  establish absence. Required code/data/description remain literal/required;
+  description is mutable and unique in the appliance model.
+- Optional omission preserves imported/prior values; create-only defaults,
+  explicit false/matching clears and unresolved unknown fail-closed behavior.
+  Partial update wire maps contain required plus configured optional fields.
+- Single-attempt writes with copied authenticated transport and retained GET
+  retry policy; shared client serialization; preflight prevents known-absent
+  UUID upsert without claiming atomicity against outside edits.
+- UUID-bound private save/delete intent, requested-field-only comparison,
+  strict recovery-byte validation, confirmed identity retention, authoritative
+  deletion checks and normal refresh-before-destroy recovery paths.
+- Public resource/lookup templates, examples and generated docs; guarded private
+  live runner reusing the per-connection pin primitive; independent saved-field
+  observations and full config/routes/runtime restoration interface.
 
-P1, before public completeness/migration positioning. Read AGENTS.md and the
-consumer-neutral validation reports in `_bmad-output/planning-artifacts/`.
-Use existing resource addresses/ownership conventions; no operator inventory or
-private adoption plan belongs in this specification.
+## Verification gates
 
-## Implementation Scope
+Verification results are reported to the parent separately while work proceeds.
+The final sanitized exact-tree live evidence is a separate artifact and excluded
+from the source digest to avoid recursive self-hashing. A skipped/failed or
+rollback-only attempt is not a passing owner proof. Parent controls private
+runtime inputs and disposable VM actions; implementation never provisions or
+accesses production.
 
-Implement `internal/service/kea/dhcpv4_option_{resource,schema,model,data_source}.go`
-and register through `exports.go` as `opnsense_kea_dhcpv4_option`. Own only
-`options.option` UUID entries, not subnet `option_data` or the DHCP singleton.
-Use scalar code/encoding/match keys, data, force, required description and tagged
-model semantics; reject invalid code/encoding and required-description clears.
-Preserve unconfigured/unknown values and unrelated options. Extend the API proof
-to matching-condition population/clear, ordering and safe linkage; keep service
-disabled during acceptance and don't duplicate existing subnet/PXE owners.
+## Boundaries and follow-up
 
-## Tasks
+The owner does not manage option_data, singleton/DDNS settings, parent links,
+hooks or operator integration. The tagged generator does not consume stored
+force; no packet-level force behavior is claimed. Parent relation selection maps
+are label-sorted and cannot reconstruct persisted order. Story 31.0p owns ordered
+linkage research/implementation through existing parent owners, not a duplicate
+subnet owner. Older-core/OpenTofu/production adoption remain unverified.
 
-1. Re-read tagged 26.7.7 model/controller and the validation evidence, then write a
-   complete implementation spec with exact fields, request/read shapes, defaults,
-   unknown/null/empty semantics, activation and recovery paths before coding.
-2. Add strict model/schema/resource/data source files above, exports, matching
-   schema/example templates and generated docs. Gate unsupported versions or
-   unavailable model endpoints before mutation; document required permissions.
-3. Add unit and actual provider-protocol fixtures for malformed responses,
-   create/update/delete/save/reconfigure failures, restart/refresh recovery,
-   cancellation, imports and data-source parity. Never treat HTTP success alone
-   as saved/activated state or turn validation errors into a missing object.
-4. Run non-skipped real Terraform lifecycle on a disposable, identity-guarded,
-   loopback-accessible target, with services/traffic disabled where applicable.
-   Capture independent API/config/runtime observations and exact restoration.
-5. Regenerate docs/audit deterministically, run full gates and independent review,
-   update support claims only for executed proof, and add the required versioned
-   Unreleased changelog entry in the implementation PR.
+Current release input is appended to 0.9.0 (Unreleased). The parent must reconcile
+the stacked gateway change and actual published tags before publication so an
+existing tag cannot skip the automatic release; no manual tag is created here.
 
-## Acceptance Criteria
+## Offline matrix audit
 
-- **Given** a valid configuration, **when** create/import/update/refresh run through
-  Terraform Core, **then** the UUID/singleton identity and all readable fields are
-  preserved and a subsequent plan has no changes.
-- **Given** drift or a populated optional field, **when** repaired or explicitly
-  cleared, **then** the API and Terraform state converge without losing unrelated
-  fields or accepting malformed/unknown intent as an empty clear.
-- **Given** a save/reconfigure/delete failure, **when** the provider restarts and
-  retries or refreshes, **then** state accurately retains committed identity and
-  recovery intent without duplication or silent deletion of an in-use owner.
-- **Given** completed acceptance, **when** Terraform destroy and harness cleanup
-  finish, **then** no test entries remain and singleton/settings/runtime baselines
-  are restored exactly; state-only singleton destruction must not alter services.
+All named tests below are registered in ordinary Go test execution. Local Core
+uses Terraform 1.16.5 and fresh protocol servers with persisted state/private
+bytes; it contacts only synthetic loopback APIs. The toolchain is
+`ghcr.io/devrail-dev/dev-toolchain:1.12.24`, Go 1.26.10.
 
-## Verification
+| Contract row | Named passing offline coverage / separate live gate |
+|---|---|
+| Core/model gate | `TestDHCPv4OptionProtocolUnsupportedCreateZeroWrites`, `TestDHCPv4OptionProtocolMalformedCatalogZeroWrites`; no writes for unsupported versions/templates/catalogs. |
+| Stored fields | `TestDHCPv4OptionProtocolCreateRestartRecovery` compares all lookup/state fields; `TestDHCPv4OptionProtocolAPIFieldValidationRetainedWithoutActivation` retains field-specific upstream rejection without retry/activation. Local Core updates description under the same UUID. |
+| Omitted/unknown intent | `TestDHCPv4OptionCoreImportOmissionClearsAndNoChange`, `TestDHCPv4OptionOmittedPlanPreservesStateAndExplicitUnknown`, `TestDHCPv4OptionProtocolUnknownRequiredOptionalZeroWrites`, `TestDHCPv4OptionProtocolPlanExplicitUnknownNeverInheritsPrior`; omitted update keys, populated imports, explicit false/clear and unresolved writes are checked. |
+| Matching | `TestDHCPv4OptionMatchingPairAndEncodingOnly` checks valid/invalid pairs and encoding-only acceptance; actual Core explicit matching clears converge. |
+| Strict read/lookup | `TestDHCPv4OptionProtocolStrictEveryFieldAndAbsence`, `TestDHCPv4OptionSelectorSentinelsFlagsAndFiniteCatalog`, all computed-field comparison in create recovery; malformed/null fields and wrappers retain state, only actual controller `[]` establishes absence. |
+| Create identity | `TestDHCPv4OptionProtocolUncertainAddMatchesAndNoAutomaticRetry`, `TestDHCPv4OptionProtocolCreateRestartRecovery`; zero/multiple/existing descriptions fail closed, one exact new match recovers, HTTP500 add is not blindly retried. Same-code distinct descriptions have a separate live companion fixture. |
+| Update/upsert/recovery | `TestDHCPv4OptionProtocolAbsentUpdateNoUpsert`, `TestDHCPv4OptionProtocolUnknownSaveRestartBindsAttempt`, `TestDHCPv4OptionProtocolUnknownSaveComparesOnlyRequestedWireFields`, `TestDHCPv4OptionProtocolCorruptUUIDPayloadRecoveryFailsBeforeMutation`; actual local Core save activation/match/mismatch failures persist error-returned state/private across fresh servers. |
+| Delete/restart | `TestDHCPv4OptionProtocolAmbiguousDeleteUnknownRestartChecksTruthFirst`, `TestDHCPv4OptionProtocolDeletedMarkerReappearedUUIDRetained`; actual local Core delete activation and still-present uncertain-delete failures recover through ordinary refresh-before-destroy. HTTP500 in-use rejection on the tracked UUID remains a separate live fixture gate. |
+| Import/drift/concurrency | `TestDHCPv4OptionCoreImportOmissionClearsAndNoChange`, `TestDHCPv4OptionProtocolConcurrentDiscoverySerializedAndCanceled`, `TestDHCPv4OptionConfiguredReadRetriesAndSinglePOST`; local Core contradictory authoritative drift reconciles then explicitly repairs on a fresh plan. |
+| Appliance acceptance | `TestAccDHCPv4OptionOwner` passed all 14 Core steps on the disabled isolated 26.7.7 appliance, including 17 independent eight-field observations, tracked-UUID HTTP500 in-use rejection, real deletion and exact restoration. Immutable publication-tree result is recorded separately in `31-0n-kea-option-live-evidence.md`; it is not merge/release proof. |
 
-Focused uncached/race-enabled service tests; actual provider-protocol tests;
-real Terraform import/no-change/drift/clear/failure/cleanup proof on disposable
-26.7.7; deterministic `go generate ./...`, structure and whitespace checks,
-`make check` and complete hosted CI. Legacy appliance/OpenTofu/live traffic or
-private adoption are unverified unless separately executed and documented.
+Normal-path `TestDHCPv4OptionAcceptanceHelperSecurity` also runs the shared
+per-connection changed-certificate-before-credentials test and both helper-hash
+fail-before-execution controls. `TestDHCPv4OptionAcceptanceShellAndExampleChecks` registers shellcheck, shfmt
+and Terraform example formatting in the ordinary Go gate. Repaired local Core
+failed-create/taint, confirmed-create bad-read, committed cancellation, pre-existing
+UUID, redirect and canonical-marker regressions also pass; see the spec triage.

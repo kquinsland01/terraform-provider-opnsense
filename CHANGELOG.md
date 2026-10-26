@@ -6,6 +6,8 @@ All notable changes to the OPNsense Terraform provider are documented here, foll
 
 FEATURES:
 
+* Added `opnsense_kea_dhcpv4_option` resource and UUID lookup for the eight stored generic-option fields on stable OPNsense 26.7.7+, with mutable unique description, omission-preserving optional intent, strict model/read validation, single-attempt writes and durable UUID-bound save/delete recovery. Ordered subnet/reservation linkage remains separate; the stored force flag is not a packet guarantee. The disabled-appliance 14-step Terraform lifecycle, 17 independent saved-field observations, in-use HTTP500 identity retention, deletion and exact restoration passed. Publication remains separately gated.
+
 * Added `opnsense_system_gateway_group` resource and UUID-keyed data source for stable OPNsense 26.7.7+, with typed gateway-name tiers, immutable names, strict firmware/model/read validation and durable save/delete activation recovery. Route reconfigure does not apply PF. The 16-step isolated Terraform lifecycle, independent saved-field observations and exact cleanup/restoration passed. Populated first-tier clearing is rejected before any write because the stable API ignores it; later-tier clears are supported. Older versions, OpenTofu and actual traffic failover remain unverified.
 
 ## 0.8.1 (Unreleased)
