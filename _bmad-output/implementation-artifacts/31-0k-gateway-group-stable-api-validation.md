@@ -2,7 +2,7 @@
 
 ## Status
 
-backlog
+review — stable source/direct-API probes recorded on 26.7.7; implementation follow-ups registered. Terraform resource/lifecycle support remains pending.
 
 ## Priority and Owner
 
@@ -28,3 +28,10 @@ Read historical `5-6-gateway-group-resource.md`, `internal/service/system/gatewa
 ## Verification and Release Boundary
 
 Disposable API/real Terraform proof as applicable, generated-doc checks if support text changes, `git diff --check` and full `make check`. Record unavailable tests explicitly. No production upgrade, Terraform adoption, live ownership transfer or new published support is implied.
+
+## Validation handoff — 2026-10-25
+
+See [direct-API contract and executed/unverified cases](../planning-artifacts/gateway-group-api-validation.md).
+Implementation owner: 31.0m. Source availability and these direct-API
+probes are not a provider support claim; real Terraform import/no-change/drift,
+failure/restart recovery and final restoration still belong to implementation.

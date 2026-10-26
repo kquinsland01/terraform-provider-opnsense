@@ -17,7 +17,18 @@ This register lists provider gaps that cannot be implemented safely until OPNsen
 
 ## Stable API Available; Provider Validation Pending
 
-As of 2026-10-20, gateway groups are **Coming**, not upstream-blocked, for OPNsense 26.7.7. The tagged [GroupSettingsController](https://github.com/opnsense/core/blob/26.7.7/src/opnsense/mvc/app/controllers/OPNsense/Routing/Api/GroupSettingsController.php) implements `/api/routing/group_settings/{get,add,set,del,search,reconfigure}` with wrapper `gateway_group`; reconfigure invokes `interface routes configure`, and deletion rejects in-use groups. This does not add provider support or establish availability on 26.1. Story 31.0k owns payload/default/tier validation, dependency-safe lifecycle proof and the implementation handoff before support claims.
+As of 2026-10-25, gateway groups remain **Coming**, not upstream-blocked, on
+OPNsense 26.7.7. Isolated direct-API CRUD/tier/trigger/pool/clear/rename,
+reference-protected deletion and exact route restoration were exercised. See the
+[executed API contract](../_bmad-output/planning-artifacts/gateway-group-api-validation.md).
+Story 31.0m owns the missing provider resource/data source and real Terraform
+acceptance. These probes do not establish provider support or actual multi-WAN
+traffic failover.
+
+Generic Kea options and DDNS settings also have
+[disabled-service API proof](../_bmad-output/planning-artifacts/kea-option-ddns-api-validation.md).
+Stories 31.0n/o own implementation; provider import/drift/recovery/state-only
+destroy remain pending. Matching-option linkage/ordering needs further coverage.
 
 ## Not Upstream-Blocked Yet
 
@@ -29,7 +40,6 @@ Some gaps have published or suspected API evidence but still need payload, lifec
 | System tunables / sysctl | Current OPNsense docs/source expose persistent `core/tunables` item CRUD/search and `reconfigure`; `opnsense_system_tunable` shipped in v0.3.0 and remains listed here only as an example of a former research item that moved out of this register. |
 | HASync configuration | `core/hasync` endpoints exist, but `syncitems` uses a dynamic `JsonKeyValueStoreField`; request/response shape needs verification before a safe resource can be designed. |
 | HASync status/actions | Endpoints appear operational/status-oriented rather than durable configuration. Data source or action semantics need a separate product decision. |
-| Kea DHCPv4 option / Kea DDNS | Stable OPNsense 26.7.7 contains DHCPv4 option CRUD/search and `kea/ddns/get` plus the inherited mutable controller surface. Payload/set/reconfigure/lifecycle semantics for dedicated option/DDNS owners remain unproven. Completed Story 31.0b already covers subnet PXE/TFTP fields, peers and delegated-prefix pools; do not repeat that implementation or equate it with generic option/DDNS support. Story 31.0l owns the remaining validation. |
 
 ## Maintenance Workflow
 

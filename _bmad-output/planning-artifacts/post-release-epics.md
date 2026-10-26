@@ -105,8 +105,11 @@ Goal: make this provider complete enough to be the default provider choice for a
 | 31.0h Quagga/BGP Field Parity | backlog | `_bmad-output/implementation-artifacts/31-0h-quagga-bgp-field-parity.md` |
 | 31.0i Live Interface Data Sources | backlog | `_bmad-output/implementation-artifacts/31-0i-live-interface-data-sources.md` |
 | 31.0j Provider Retry Settings | backlog | `_bmad-output/implementation-artifacts/31-0j-provider-retry-settings.md` |
-| 31.0k Gateway Group Stable API Validation | backlog | `_bmad-output/implementation-artifacts/31-0k-gateway-group-stable-api-validation.md` |
-| 31.0l Kea Option and DDNS Stable API Validation | backlog | `_bmad-output/implementation-artifacts/31-0l-kea-option-ddns-stable-api-validation.md` |
+| 31.0k Gateway Group Stable API Validation | review (direct-API report recorded) | `_bmad-output/implementation-artifacts/31-0k-gateway-group-stable-api-validation.md` |
+| 31.0l Kea Option and DDNS Stable API Validation | review (direct-API report recorded) | `_bmad-output/implementation-artifacts/31-0l-kea-option-ddns-stable-api-validation.md` |
+| 31.0m Gateway Group Resource/Data Source | backlog | `_bmad-output/implementation-artifacts/31-0m-gateway-group-resource.md` |
+| 31.0n Kea Generic Option Resource/Data Source | backlog | `_bmad-output/implementation-artifacts/31-0n-kea-generic-option-resource.md` |
+| 31.0o Kea DDNS Settings Resource/Data Source | backlog | `_bmad-output/implementation-artifacts/31-0o-kea-ddns-settings-resource.md` |
 | 31.1 Complete Provider Positioning README and Registry Pass | backlog | `_bmad-output/implementation-artifacts/31-1-complete-provider-positioning-docs.md` |
 | 31.2 Existing Provider Migration Guide | backlog | `_bmad-output/implementation-artifacts/31-2-existing-provider-migration-guide.md` |
 | 31.3 Example Stacks for Adoption | backlog | `_bmad-output/implementation-artifacts/31-3-example-stacks-for-adoption.md` |
