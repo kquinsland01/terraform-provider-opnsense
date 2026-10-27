@@ -43,7 +43,7 @@ so that we know exactly when interface IP configuration can be safely implemente
 - `26.7.6`, `26.7.7`, and `stable/26.7` have the complete probed surface.
 - `27.1.a` predates the expansion and is not complete despite its higher version number.
 - The committed machine-readable baseline is `_bmad-output/planning-artifacts/opnsense-assignment-api-release-probe.json`.
-- The `Upstream Assignment API` workflow runs weekly and on manual dispatch. It fails when current upstream evidence differs from the committed baseline and uploads the fresh result for review.
+- The `Upstream Assignment API` workflow runs weekly, on manual dispatch, and for probe/baseline/workflow changes in pull requests or pushes to main. It fails when current upstream evidence differs from the committed baseline and uploads the fresh result for review.
 - Stable API availability clears the upstream release gate, but provider support still requires Story 30.2 implementation and disposable-appliance acceptance proof. PPPoE behavior remains outside the first implementation scope until separately validated.
 
 ## Validation
@@ -95,4 +95,4 @@ so that we know exactly when interface IP configuration can be safely implemente
 - Reviewed the complete old/new `NetworkInterface.xml` blobs on `master` and `stable/26.7`, rather than accepting changed hashes without inspection. The change adds `<Default>0</Default>` to the `dhcp6-ia-pd-len` OptionField and requires it on stable; master relocates its existing Required marker. The provider assignment model does not expose or serialize this field.
 - Reviewed model blob transitions: `master` `53d351938c60fa3334b123c9a5d13454fd60d65c` → `4fae64840308390c95857888e73dfca6136d8379`; `stable/26.7` `b43147511612454e292429d5961e90ea0ef0d122` → `85e25100479392d5d5af13b12eb72f5aa25d3290`.
 - A fresh live probe differs from the old baseline only in those two model SHAs. Required-field detection, controller SHAs, actions, all tagged-release evidence and `first_released_tag = 26.7.6` are unchanged. Refresh the two reviewed hashes while preserving byte-for-byte comparison and all drift checks.
-- This is monitoring evidence maintenance, not a new provider feature, firmware upgrade or appliance acceptance claim. No provider code, probe logic, workflow behavior or release heading is changed.
+- This is monitoring evidence maintenance, not a new provider feature, firmware upgrade or appliance acceptance claim. No provider code, probe logic or release heading is changed. The workflow also runs for probe/baseline/workflow changes in PRs and on main, so reviewed baseline updates get hosted validation before and after merge without a separate manual dispatch. Weekly/manual triggers and exact drift comparison remain enabled.
