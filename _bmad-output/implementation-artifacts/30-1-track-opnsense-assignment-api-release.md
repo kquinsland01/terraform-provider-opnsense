@@ -88,3 +88,11 @@ so that we know exactly when interface IP configuration can be safely implemente
 ## Change Log
 
 - 2026-10-17: Implemented the release tracker and recorded OPNsense `26.7.6` as the first release with the complete assignment/IP API surface.
+
+
+### 2026-10-27 reviewed baseline refresh
+
+- Reviewed the complete old/new `NetworkInterface.xml` blobs on `master` and `stable/26.7`, rather than accepting changed hashes without inspection. The change adds `<Default>0</Default>` to the `dhcp6-ia-pd-len` OptionField and requires it on stable; master relocates its existing Required marker. The provider assignment model does not expose or serialize this field.
+- Reviewed model blob transitions: `master` `53d351938c60fa3334b123c9a5d13454fd60d65c` → `4fae64840308390c95857888e73dfca6136d8379`; `stable/26.7` `b43147511612454e292429d5961e90ea0ef0d122` → `85e25100479392d5d5af13b12eb72f5aa25d3290`.
+- A fresh live probe differs from the old baseline only in those two model SHAs. Required-field detection, controller SHAs, actions, all tagged-release evidence and `first_released_tag = 26.7.6` are unchanged. Refresh the two reviewed hashes while preserving byte-for-byte comparison and all drift checks.
+- This is monitoring evidence maintenance, not a new provider feature, firmware upgrade or appliance acceptance claim. No provider code, probe logic, workflow behavior or release heading is changed.
