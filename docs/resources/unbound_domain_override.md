@@ -51,3 +51,5 @@ resource "opnsense_unbound_domain_override" "private_dot" {
 ```shell
 terraform import opnsense_unbound_domain_override.example 12345678-1234-1234-1234-123456789012
 ```
+
+Set `domain = ""` for a global forwarder. The empty domain is preserved for both ordinary DNS and DNS over TLS.
