@@ -4,6 +4,10 @@ All notable changes to the OPNsense Terraform provider are documented here, foll
 
 ## 0.16.0 (Unreleased)
 
+BUG FIXES:
+
+* Normalize selected empty alias content to an empty set. Existing `[""]` workarounds should be replaced by `[]`.
+
 FEATURES:
 
 * Extend the existing FRR neighbor with 20 source-backed advanced attributes, config-owned sensitive authentication input, public password-free lookups, and peer-group strict CIDR listen ranges. Preserve existing addresses, grouped policy references, family semantics and pending activation recovery. Advanced writes require released capability or authoritative field-presence proof before mutation.
