@@ -2,7 +2,63 @@
 
 All notable changes to the OPNsense Terraform provider are documented here, following the [Terraform provider changelog format](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning).
 
-## 0.18.0 (Unreleased)
+## 0.23.1 (Unreleased)
+
+BUG FIXES:
+
+* Preserve explicit empty `client_id` updates for Dnsmasq hosts so an existing DHCP client identifier can be cleared. Null and unknown values remain omitted from API writes.
+
+## 0.23.0 (2026-11-13)
+
+FEATURES:
+
+* Add a read-only `opnsense_kea_dhcpv4_settings` lookup for the existing singleton. It reads the stable DHCPv4 GET, requires identity `kea-dhcpv4`, and publishes only the public resource allowlist: enabled, manual configuration, interfaces, valid lifetime, firewall rules, and DHCP socket type. A disabled server stays false. A blank optional manual configuration stays null. Missing required fields are not replaced with model defaults. Socket retry, decline probation, compatibility, lease expiry, and HA nodes are not lookup state. The released general model has no password or write-only secret.
+
+UPGRADE NOTES:
+
+* No DHCPv4 settings resource behavior changes. The lookup never writes or reconfigures. Identity is `kea-dhcpv4`, not a UUID. Fixture and protocol checks are not appliance proof. Merging this heading authorizes the automatic v0.23.0 publication path after successful main CI. v0.22.0 is already published, so this change does not append to that heading.
+
+## 0.22.0 (2026-11-13)
+
+FEATURES:
+
+* Add a read-only `opnsense_kea_ctrl_agent` lookup for the existing singleton. It reads the stable control-agent GET, requires identity `kea-ctrl-agent`, and publishes only the public resource allowlist: enabled, listen address, and listen port. A disabled agent stays false. Missing required fields are not replaced with model defaults. The released general model has no password or write-only secret.
+
+UPGRADE NOTES:
+
+* No control-agent resource behavior changes. The lookup never writes or reconfigures. Identity is `kea-ctrl-agent`, not a UUID. Fixture and protocol checks are not appliance proof. Merging this heading authorizes the automatic v0.22.0 publication path after successful main CI. v0.21.0 is already published, so this change does not append to that heading.
+
+## 0.21.0 (2026-11-13)
+
+FEATURES:
+
+* Add a read-only `opnsense_ipsec_psk` lookup for an existing pre-shared key UUID. The public allowlist is local identity, remote identity, key type, and description. The pre-shared key value is not lookup state. An omitted or returned secret stays absent rather than a synthetic value. Empty remote identity and description stay empty strings. A response without an identity or key type fails closed.
+
+UPGRADE NOTES:
+
+* No pre-shared-key resource behavior changes. The lookup never writes or reconfigures. Identity is the pre-shared-key UUID. Fixture and protocol checks are not appliance proof. Merging this heading authorizes the automatic v0.21.0 publication path after successful main CI. v0.20.0 is already published, so this change does not append to that heading.
+
+## 0.20.0 (2026-11-12)
+
+FEATURES:
+
+* Add a read-only `opnsense_ipsec_key_pair` lookup for an existing key pair UUID. The public allowlist is name, key type, derived size, and fingerprint. Public and private key PEM payloads are not lookup state. An omitted private key stays absent rather than a synthetic secret. Empty derived size and fingerprint stay empty strings. A response without a name or key type fails closed.
+
+UPGRADE NOTES:
+
+* No key-pair resource behavior changes. The lookup never writes or reconfigures. Identity is the key-pair UUID. Fixture and protocol checks are not appliance proof. Merging this heading authorizes the automatic v0.20.0 publication path after successful main CI. v0.19.0 is already published, so this change does not append to that heading.
+
+## 0.19.0 (2026-11-12)
+
+FEATURES:
+
+* Add a read-only `opnsense_interface_assignment` lookup for an existing `wan`, `lan`, or `optN` assignment. The public allowlist matches the resource contract. Device, description, MTU, hardware, tunnel, and response-only fields are not lookup state. Missing required fields, unknown names, and unsupported tunnel modes fail closed.
+
+UPGRADE NOTES:
+
+* No assignment resource behavior changes. The lookup never writes or reconfigures. Empty addresses stay empty strings with null prefix lengths. Identity is the assignment name, not a UUID. Live interface diagnostics remain separate data sources. Fixture and protocol checks are not appliance proof; older firmware, OpenTofu, and tunnel-mode assignments are not claimed. Merging this heading authorizes the automatic v0.19.0 publication path after successful main CI.
+
+## 0.18.0 (2026-11-12)
 
 FEATURES:
 
