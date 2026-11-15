@@ -30,10 +30,13 @@ func Resources() []func() resource.Resource {
 // DataSources returns the list of Kea data source types.
 func DataSources() []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		newCtrlAgentDataSource,
 		newDDNSSettingsDataSource,
+		newDHCPv4SettingsDataSource,
 		newDHCPv4SubnetDataSource,
 		newDHCPv4OptionDataSource,
 		newDHCPv4ReservationDataSource,
+		newDHCPv6SettingsDataSource,
 		newDHCPv6SubnetDataSource,
 		newDHCPv6ReservationDataSource,
 		newHAPeerDataSource,
